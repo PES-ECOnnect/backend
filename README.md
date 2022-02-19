@@ -3,7 +3,7 @@
 ## Team Members
 | Name | GitHub username | Taiga username |
 | --- | --- | --- |
-| Pol Rivero | PolRivero |  |
+| Pol Rivero | PolRivero | polrivero |
 | Pau Antonio | pauantonio | pauantonio |
 | Marc César | marc-cesar |  |
 | David Jiménez | DavidFIB |  |
