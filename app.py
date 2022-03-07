@@ -20,8 +20,8 @@ def random_inserts():
   
   return "Inserted random users successfully."
 
-@app.route("/list-users/<name>")
-def list_users(name):
+@app.route("/list-users")
+def list_users():
   con = sqlite3.connect('main.db')
   con.row_factory = sqlite3.Row # allow associative query result in form of python dictionary
   cur = con.cursor()
