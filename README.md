@@ -10,3 +10,9 @@
 | Thiago Mulero | thiagobulls05 | thiagobulls05 |
 | Pol Burkardt | pol9061 | pol9061 |
 | Silvia Andreu | silviandreu | silviandreu |
+
+## Requirements Installation
+sudo apt-get install python3-pip
+. venv/bin/activate
+pip3 install -r requirements.txt
+python3 app.py
