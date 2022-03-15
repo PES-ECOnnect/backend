@@ -1,44 +1,38 @@
-from flask import Flask
-import sqlite3
+from flask import Flask, request
+from random import randint
+from CustomExceptions import UsernameExistsException
+from User import User
+
+# Error codes
+# TODO: Move into separate file
+ERR_USERNAME_EXISTS = 10001
+
 
 app = Flask(__name__)
 
 @app.route("/")
-def hello_world():
-  return "Hello World!"
+def helloWorld():
+  return "PES Econnect Root!"
 
-@app.route("/random-inserts")
-def random_inserts():
-  con = sqlite3.connect('main.db')
-  cur = con.cursor()
-  for i in range(0,10):
-    cur.execute("INSERT INTO user (name, email) VALUES ('User %d','Email %d')" % (i, i))
-
-  # Save (commit) the changes
-  con.commit()
-  con.close()
+@app.route("/account")
+def registerUser():
+  # TODO: Use POST request instead of test data
   
-  return "Inserted random users successfully."
+  username = "TestUser" + str(randint(1, 10000))
+  password = "TestPass" + str(randint(1, 10000))
 
-@app.route("/list-users")
-def list_users():
-  con = sqlite3.connect('main.db')
-  con.row_factory = sqlite3.Row # allow associative query result in form of python dictionary
-  cur = con.cursor()
-  s = "<table><tr><th>ID</th><th>Name</th><th>Email</th></tr>"
-  i = 0
-  for row in cur.execute("SELECT * FROM user"):
-  	bgColor = "white" if i%2 else "#DBDBDB"  
-  	s += "<tr style= 'background-color: %s'>" % (bgColor)
-  	s += "<td>[%d]</td><td>%s</td><td>%s</td></tr>" % (row['id'], row['name'], row['email'])
-  	i += 1
+  try:
+    User.register(username, password)
+    
+    # User created successfully
+    return 0; 
 
-  s += "</table>"
-
-  return s
+  except UsernameExistsException as ue:
+    print(ue.message) # Debug
+    
+    # Failed to create user because username already exists
+    return ERR_USERNAME_EXISTS;
 
 
 if __name__ == "__main__":
   app.run()
-  
-  
