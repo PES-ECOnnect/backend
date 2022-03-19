@@ -1,7 +1,7 @@
 from flask import Flask, request
 from random import randint
 import CustomExceptions as ce
-from User import User
+from domain.User import User
 import json
 
 # Error codes
@@ -40,6 +40,21 @@ def registerUser():
 			# Failed to create user because username already exists
 			return ERR_USERNAME_EXISTS;
 
+@app.route("/account/logout", methods = ['GET'])
+def logout():
+	tok = request.args.get('token')
+	try:
+		User.logout(tok);
+	except ce.InvalidTokenException as invalidTokenException:
+		return json.dumps({
+			'error': {
+				'name': 'ERROR_INVALID_TOKEN',
+				'message': invalidTokenException.message
+			}
+		})
+	return '0';
+
+
 @app.route("/admin/login")
 def adminUser():
 	aUsername = request.args.get('name')
@@ -77,10 +92,8 @@ def adminUser():
 			}
 		})
 
-@app.route("/products/<id>/answer")
-def adminUser(id):
-
-
+'''@app.route("/products/<id>/answer")
+def adminUser(id):'''
 if __name__ == "__main__":
-	app.debug = True
-	app.run()
+		app.debug = True
+		app.run()

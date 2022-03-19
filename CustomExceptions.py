@@ -24,3 +24,11 @@ class UserNotFoundException(Exception):
         else:
         	self.message = message
         super().__init__(self.message)
+
+class InvalidTokenException(Exception):
+    def __init__(self, token, message = "Invalid Token."):
+        if token:
+            self.message = "Token " + token + " is not registered on the system."
+        else:
+            self.message = message
+        super().__init__(self.message)

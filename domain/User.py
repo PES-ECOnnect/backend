@@ -1,4 +1,6 @@
-
+from data.DBSessionToken import DBSessionToken
+import CustomExceptions as ce
+import json
 
 class User:
 
@@ -6,6 +8,13 @@ class User:
 		self.username = username
 		self.email = email
 		self.password = password
+
+
+
+	@staticmethod
+	def logout(token):
+		return DBSessionToken.delete(token)
+
 
 
 '''
