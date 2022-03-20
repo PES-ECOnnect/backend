@@ -15,8 +15,11 @@ class DBSession:
     def delete(self, token):
         tokenRow = self._con.cursor().execute("SELECT * FROM SessionToken where token = '%s'" % token).fetchone()
         if tokenRow is None:
-            return "ERROR_USER_NOT_FOUND"
+            raise InvalidTokenException()
 
         self._con.cursor().execute("DELETE FROM SessionToken where token = '%s'" % token)
         self._con.commit()
-        return {'status': 'success'}
+
+
+class InvalidTokenException(Exception):
+    pass

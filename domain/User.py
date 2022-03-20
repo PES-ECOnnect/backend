@@ -1,47 +1,45 @@
-from data.DBSessionToken import DBSessionToken
 import json
+
 
 class User:
 
-	def __init__(self, id, name, email, enPass, addr, bann, priv, acMedId):
-		self._id = id
-		self._name = name
-		self._email = email
-		self._enPass = enPass
-		self._addr = addr
-		self._bann = bann
-		self._priv = priv
-		self._acMedId = acMedId
+    def __init__(self, id, name, email, enPass, addr, bann, priv, acMedId):
+        self._id = id
+        self._name = name
+        self._email = email
+        self._enPass = enPass
+        self._addr = addr
+        self._bann = bann
+        self._priv = priv
+        self._acMedId = acMedId
 
-	def getId(self):
-		return self._id
+    def getId(self):
+        return self._id
 
-	def getName(self):
-		return self._name
+    def getName(self):
+        return self._name
 
-	def getEmail(self):
-		return self._email
+    def getEmail(self):
+        return self._email
 
-	def getEncryptedPassword(self):
-		return self._enPass
+    def getEncryptedPassword(self):
+        return self._enPass
 
-	def getAddress(self):
-		return self._addr
+    def getAddress(self):
+        return self._addr
 
-	def isBanned(self):
-		return self._bann
+    def isBanned(self):
+        return self._bann
 
-	def getIsPrivate(self):
-		return self._priv
+    def getIsPrivate(self):
+        return self._priv
 
-	def getActiveMedalId(self):
-		return self._acMedId
+    def getActiveMedalId(self):
+        return self._acMedId
 
-
-	@staticmethod
-	def logout(token):
-		return DBSessionToken.delete(token)
-
+    @staticmethod
+    def logout(token):
+        return DBSessionToken.delete(token)
 
 
 '''

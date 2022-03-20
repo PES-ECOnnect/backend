@@ -65,7 +65,11 @@ def accountLogin():
 @app.route("/account/logout", methods=['GET'])
 def logout():
     tok = request.args.get('token')
-    return logOut(tok)
+    try:
+        logOut(tok)
+        return {'status': 'success'}
+    except InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
 
 
 @app.route("/products/<id>/answer")

@@ -5,8 +5,7 @@ from data.DBSession import *
 
 
 def logOut(token):
-    return DBSession().delete(token)
-
+    DBSession().delete(token)
 
 def logIn(email, passwordString):
     dbu = DBUser()
