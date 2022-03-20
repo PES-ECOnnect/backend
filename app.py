@@ -1,6 +1,7 @@
 from flask import Flask, request
 from random import randint
 from domain.Authenticator import *
+from domain.Authenticator import logOut
 from domain.User import *
 import json
 
@@ -48,8 +49,7 @@ def accountLogin():
     passwordString = request.args.get('password')
 
     try:
-        auth = Authenticator()
-        token = auth.logIn(email, passwordString)
+        token = logIn(email, passwordString)
         return json.dumps({
             'token': str(token)
         })
@@ -62,6 +62,12 @@ def accountLogin():
 
     except FailedStartingSessionForUserException:
         return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
+
+
+@app.route("/account/logout", methods=['GET'])
+def logout():
+    tok = request.args.get('token')
+    return logOut(tok)
 
 
 @app.route("/products/<id>/answer")
