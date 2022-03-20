@@ -1,0 +1,218 @@
+#!/home/vant/PycharmProjects/backend/venv/bin/python
+from cm_rgb.ctrl import LedChannel, LedMode, CMRGBController
+import psutil
+import atexit
+import time
+import click
+
+import os
+from statistics import mean
+
+if os.name == "nt":
+    import wmi
+    windows = True
+    windowsSensors = wmi.WMI(namespace="root\OpenHardwareMonitor").Sensor()
+else:
+    windows = False
+
+
+def print_available_sources(ctx,param,value):
+    if value:
+        print("Available sensors:")
+        sensorDict = psutil.sensors_temperatures()
+        for chipname, chip in sensorDict.items():
+            for feature in chip:
+                print(chipname + "/" + feature.label," -> ", feature.current)
+                
+        print("Available fan speed sensors for mirage:")
+        fanDict = psutil.sensors_fans()
+        for chipname, chip in fanDict.items():
+            i = 0
+            for feature in chip:
+                print(chipname + "/" + str(i)," -> ", feature.current)
+
+        ctx.exit()
+        
+def getTemperatureWindows():
+    cpu_temps = []
+    for sensor in windowsSensors:
+        if sensor.SensorType=='Temperature' and not 'GPU' in sensor.Name:
+            cpu_temps += [float(sensor.Value)]
+    temperature = cpu_temps[1]
+    return temperature
+
+def getFanSpeedWindows():
+    print("Fan speed not implemented on Windows")
+    raise NotImplementedError
+    return fanSpeed
+
+@click.command()
+@click.option("--bg-color", "bgColor", default="#00FFFF", help="Background LED's color")
+@click.option("--cpu-color", "cpuColor", default="#FFA500", help="Color of the cpu load LED's")
+@click.option("--brightness", type=click.IntRange(1, 5, clamp=True), default=4)
+@click.option("--interval", type=click.FloatRange(0.01, 60, clamp=True), default=0.2)
+
+@click.option("--verbose", "verbose", is_flag=True, help="Print cpu load and sensor readout")
+
+@click.option("--show-temp", "showSensor", is_flag=True, help="Show temperature of selected sensor on cpu fan")
+@click.option("--temp-source", "tempSource", type=str, default="k10temp/Tdie", help="Temperature source <chip>/<feature> (eg. \"k10temp/Tdie\")")
+@click.option("--temp-low", "low", type=float, default=50, help="Temperature considered low")
+@click.option("--temp-high", "high", type=float, default=80, help="Temperature considered high")
+@click.option("--temp-low-color", "tLowColor", default="#00FFFF", help="Color representing low temperature")
+@click.option("--temp-high-color", "tHighColor", default="#FFA500", help="Color representing high temperature")
+
+@click.option("--show-cpu-frequency", "showCPUFreq", is_flag=True, help="Show CPU frequency on logo")
+@click.option("--freq-low-color", "fLowColor", default="#00FFFF", help="Color representing low frequency")
+@click.option("--freq-high-color", "fHighColor", default="#FFA500", help="Color representing high frequency")
+@click.option("--smoothing", "smoothing", type=click.FloatRange(0, 1, clamp=True), default=0.8, help="Smoothing of measured values to make color less jumpy. 0 -> no smoothing, 0.9 -> a lot")
+
+@click.option("--mirage", "mirage", is_flag=True, help="Mirage effect depending on fan speed")
+@click.option("--mirage-fan", "mirageFan", type=str, default="nct6797/1", help="Fan speed source <chip>/<index> (eg. \"nct6797/1\")")
+@click.option("--mirage-factors", "mirageFactors", type=str, default="7.0,7.0,7.0", help="Fan speed to mirage frequency factor(s) - try some!")
+
+@click.option('--list-temp-sources', is_flag=True, callback=print_available_sources, expose_value=False, is_eager=True)
+
+def monitor(
+        bgColor,
+        cpuColor,
+        brightness,
+        interval,
+        verbose,
+        showSensor,
+        tempSource,
+        low,
+        high,
+        tLowColor,
+        tHighColor,
+        showCPUFreq,
+        fLowColor,
+        fHighColor,
+        smoothing,
+        mirage,
+        mirageFan,
+        mirageFactors
+        ):
+    c = CMRGBController()
+
+    # c.disableMirage() ## Fails with this uncommented
+
+    bgChannel = LedChannel.R_STATIC
+    cpuChannel = LedChannel.R_SWIRL
+
+    b = [0x33, 0x66, 0x99, 0xCC, 0xFF][brightness-1]
+
+    bgColor = bgColor.lstrip('#')
+    col = [int(bgColor[i:i+2], 16) for i in (0, 2, 4)]
+    c.set_channel(bgChannel, LedMode.R_DEFAULT, b, col[0], col[1], col[2])
+
+    cpuColor = cpuColor.lstrip('#')
+    col = [int(cpuColor[i:i+2], 16) for i in (0, 2, 4)]
+    c.set_channel(cpuChannel, LedMode.R_DEFAULT, b, col[0], col[1], col[2], 0x60)
+
+    c.apply()
+
+    def exit_handler():
+        c.restore()
+
+    atexit.register(exit_handler)
+
+
+    tLowColor = [int(tLowColor.lstrip('#')[i:i+2], 16) for i in (0, 2, 4)]
+    tHighColor = [int(tHighColor.lstrip('#')[i:i+2], 16) for i in (0, 2, 4)]
+    
+    fLowColor = [int(fLowColor.lstrip('#')[i:i+2], 16) for i in (0, 2, 4)]
+    fHighColor = [int(fHighColor.lstrip('#')[i:i+2], 16) for i in (0, 2, 4)]
+    
+    smoothedCPUFrequency = 3000
+    smoothedFanFrequency = 50
+    smoothedTemperture = 45
+
+    if showSensor:
+        if not windows:
+            try:
+                sensorGroup, sensorLabel = tempSource.split("/")
+                if verbose:
+                    print(sensorGroup, sensorLabel)
+                for i, sensor in enumerate(psutil.sensors_temperatures()[sensorGroup]):
+                    if sensor.label == sensorLabel:
+                        sensorIndex = i
+            except:
+                print("Temp source not found, try running with --list-temp-sources")
+                showSensor = False
+    
+    if mirage:
+        mirageFanSensor, mirageFanIndex = mirageFan.split("/")
+        mirageFanIndex = int(mirageFanIndex)
+        mirageFactors = [float(i) for i in mirageFactors.split(",")]
+        if len(mirageFactors) != 3:
+            mirageFactors = 3 * [mirageFactors[0]]
+        print("Mirage factors:", mirageFactors)
+
+    while True:
+        if showSensor:
+            if windows:
+                t = getTemperatureWindows()
+            else:
+                t = psutil.sensors_temperatures()[sensorGroup][sensorIndex].current
+            smoothedTemperture = smoothing * smoothedTemperture + (1-smoothing) * t
+            interp_t = max(0, min(1, (smoothedTemperture-low)/(high-low)))
+            color = [
+                int(interp_t * tHighColor[i] + (1 - interp_t)*tLowColor[i])
+                for i in range(3)
+                ]
+            if verbose:
+                print("Temperature:", t)
+                print("Temperature color:", color)
+            c.set_channel(LedChannel.FAN, LedMode.STATIC, b, color[0], color[1], color[2])
+            
+        if showCPUFreq:
+            freqs = psutil.cpu_freq(percpu=True)
+            maxFreq = max(i.current for i in freqs)
+            smoothedCPUFrequency = smoothing * smoothedCPUFrequency + (1 - smoothing) * maxFreq
+            try:
+                interp_f = max(0, min(1, (smoothedCPUFrequency-psutil.cpu_freq().min)/(psutil.cpu_freq().max-psutil.cpu_freq().min)))
+            except ZeroDivisionError:
+                interp_f = 0.5          
+            color = [
+                int(interp_f * fHighColor[i] + (1 - interp_f)*fLowColor[i])
+                for i in range(3)
+                ]
+            if verbose:
+                print("Current Freq: ", maxFreq)
+                print("Smoothed Freq:", smoothedCPUFrequency)
+                print("Frequency Color:", color)
+            c.set_channel(LedChannel.LOGO, LedMode.STATIC, b, color[0], color[1], color[2])
+            
+        if mirage:
+            if windows:
+                fans = getFanSpeedWindows()
+            else:
+                fans = psutil.sensors_fans()
+            currentFanFreq = fans[mirageFanSensor][mirageFanIndex].current/60
+            smoothedFanFrequency = smoothing * smoothedFanFrequency + (1-smoothing) * currentFanFreq
+            mirageFrequencies = [smoothedFanFrequency * i for i in mirageFactors]
+            if verbose:
+                print("Fan rotation frequency:", currentFanFreq)
+                print(mirageFrequencies)
+            c.enableMirage(*mirageFrequencies)
+
+        # gives a single float value
+        cpu = psutil.cpu_percent()
+        cpu_leds = int(round(cpu*15 / 100))
+
+        total = 15 - cpu_leds
+
+        ring_leds = ([cpuChannel]*cpu_leds)
+        ring_leds = ring_leds + ([bgChannel]*total)
+
+        shift = -8
+        ring_leds = ring_leds[-shift:]+ring_leds[:-shift]
+
+        c.assign_leds_to_channels(LedChannel.LOGO, LedChannel.FAN, *ring_leds)
+        c.apply()
+
+        time.sleep(interval)
+
+
+if __name__ == '__main__':
+    monitor()
