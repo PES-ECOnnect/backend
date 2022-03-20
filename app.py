@@ -1,13 +1,11 @@
 from flask import Flask, request
 from random import randint
+
 from domain.Authenticator import *
 from domain.Authenticator import logOut
 from domain.User import *
-import json
 
-# Error codes
-# TODO: Move into separate file
-ERR_USERNAME_EXISTS = 10001
+import json
 
 app = Flask(__name__)
 
@@ -78,3 +76,4 @@ def adminUser(id):
 if __name__ == "__main__":
     app.debug = True
     app.run()
+
