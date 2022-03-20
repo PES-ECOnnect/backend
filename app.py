@@ -1,99 +1,79 @@
 from flask import Flask, request
 from random import randint
-import CustomExceptions as ce
-from domain.User import User
+
+from domain.Authenticator import *
+from domain.Authenticator import logOut
+from domain.User import *
+
 import json
-
-# Error codes
-# TODO: Move into separate file
-ERR_USERNAME_EXISTS = 10001
-
 
 app = Flask(__name__)
 
+
 @app.route("/")
 def helloWorld():
-	return "PES Econnect Root!"
+    return "PES Econnect Root!"
 
-@app.route("/account", methods = ['POST'])
+
+@app.route("/account", methods=['POST'])
 def registerUser():
-	# TODO: Use POST request instead of test data
+    # TODO: Use POST request instead of test data
 
-	if request.method == 'POST':
-		# Create account
-		username = request.form['username']
-		username = request.form['email']
-		password = request.form['password']
+    if request.method == 'POST':
+        # Create account
+        username = request.form['username']
+        username = request.form['email']
+        password = request.form['password']
 
-		username = "TestUser" + str(randint(1, 10000))
-		password = "TestPass" + str(randint(1, 10000))
+        username = "TestUser" + str(randint(1, 10000))
+        password = "TestPass" + str(randint(1, 10000))
 
-		try:
-			User.register(username, password)
-			
-			# User created successfully
-			return 0 
+        try:
+            User.register(username, password)
 
-		except UsernameExistsException as ue:
-			print(ue.message) # Debug
-			
-			# Failed to create user because username already exists
-			return ERR_USERNAME_EXISTS;
+            # User created successfully
+            return 0
 
-@app.route("/account/logout", methods = ['GET'])
+        except UserAlreadyExistsException as ue:
+            print(ue)
+
+            # Failed to create user because username already exists
+            return ERR_USERNAME_EXISTS;
+
+
+@app.route("/account/login")
+def accountLogin():
+    email = request.args.get('email')
+    passwordString = request.args.get('password')
+
+    try:
+        token = logIn(email, passwordString)
+        return json.dumps({
+            'token': str(token)
+        })
+
+    except UserNotFoundException:
+        return json.dumps({'error': 'ERROR_USER_NOT_FOUND'})
+
+    except IncorrectUserPasswordException:
+        return json.dumps({'error': 'ERROR_USER_INCORRECT_PASSWORD'})
+
+    except FailedStartingSessionForUserException:
+        return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
+
+
+@app.route("/account/logout", methods=['GET'])
 def logout():
-	tok = request.args.get('token')
-	try:
-		User.logout(tok);
-	except ce.InvalidTokenException as invalidTokenException:
-		return json.dumps({
-			'error': {
-				'name': 'ERROR_INVALID_TOKEN',
-				'message': invalidTokenException.message
-			}
-		})
-	return '0';
+    tok = request.args.get('token')
+    return logOut(tok)
 
 
-@app.route("/admin/login")
-def adminUser():
-	aUsername = request.args.get('name')
-	aPassword = request.args.get('password')
-	
-	try:
-		# If user is not even admin, error.
-		if not User.isAdmin(aUsername):
-			return json.dumps({
-				'error' : {
-					'name': 'ERROR_USER_NOT_ADMIN',
-					'message': "Username " + aUsername + " is not admin" 
-				}
-			})
+@app.route("/products/<id>/answer")
+def adminUser(id):
+    pass
 
-		# Try to log in
-		token = User.login(aUsername, aPassword)
-		return json.dumps({
-			'token': token
-		})
 
-	except ce.UserNotFoundException as userNotFoundException:
-		return json.dumps({
-			'error' : {
-				'name': 'ERROR_USER_NOT_FOUND',
-				'message': userNotFoundException.message 
-			}
-		})
-
-	except ce.IncorrectUserPasswordException as incorrectUserException:
-		return json.dumps({
-			'error' : {
-				'name': 'ERROR_USER_INCORRECT_PASSWORD',
-				'message': incorrectUserException.message 
-			}
-		})
-
-'''@app.route("/products/<id>/answer")
-def adminUser(id):'''
 if __name__ == "__main__":
-		app.debug = True
-		app.run()
+    app.debug = True
+    app.run()
+
