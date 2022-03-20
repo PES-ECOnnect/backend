@@ -1,4 +1,6 @@
-
+from data.DBSessionToken import DBSessionToken
+import CustomExceptions as ce
+import json
 
 class User:
 
@@ -35,6 +37,13 @@ class User:
 
 	def getActiveMedalId(self):
 		return self._acMedId
+
+
+	@staticmethod
+	def logout(token):
+		return DBSessionToken.delete(token)
+
+
 
 '''
 
