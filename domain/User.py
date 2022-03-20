@@ -1,5 +1,4 @@
 from data.DBSessionToken import DBSessionToken
-import CustomExceptions as ce
 import json
 
 class User:
