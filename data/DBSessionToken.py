@@ -1,5 +1,4 @@
 from data.DBUtilities import DBUtilities
-import CustomExceptions as ce
 
 class DBSessionToken:
     @staticmethod
