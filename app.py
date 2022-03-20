@@ -52,7 +52,7 @@ def logout():
 				'message': invalidTokenException.message
 			}
 		})
-	return '0';
+	return json.dumps({})
 
 
 @app.route("/admin/login")
