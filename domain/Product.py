@@ -9,4 +9,4 @@ class Product:
 
     def answerQuestion(self, questionId, productId, token, chosenOption):
         dbp = DBProduct()
-        dbp.answer(questionId, productId, token, chosenOption)
+        return dbp.answer(questionId, productId, token, chosenOption)

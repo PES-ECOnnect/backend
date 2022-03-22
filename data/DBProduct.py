@@ -1,5 +1,6 @@
 
 from data.DBUtils import *
+from data.DBSession import *
 from domain.Product import *
 
 class DBProduct:
@@ -8,14 +9,13 @@ class DBProduct:
         self._con = getCon()
 
     def answer(self, idQuestion, idReviewable, token, chosenOption):
-        tokenRow = self._con.cursor().execute("SELECT * FROM SessionToken where token = '%s'" % token).fetchone()
-        idUser = tokenRow['idUser']
+        idUser = getUserIdForToken(token)
 
-        cur = self._con.cursor()
-        answerRow = cur.execute("SELECT * FROM Answer WHERE idQuestion = '%s' AND idReviewable = '%s' AND idUser = '%s'" % (idQuestion, idReviewable, idUser))
+        q = "SELECT * FROM Answer WHERE idQuestion = (?) AND idReviewable = (?) AND idUser = (?)"
+        answerRow = selectQuery(query=q, args=(idQuestion, idReviewable, idUser,), one=True)
         if answerRow is None:
-            cur.execute("INSERT INTO Answer (idQuestion, idReviewable, idUser, chosenOption) VALUES ('%s', '%s', '%s', '%s')" % (idQuestion, idReviewable, idUser, chosenOption))
+            q = "INSERT INTO Answer (idQuestion, idReviewable, idUser, chosenOption) VALUES ((?), (?), (?), (?))"
+            return insertQuery(query=q, args=(idQuestion, idReviewable, idUser, chosenOption,))
         else:
-            cur.execute("UPDATE Answer SET chosenOption = '%s' WHERE idQuestion = '%s' AND idReviewable = '%s' AND idUser = '%s'" % (chosenOption, idQuestion, idReviewable, idUser))
-        cur.close()
-        self._con.commit()
+            q = "UPDATE Answer SET chosenOption = (?) WHERE idQuestion = (?) AND idReviewable = (?) AND idUser = (?)"
+            return updateQuery(query=q, args=(chosenOption, idQuestion, idReviewable, idUser,))

@@ -1,14 +1,13 @@
 import hashlib
 import uuid
-from data.DBUser import *
-from data.DBSession import *
+import data.DBUser as dbu
+import data.DBSession as dbs
 
 
 def logOut(token):
-    DBSession().delete(token)
+    dbs.deleteToken(token)
 
 def logIn(email, passwordString):
-    dbu = DBUser()
     guessPassword = hashlib.sha256(passwordString.encode('UTF-8')).hexdigest()
 
     u = dbu.selectByEmail(email)
@@ -21,15 +20,18 @@ def logIn(email, passwordString):
         raise IncorrectUserPasswordException(email)
 
     # Correct email and password
-    userSessionToken = uuid.uuid1()
-    try:
-        dbs = DBSession()
-        dbs.insert(u.getId(), userSessionToken)
-    except Exception:
-        raise FailedStartingSessionForUserException(email)
+    userSessionToken = str(uuid.uuid1())
+    dbs.insert(u.getId(), userSessionToken)
 
     return userSessionToken
 
+def checkValidToken(token):
+    if not dbs.tokenExists(token):
+        raise dbs.InvalidTokenException()
+
+def getUserForToken(token):
+    userId = dbs.getUserIdForToken(token)
+    return dbu.selectById(userId)
 
 def register(self):
     pass
@@ -54,6 +56,3 @@ class UserNotFoundException(AuthenticationException):
 class UserAlreadyExistsException(AuthenticationException):
     pass
 
-
-class FailedStartingSessionForUserException(AuthenticationException):
-    pass

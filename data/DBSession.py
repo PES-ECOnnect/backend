@@ -1,25 +1,41 @@
-from data.DBUtils import getCon
+from data.DBUtils import *
+
+def insert(userId, userSessionToken):
+    q = "INSERT INTO SessionToken (token, idUser) VALUES (?, ?)"
+    res = insertQuery(query=q, args=(userSessionToken, userId))
+    if res == False:
+        raise FailedToOpenSessionException()
+
+def deleteToken(token):
+    dQuery = "DELETE FROM SessionToken where token = ?"
+    res = deleteQuery(dQuery, (token, ))
+    if res == False:
+        raise FailedToRemoveSessionTokenException()           
+
+def tokenExists(token):
+    sQuery = "SELECT * FROM SessionToken where token = ?"
+    tokenRow = selectQuery(sQuery, (token, ), True)
+    return tokenRow is not None
+
+def getUserIdForToken(token):
+    sQuery = "SELECT * FROM SessionToken where token = ?"
+    tokenRow = selectQuery(sQuery, (token, ), True)
+    return tokenRow['idUser'] if tokenRow is not None else None
 
 
-class DBSession:
+# ---  Exceptions
 
-    def __init__(self):
-        self._con = getCon()
-
-    def insert(self, userId, userSessionToken):
-        cur = self._con.cursor()
-        cur.execute("INSERT INTO SessionToken (token, idUser) VALUES ('%s', '%s')" % (userSessionToken, userId))
-        cur.close()
-        self._con.commit()
-
-    def delete(self, token):
-        tokenRow = self._con.cursor().execute("SELECT * FROM SessionToken where token = '%s'" % token).fetchone()
-        if tokenRow is None:
-            raise InvalidTokenException()
-
-        self._con.cursor().execute("DELETE FROM SessionToken where token = '%s'" % token)
-        self._con.commit()
+class SessionException(Exception):
+    pass
 
 
-class InvalidTokenException(Exception):
+class InvalidTokenException(SessionException):
+    pass
+
+
+class FailedToRemoveSessionTokenException(SessionException):
+    pass
+
+
+class FailedToOpenSessionException(SessionException):
     pass
