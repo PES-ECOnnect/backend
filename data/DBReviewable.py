@@ -29,7 +29,7 @@ def insert(name, revType, imageURL, manufacturer=None, lat=None, lon=None):
         c.execute("commit")
     except con.Error:
         c.execute("rollback")
-        raise FailedToInsertProductException()
+        raise FailedToInsertReviewableException()
 
 
 def answer(idQuestion, idReviewable, token, chosenOption):
@@ -45,7 +45,7 @@ def answer(idQuestion, idReviewable, token, chosenOption):
         return updateQuery(query=q, args=(chosenOption, idQuestion, idReviewable, idUser,))
 
 
-class FailedToInsertProductException(Exception):
+class FailedToInsertReviewableException(Exception):
     pass
 
 
