@@ -89,6 +89,11 @@ def logout():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
+@app.route("/companies", methods=['POST'])
+def createCompany():
+    pass
+
+
 @app.route("/products/<id>/answer")
 def answerQuestion(id):
     token = request.args.get('token')
