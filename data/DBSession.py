@@ -1,34 +1,41 @@
 from data.DBUtils import *
 
+def insert(userId, userSessionToken):
+    q = "INSERT INTO SessionToken (token, idUser) VALUES (?, ?)"
+    res = insertQuery(query=q, args=(userSessionToken, userId))
+    if res == False:
+        raise FailedToOpenSessionException()
 
-class DBSession:
+def deleteToken(token):
+    dQuery = "DELETE FROM SessionToken where token = ?"
+    res = deleteQuery(dQuery, (token, ))
+    if res == False:
+        raise FailedToRemoveSessionTokenException()           
 
-    def insert(self, userId, userSessionToken):
-        q = "INSERT INTO SessionToken (token, idUser) VALUES (?, ?)"
-        res = insertQuery(query=q, args=(userSessionToken, userId))
-        if res == False:
-            raise FailedToOpenSession()
+def tokenExists(token):
+    sQuery = "SELECT * FROM SessionToken where token = ?"
+    tokenRow = selectQuery(sQuery, (token, ), True)
+    return tokenRow is not None
 
-    def delete(self, token):
-        sQuery = "SELECT * FROM SessionToken where token = ?"
-        tokenRow = selectQuery(sQuery, (token, ), True)
-        if tokenRow is None:
-            raise InvalidTokenException()
-
-        dQuery = "DELETE FROM SessionToken where token = ?"
-        res = deleteQuery(dQuery, (token, ))
-        if res == False:
-            raise FailedToRemoveSessionTokenException()
-
-        print("----------", res)
+def getUserIdForToken(token):
+    sQuery = "SELECT * FROM SessionToken where token = ?"
+    tokenRow = selectQuery(sQuery, (token, ), True)
+    return tokenRow['idUser'] if tokenRow is not None else None
 
 
-class InvalidTokenException(Exception):
+# ---  Exceptions
+
+class SessionException(Exception):
     pass
 
 
-class FailedToRemoveSessionTokenException(Exception):
+class InvalidTokenException(SessionException):
     pass
 
-class FailedToOpenSession(Exception):
+
+class FailedToRemoveSessionTokenException(SessionException):
+    pass
+
+
+class FailedToOpenSessionException(SessionException):
     pass
