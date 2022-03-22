@@ -108,23 +108,28 @@ def products():
     token = request.args.get('token')
     auth.checkValidToken(token)
 
-    if request.method == 'POST':
-        # Create company
-        name = request.args.get('name')
-        manufacturer = request.args.get('manufacturer')
-        type = request.args.get('type')
+    revType = request.args.get('type')
+    name = request.args.get('name')
 
+    if request.method == 'POST':
+        # Create product
+
+        manufacturer = request.args.get('manufacturer')
         # TODO: Obtain bytes from request body, upload to storage service, obtain URL, save it and return it.
         # imageURL = request.args.get('image')
         imageURL = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-product-6_large.png'
 
-        newProduct = Reviewable(id=None, name=name, type=type, imageURL=imageURL, manufacturer=manufacturer, lat=None, lon=None)
+        newProduct = Reviewable(id=None, name=name, type=revType, imageURL=imageURL, manufacturer=manufacturer, lat=None, lon=None)
         try:
             newProduct.insert()
             return {'status': 'success'}
 
         except dbp.FailedToInsertReviewableException:
             return {'error': 'ERROR_FAILED_TO_CREATE_PRODUCT'}
+
+    elif request.method == 'GET':
+        revRows = getReviewablesByType(revType)
+        return {'result': revRows}
 
     return {'error': 'ERROR_NOT_YET_IMPLEMENTED'}
 
@@ -161,7 +166,6 @@ def companies():
             return {'error': 'ERROR_FAILED_TO_CREATE_COMPANY'}
 
     return {'error': 'ERROR_NOT_YET_IMPLEMENTED'}
-
 
 
 @app.route("/products/<id>/answer")

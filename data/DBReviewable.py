@@ -32,6 +32,26 @@ def insert(name, revType, imageURL, manufacturer=None, lat=None, lon=None):
         raise FailedToInsertReviewableException()
 
 
+def selectByType(revType):
+    typeRow = dbrt.getReviewableIdForType(revType)
+    if typeRow is None:
+        raise IncorrectReviewableTypeException()
+
+    typeId = typeRow['TypeId']
+    q = "" \
+        "SELECT *" \
+        " FROM Reviewable r" \
+        " JOIN %s t on t.ReviewableId = r.idReviewable" \
+        " WHERE r.TypeId = ?" % ("InstallerCompany" if revType == "Company" else "EquipmentProduct")
+
+    print("---")
+    print(q)
+    print(typeId)
+    print("---")
+
+    return selectQuery(q, (typeId,), False)
+
+
 def answer(idQuestion, idReviewable, token, chosenOption):
     idUser = getUserIdForToken(token)
 

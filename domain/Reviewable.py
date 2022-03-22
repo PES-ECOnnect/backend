@@ -1,4 +1,8 @@
-import data.DBReviewable as dbp
+import data.DBReviewable as dbr
+
+
+def getReviewablesByType(type):
+    return dbr.selectByType(type)
 
 
 class Reviewable:
@@ -11,12 +15,12 @@ class Reviewable:
         self._lat = lat
         self._lon = lon
 
-
     def answerQuestion(self, questionId, productId, token, chosenOption):
-        return dbp.answer(questionId, productId, token, chosenOption)
+        return dbr.answer(questionId, productId, token, chosenOption)
 
     def insert(self):
-        dbp.insert(name=self._name, revType=self._type, imageURL=self._imageURL, manufacturer=self._manufacturer, lat=self._lat, lon=self._lon)
+        dbr.insert(name=self._name, revType=self._type, imageURL=self._imageURL, manufacturer=self._manufacturer,
+                   lat=self._lat, lon=self._lon)
 
     def getId(self):
         return self._id
