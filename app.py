@@ -4,10 +4,9 @@ from flask import Flask, request
 
 # Domain Layer
 import domain.Authenticator as auth
-from domain.User import *
+
 from domain.Product import *
 
-import data.DBUser as dbu
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -87,6 +86,11 @@ def logout():
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@app.route("/companies", methods=['POST'])
+def createCompany():
+    pass
 
 
 @app.route("/products/<id>/answer")
