@@ -1,4 +1,4 @@
-class Question:
+class DBQuestion:
 
     '''
     @def insertQuestion()
