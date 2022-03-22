@@ -7,13 +7,15 @@ class DBProduct:
     def __init__(self):
         self._con = getCon()
 
-    def answer(self, idQuestion, idReviewable, token, ChosenOption):
+    def answer(self, idQuestion, idReviewable, token, chosenOption):
         tokenRow = self._con.cursor().execute("SELECT * FROM SessionToken where token = '%s'" % token).fetchone()
-        if tokenRow is None:
-            return None
         idUser = tokenRow['idUser']
 
         cur = self._con.cursor()
-        cur.execute("INSERT INTO Answer (idQuestion, idReviewable, idUser, chosenOption) VALUES ('%s', '%s', '%s', '%s')" % (idQuestion, idReviewable, idUser, ChosenOption))
+        answerRow = cur.execute("SELECT * FROM Answer WHERE idQuestion = '%s' AND idReviewable = '%s' AND idUser = '%s'" % (idQuestion, idReviewable, idUser))
+        if answerRow is None:
+            cur.execute("INSERT INTO Answer (idQuestion, idReviewable, idUser, chosenOption) VALUES ('%s', '%s', '%s', '%s')" % (idQuestion, idReviewable, idUser, chosenOption))
+        else:
+            cur.execute("UPDATE Answer SET chosenOption = '%s' WHERE idQuestion = '%s' AND idReviewable = '%s' AND idUser = '%s'" % (chosenOption, idQuestion, idReviewable, idUser))
         cur.close()
         self._con.commit()

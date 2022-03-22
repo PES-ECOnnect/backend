@@ -7,6 +7,6 @@ class Product:
         self._name = name
         self._typeId = typeId
 
-    def answerQuestion(self, productId, questionId, token, chosenOption):
+    def answerQuestion(self, questionId, productId, token, chosenOption):
         dbp = DBProduct()
         dbp.answer(questionId, productId, token, chosenOption)
