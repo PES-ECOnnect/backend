@@ -5,6 +5,8 @@ from domain.Authenticator import *
 from domain.Authenticator import logOut
 from domain.User import *
 
+import traceback
+
 import json
 
 app = Flask(__name__)
@@ -58,7 +60,7 @@ def accountLogin():
     except IncorrectUserPasswordException:
         return json.dumps({'error': 'ERROR_USER_INCORRECT_PASSWORD'})
 
-    except FailedStartingSessionForUserException:
+    except FailedToOpenSession as e:
         return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
 
 

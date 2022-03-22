@@ -14,8 +14,8 @@ class DBUser:
         pass
 
     def selectByEmail(self, email):
-        q = "SELECT * FROM User WHERE email = ?"
-        userRow = query_db(query=q, args=(email), one=True)
+        q = "SELECT * FROM User WHERE email = (?)"
+        userRow = selectQuery(query=q, args=(email,), one=True)
 
         if userRow is None:
             return None
