@@ -4,9 +4,6 @@ from domain.User import *
 
 class DBUser:
 
-    def __init__(self):
-        self._con = getCon()
-
     def insert(self, user):
         pass
 
@@ -17,10 +14,8 @@ class DBUser:
         pass
 
     def selectByEmail(self, email):
-        cur = self._con.cursor()
-        cur.execute("SELECT * FROM User WHERE email = '%s'" % email)
-        userRow = cur.fetchone()
-        cur.close()
+        q = "SELECT * FROM User WHERE email = (?)"
+        userRow = selectQuery(query=q, args=(email,), one=True)
 
         if userRow is None:
             return None

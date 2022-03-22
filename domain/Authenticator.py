@@ -5,8 +5,7 @@ from data.DBSession import *
 
 
 def logOut(token):
-    return DBSession().delete(token)
-
+    DBSession().delete(token)
 
 def logIn(email, passwordString):
     dbu = DBUser()
@@ -22,12 +21,9 @@ def logIn(email, passwordString):
         raise IncorrectUserPasswordException(email)
 
     # Correct email and password
-    userSessionToken = uuid.uuid1()
-    try:
-        dbs = DBSession()
-        dbs.insert(u.getId(), userSessionToken)
-    except Exception:
-        raise FailedStartingSessionForUserException(email)
+    userSessionToken = str(uuid.uuid1())
+    dbs = DBSession()
+    dbs.insert(u.getId(), userSessionToken)
 
     return userSessionToken
 
