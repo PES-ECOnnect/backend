@@ -1,17 +1,19 @@
+import sqlite3
+
 from flask import Flask, request
-from random import randint
 
+# Domain Layer
 import domain.Authenticator as auth
-
 from domain.User import *
 from domain.Product import *
 
 import data.DBUser as dbu
+
+# Data Layer (TODO - Remove)
 import data.DBSession as dbs
 
-import traceback
-
 import json
+import hashlib
 
 app = Flask(__name__)
 
@@ -22,9 +24,25 @@ def helloWorld():
 
 
 @app.route("/account", methods=['POST'])
-def registerUser():
-    # TODO: Use POST request instead of test data
-    pass
+def signUp():
+    email = request.args.get('email')
+    username = request.args.get('username')
+    password = request.args.get('password')
+    enPass = hashlib.sha256(password.encode('UTF-8')).hexdigest()
+
+    if auth.getUserForEmail(email) is not None:
+        return {'error': 'ERROR_USER_EMAIL_EXISTS'}
+
+    if auth.getUserForUsername(username) is not None:
+        return {'error': 'ERROR_USER_USERNAME_EXISTS'}
+
+    try:
+        auth.signUp(email, username, enPass)
+        return {'status': 'success'}
+
+    except sqlite3.Error:
+        return {'error': 'ERROR_FAILED_SIGN_UP'}
+
 
 @app.route("/account/login")
 def accountLogin():
@@ -60,7 +78,6 @@ def isAdmin():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-
 @app.route("/account/logout", methods=['GET'])
 def logout():
     token = request.args.get('token')
@@ -89,4 +106,3 @@ def answerQuestion(id):
 if __name__ == "__main__":
     app.debug = True
     app.run()
-

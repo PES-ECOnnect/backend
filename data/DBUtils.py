@@ -35,7 +35,7 @@ def insertQuery(query, args=()):
 
         return cur.lastrowid
 
-    except:
+    except sqlite3.exc:
         return False
 
 
