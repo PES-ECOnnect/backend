@@ -4,7 +4,10 @@ from flask import Flask, request
 
 # Domain Layer
 import domain.Authenticator as auth
-from domain.User import User
+from domain.User import *
+from domain.Product import *
+
+import data.DBUser as dbu
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -87,9 +90,18 @@ def logout():
 
 
 @app.route("/products/<id>/answer")
-def adminUser(id):
-    pass
+def answerQuestion(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        questionId = request.args.get('questionId')
+        chosenOption = request.args.get('chosenOption')
 
+        product = Product(id, 'a', 1)
+        product.answerQuestion(questionId, id, token, chosenOption)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
 
 if __name__ == "__main__":
     app.debug = True

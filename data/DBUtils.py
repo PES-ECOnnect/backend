@@ -39,6 +39,17 @@ def insertQuery(query, args=()):
         return False
 
 
+def updateQuery(query, args=()):
+    try:
+        con = sqlite3.connect('data/main.db')
+        cur = con.execute(query, args)
+        con.commit()
+
+        return True
+
+    except:
+        return False
+
 
 def deleteQuery(query, args=()):
     try:
