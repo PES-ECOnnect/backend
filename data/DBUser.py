@@ -41,7 +41,7 @@ def userFromRow(userRow) -> User:
         str(userRow['address']),
         str(userRow['banned']),
         bool(userRow['privateProfile']),
-        (int(userRow['idActiveMedal']) if (userRow['idActiveMedal'] is not None and userRow['idActiveMedal'].isdigit()) else None),
+        (int(userRow['idActiveMedal']) if userRow['idActiveMedal'] is not None else None),
         (True if userRow['isAdmin'] == 'true' else False)
     )
 
