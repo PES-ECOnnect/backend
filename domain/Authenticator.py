@@ -7,6 +7,7 @@ import data.DBSession as dbs
 def logOut(token):
     dbs.deleteToken(token)
 
+
 def logIn(email, passwordString):
     guessPassword = hashlib.sha256(passwordString.encode('UTF-8')).hexdigest()
 
@@ -25,16 +26,27 @@ def logIn(email, passwordString):
 
     return userSessionToken
 
+
 def checkValidToken(token):
     if not dbs.tokenExists(token):
         raise dbs.InvalidTokenException()
+
 
 def getUserForToken(token):
     userId = dbs.getUserIdForToken(token)
     return dbu.selectById(userId)
 
-def register(self):
-    pass
+
+def getUserForEmail(email):
+    return dbu.selectByEmail(email)
+
+
+def getUserForUsername(username):
+    return dbu.selectByUsername(username)
+
+
+def signUp(email, username, enPass):
+    dbu.insert(email, username, enPass)
 
 
 # --- Exceptions
@@ -55,4 +67,3 @@ class UserNotFoundException(AuthenticationException):
 
 class UserAlreadyExistsException(AuthenticationException):
     pass
-
