@@ -4,6 +4,7 @@ from random import randint
 from domain.Authenticator import *
 from domain.Authenticator import logOut
 from domain.User import *
+from domain.Product import *
 
 import json
 
@@ -73,9 +74,14 @@ def logout():
 
 
 @app.route("/products/<id>/answer")
-def adminUser(id):
-    pass
+def answerQuestion(id):
+    token = request.args.get('token')
+    questionId = request.args.get('questionId')
+    chosenOption = request.args.get('chosenOption')
 
+    product = Product(id, 'a', 1)
+    product.answerQuestion(questionId, id, token, chosenOption)
+    return 'Question answered correctly'
 
 if __name__ == "__main__":
     app.debug = True
