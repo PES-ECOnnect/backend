@@ -7,7 +7,7 @@ import domain.Authenticator as auth
 
 from domain.Reviewable import *
 from domain.Product import *
-
+from domain.Question import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -180,6 +180,47 @@ def answerQuestion(id):
         product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
         product.answerQuestion(questionId, id, token, chosenOption)
         return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/types/new", methods=['POST'])
+def newProductType():
+    if request.method != 'POST':
+        return {'error': 'INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    auth.checkValidToken(token)
+    name = request.args.get('name')
+
+    try:
+        q = request.args.get('questions')
+
+
+        createType(name)
+
+        id = getTypeIdByName(name)
+        typeId = id['TypeId']
+            # hardcoded just for test
+        newQuestion = Question(typeId, q, 1)
+        newQuestion.insert()
+
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@app.route("/types", methods=['GET'])
+def getProductTypes():
+    if request.method != 'GET':
+        return {'error': 'INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        result = getAllReviewableTypes()
+        print("types: ")
+        # {'name': 'NOM', 'preguntes': [{'idx': 'b', 'text': 'TEXT'}, {'idx': 'b', 'text': 'TEXT'}]}
+        return {'result':result}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 

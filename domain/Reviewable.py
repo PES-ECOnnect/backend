@@ -1,9 +1,31 @@
 import data.DBReviewable as dbr
-
+import data.DBReviewableType as dbrt
+import data.DBQuestion as dbq
 
 def getReviewablesByType(type):
     return dbr.selectByType(type)
 
+def createType(name):
+    return dbrt.insertType(name)
+
+def getTypeIdByName(typeName) ->int:
+    id = dbrt.getReviewableIdForType(typeName)
+    if id is None:
+        raise IncorrectReviewableTypeException()
+    return id
+
+def getAllReviewableTypes():
+    types = dbrt.getAllReviewableTypes()
+    result = []
+    for t in types:
+        #print(t['name'])
+        #print(t['TypeId'])
+        questions = dbq.getQuestionsFromType(int(t['TypeId']))
+        aux = {}
+        aux['name'] = t['name']
+        aux['questions'] = questions
+        result.append(aux)
+    return result
 
 class Reviewable:
     def __init__(self, id, name, type, imageURL, manufacturer, lat, lon):
