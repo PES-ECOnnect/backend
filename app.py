@@ -180,6 +180,7 @@ def answerQuestion(id):
 
         product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
         product.answerQuestion(id, token, chosenOption, idTipus, questionIndex)
+
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
@@ -194,6 +195,7 @@ def reviewProduct(id):
 
         product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
         product.review(id, token, review)
+
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
