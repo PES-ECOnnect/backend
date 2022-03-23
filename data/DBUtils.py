@@ -28,16 +28,25 @@ def selectQuery(query, args=(), one=False):
 
 
 def insertQuery(query, args=()):
+    #try:
+    con = sqlite3.connect('data/main.db')
+    cur = con.execute(query, args)
+    con.commit()
+    return cur.lastrowid
+
+    #except sqlite3.exc:
+    #return False
+
+def updateQuery(query, args=()):
     try:
         con = sqlite3.connect('data/main.db')
         cur = con.execute(query, args)
         con.commit()
 
-        return cur.lastrowid
+        return True
 
     except:
         return False
-
 
 
 def deleteQuery(query, args=()):
