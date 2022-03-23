@@ -7,6 +7,10 @@ class Product:
         self._name = name
         self._typeId = typeId
 
-    def answerQuestion(self, questionId, productId, token, chosenOption):
+    def answerQuestion(self, idType, QuestionIndex, productId, token, chosenOption):
         dbp = DBProduct()
-        return dbp.answer(questionId, productId, token, chosenOption)
+        return dbp.answer(idType, QuestionIndex, productId, token, chosenOption)
+
+    def deleteQuestion(self,QuestIndex,idTipus):
+        dbp = DBProduct()
+        return dbp.deleteQuestion(QuestIndex, idTipus)
