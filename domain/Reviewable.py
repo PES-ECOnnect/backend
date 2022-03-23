@@ -15,8 +15,8 @@ class Reviewable:
         self._lat = lat
         self._lon = lon
 
-    def answerQuestion(self, questionId, productId, token, chosenOption):
-        return dbr.answer(questionId, productId, token, chosenOption)
+    def answerQuestion(self, productId, token, chosenOption, idTipus, questionIndex):
+        return dbr.answer(productId, token, chosenOption, idTipus, questionIndex)
 
     def insert(self):
         dbr.insert(name=self._name, revType=self._type, imageURL=self._imageURL, manufacturer=self._manufacturer,

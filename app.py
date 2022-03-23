@@ -174,11 +174,12 @@ def answerQuestion(id):
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
-        questionId = request.args.get('questionId')
+        idTipus = request.args.get('idTipus')
+        questionIndex = request.args.get('questionIndex')
         chosenOption = request.args.get('chosenOption')
 
         product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
-        product.answerQuestion(questionId, id, token, chosenOption)
+        product.answerQuestion(id, token, chosenOption, idTipus, questionIndex)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
