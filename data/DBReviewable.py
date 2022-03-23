@@ -65,6 +65,19 @@ def answer(idReviewable, token, chosenOption, idTipus, questionIndex):
         return updateQuery(query=q, args=(chosenOption, idReviewable, idUser, idTipus, questionIndex,))
 
 
+def review(idReviewable, token, review):
+    idUser = getUserIdForToken(token)
+
+    q = "SELECT * FROM Valoration WHERE UserId = (?) AND ReviewableId = (?)"
+    answerRow = selectQuery(query=q, args=(idUser, idReviewable,), one=True)
+    if answerRow is None:
+        q = "INSERT INTO Valoration (UserId, ReviewableId, Stars) VALUES ((?), (?), (?))"
+        return insertQuery(query=q, args=(idUser, idReviewable, review,))
+    else:
+        q = "UPDATE Valoration SET Stars = (?) WHERE UserId = (?) AND ReviewableId = (?)"
+        return updateQuery(query=q, args=(review, idUser, idReviewable,))
+
+
 class FailedToInsertReviewableException(Exception):
     pass
 
