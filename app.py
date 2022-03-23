@@ -11,7 +11,7 @@ import data.DBUser as dbu
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
-
+import data.DBProduct
 import json
 import hashlib
 
@@ -20,8 +20,12 @@ app = Flask(__name__)
 
 @app.route("/")
 def helloWorld():
-    return "PES Econnect Root!"
-
+    #return "PES Econnect Root!"
+    p = Product(1,"paco",2)
+    res = p.answerQuestion(2,100,2,"370a0f3c-a9bd-11ec-85b5-9937708f1f24",1)
+    if res is False:
+        return "error"
+    return "okay"
 
 @app.route("/account", methods=['POST'])
 def signUp():
