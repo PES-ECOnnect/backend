@@ -2,3 +2,5 @@ __pycache__/
 .idea/
 .idea/*
 .DS_Store
+venv/bin/activate_with_windows_line_endings
+venv/bin/activate

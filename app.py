@@ -21,7 +21,6 @@ app = Flask(__name__)
 def helloWorld():
     return "PES Econnect Root!"
 
-
 @app.route("/account", methods=['POST'])
 def signUp():
     if request.method != 'POST':
@@ -176,7 +175,7 @@ def answerQuestion(id):
         questionId = request.args.get('questionId')
         chosenOption = request.args.get('chosenOption')
 
-        product = Reviewable(id, 'a', 1)
+        product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
         product.answerQuestion(questionId, id, token, chosenOption)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
