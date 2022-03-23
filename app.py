@@ -87,7 +87,7 @@ def isAdmin():
 
 @app.route("/account/logout", methods=['GET'])
 def logout():
-    if request.method != 'POST':
+    if request.method != 'GET':
         return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
 
     token = request.args.get('token')
