@@ -21,9 +21,6 @@ class Reviewable:
     def review(self, productId, token, review):
         return dbr.review(productId, token, review)
 
-    def review(self, productId, token, review):
-        return dbr.review(productId, token, review)
-
     def insert(self):
         dbr.insert(name=self._name, revType=self._type, imageURL=self._imageURL, manufacturer=self._manufacturer,
                    lat=self._lat, lon=self._lon)
