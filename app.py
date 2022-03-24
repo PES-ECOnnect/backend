@@ -143,17 +143,14 @@ def companies():
     token = request.args.get('token')
     auth.checkValidToken(token)
 
+    revType = 'Company'
+
     if request.method == 'POST':
         # Create company
-        revType = request.args.get('type')
-        if revType != 'Company':
-            return {'error': 'ERROR_NOT_COMPANY_TYPE'}
 
         name = request.args.get('name')
-
         lat = float(request.args.get('lat'))
         lon = float(request.args.get('lon'))
-
         # TODO: Obtain bytes from request body, upload to storage service, obtain URL, save it and return it.
         # imageURL = request.args.get('image')
         imageURL = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-product-6_large.png'
@@ -166,7 +163,9 @@ def companies():
         except dbp.FailedToInsertReviewableException:
             return {'error': 'ERROR_FAILED_TO_CREATE_COMPANY'}
 
-    return {'error': 'ERROR_NOT_YET_IMPLEMENTED'}
+    elif request.method == 'GET':
+        revRows = getReviewablesByType(revType)
+        return {'result': revRows}
 
 
 @app.route("/products/<id>/answer", methods=['POST'])
