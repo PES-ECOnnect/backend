@@ -8,7 +8,6 @@ import domain.Authenticator as auth
 from domain.Reviewable import *
 from domain.Product import *
 
-
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
 import data.DBReviewable as dbp
@@ -22,6 +21,7 @@ app = Flask(__name__)
 @app.route("/")
 def helloWorld():
     return "PES Econnect Root!"
+
 
 @app.route("/account", methods=['POST'])
 def signUp():
@@ -101,6 +101,21 @@ def logout():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
+'''
+products
+- invalid token
+- if no type -> all except company
+- if type -> all of type, empty if none
+    - error: ERROR_TYPE_NOT_EXISTS
+
+
+create
+- product exists -> ERROR_PRODUCT_EXISTS / ERROR_COMPANY_EXISTS
+- si type no existeix -> ERROR_TYPE_NOT_EXISTS
+'''
+
+
+@app.route("/companies", methods=['POST', 'GET'])
 @app.route("/products", methods=['POST', 'GET'])
 def products():
     if request.method != 'POST' and request.method != 'GET':
@@ -120,55 +135,29 @@ def products():
         # imageURL = request.args.get('image')
         imageURL = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-product-6_large.png'
 
-        newProduct = Reviewable(id=None, name=name, type=revType, imageURL=imageURL, manufacturer=manufacturer, lat=None, lon=None)
+        if revType == "Company":
+            newReviewable = Reviewable(id=None, name=name, type=revType, imageURL=imageURL, manufacturer=None,
+                                       lat=lat,
+                                       lon=lon)
+        else:
+            newReviewable = Reviewable(id=None, name=name, type=revType, imageURL=imageURL,
+                                       manufacturer=manufacturer,
+                                       lat=None, lon=None)
         try:
-            newProduct.insert()
+            newReviewable.insert()
             return {'status': 'success'}
 
         except dbp.FailedToInsertReviewableException:
-            return {'error': 'ERROR_FAILED_TO_CREATE_PRODUCT'}
+            return {'error': 'ERROR_FAILED_TO_CREATE_REVIEWABLE'}
 
     elif request.method == 'GET':
         revRows = getReviewablesByType(revType)
         return {'result': revRows}
 
-    return {'error': 'ERROR_NOT_YET_IMPLEMENTED'}
+    return {'error': 'ERROR_SOMETHING_WENT_WRONG'}
 
 
-@app.route("/companies", methods=['POST', 'GET'])
-def companies():
-    if request.method != 'POST' and request.method != 'GET':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
-    token = request.args.get('token')
-    auth.checkValidToken(token)
-
-    if request.method == 'POST':
-        # Create company
-        revType = request.args.get('type')
-        if revType != 'Company':
-            return {'error': 'ERROR_NOT_COMPANY_TYPE'}
-
-        name = request.args.get('name')
-
-        lat = float(request.args.get('lat'))
-        lon = float(request.args.get('lon'))
-
-        # TODO: Obtain bytes from request body, upload to storage service, obtain URL, save it and return it.
-        # imageURL = request.args.get('image')
-        imageURL = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-product-6_large.png'
-
-        newCompany = Reviewable(id=None, name=name, type=revType, imageURL=imageURL, manufacturer=None, lat=lat, lon=lon)
-        try:
-            newCompany.insert()
-            return {'status': 'success'}
-
-        except dbp.FailedToInsertReviewableException:
-            return {'error': 'ERROR_FAILED_TO_CREATE_COMPANY'}
-
-    return {'error': 'ERROR_NOT_YET_IMPLEMENTED'}
-
-
+@app.route("/companies/<id>/answer", methods=['POST'])
 @app.route("/products/<id>/answer", methods=['POST'])
 def answerQuestion(id):
     token = request.args.get('token')
@@ -178,25 +167,25 @@ def answerQuestion(id):
         questionIndex = request.args.get('questionIndex')
         chosenOption = request.args.get('chosenOption')
 
-        product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
-        product.answerQuestion(id, token, chosenOption, idTipus, questionIndex)
+        reviewable = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
+        reviewable.answerQuestion(id, token, chosenOption, idTipus, questionIndex)
 
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/products/<id>")
-def reviewProduct(id):
+@app.route("/companies/<id>/review", methods=['POST'])
+@app.route("/products/<id>/review", methods=['POST'])
+def reviewReviewable(id):
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
         review = request.args.get('review')
 
-        product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
-        product.review(id, token, review)
+        reviewable = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
+        reviewable.review(id, token, review)
 
-        product.answerQuestion(questionId, id, token, chosenOption)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
