@@ -183,12 +183,14 @@ def answerQuestion(id):
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+@app.route("/companies/<id>")
 @app.route("/products/<id>")
-def getProduct(id):
+def getReviewable(id):
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
         # return name, image, manufacturer, type, ratings[5], vector, questions{text,num_yes, num_no}
+        return
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 

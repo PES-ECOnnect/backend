@@ -4,7 +4,7 @@ import data.DBReviewable as dbr
 def getReviewablesByType(type):
     return dbr.selectByType(type)
 
-def infoProduct(self, id):
+'''def infoProduct(self, id):
     dbp = DBProduct()
     # return name, image, manufacturer, type, ratings[5], vector, questions{text,num_yes, num_no}
     TypeName =  # select type
@@ -14,7 +14,20 @@ def infoProduct(self, id):
         # add manufacturer
     prod = #select de nom+manufacturer+
     ratings[0..5] = # select ratings
-    questions(num_yes num_no) = #select questions from... -> select answers yes + no
+    questions(num_yes num_no) = #select questions from... -> select answers yes + no'''
+
+def getProduct(id):
+    TypeName = dbr.getTypeName(id)
+    if TypeName == "company":
+        # localization
+    else:
+        # manufacturer
+    # ratings MIRAR QUERY
+    # QUESTIONS
+
+def getRatings(idReviewable):
+    return dbr.getRatings(idReviewable)
+
 
 
 
@@ -49,5 +62,4 @@ class Reviewable:
 
     def getImageURL(self):
         return self._imageURL
-
 

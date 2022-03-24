@@ -51,6 +51,12 @@ def selectByType(revType):
 
     return selectQuery(q, (typeId,), False)
 
+def getTypeName(idReviewable):
+    q = "SELECT t.name FROM ReviewableType t, Reviewable r WHERE r.idReviewable = (?) AND t.TypeId = r.TypeId "
+    return selectQuery(q, (idReviewable,), True)
+
+def getRatings(idReviewable):
+    # THINK THIS QUERY
 
 def answer(idQuestion, idReviewable, token, chosenOption):
     idUser = getUserIdForToken(token)
