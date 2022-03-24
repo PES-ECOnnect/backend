@@ -15,8 +15,8 @@ class Reviewable:
         self._lat = lat
         self._lon = lon
 
-    def answerQuestion(self, productId, token, chosenOption, idTipus, questionIndex):
-        return dbr.answer(productId, token, chosenOption, idTipus, questionIndex)
+    def answerQuestion(self, productId, token, chosenOption, questionIndex):
+        return dbr.answer(productId, token, chosenOption, questionIndex)
 
     def review(self, productId, token, review):
         return dbr.review(productId, token, review)
