@@ -169,15 +169,33 @@ def companies():
     return {'error': 'ERROR_NOT_YET_IMPLEMENTED'}
 
 
-@app.route("/products/<id>/answer")
+@app.route("/products/<id>/answer", methods=['POST'])
 def answerQuestion(id):
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
-        questionId = request.args.get('questionId')
+        idTipus = request.args.get('idTipus')
+        questionIndex = request.args.get('questionIndex')
         chosenOption = request.args.get('chosenOption')
 
         product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
+        product.answerQuestion(id, token, chosenOption, idTipus, questionIndex)
+
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@app.route("/products/<id>")
+def reviewProduct(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        review = request.args.get('review')
+
+        product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
+        product.review(id, token, review)
+
         product.answerQuestion(questionId, id, token, chosenOption)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
