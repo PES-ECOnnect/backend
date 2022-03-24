@@ -6,7 +6,6 @@ from flask import Flask, request
 import domain.Authenticator as auth
 
 from domain.Reviewable import *
-from domain.Product import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -172,7 +171,6 @@ def answerQuestion(id):
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
-
 
 @app.route("/companies/<id>/review", methods=['POST'])
 @app.route("/products/<id>/review", methods=['POST'])
