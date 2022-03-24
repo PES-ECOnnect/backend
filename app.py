@@ -224,7 +224,6 @@ def getProductTypes():
     try:
         auth.checkValidToken(token)
         result = getAllReviewableTypes()
-        print("types: ")
         # {'name': 'NOM', 'preguntes': [{'idx': 'b', 'text': 'TEXT'}, {'idx': 'b', 'text': 'TEXT'}]}
         return {'result':result}
     except dbs.InvalidTokenException:
