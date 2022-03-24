@@ -101,6 +101,20 @@ def logout():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
+'''
+products
+- invalid token
+- if no type -> all except company
+- if type -> all of type, empty if none
+    - error: ERROR_TYPE_NOT_EXISTS
+
+
+create
+- product exists -> ERROR_PRODUCT_EXISTS / ERROR_COMPANY_EXISTS
+- si type no existeix -> ERROR_TYPE_NOT_EXISTS
+'''
+
+
 @app.route("/companies", methods=['POST', 'GET'])
 @app.route("/products", methods=['POST', 'GET'])
 def products():
@@ -137,12 +151,8 @@ def products():
             return {'error': 'ERROR_FAILED_TO_CREATE_REVIEWABLE'}
 
     elif request.method == 'GET':
-        try:
-            revRows = getReviewablesByType(revType)
-            return {'result': revRows}
-
-        except Exception:
-            return {'error': 'ERROR_NO_REVIEWABLE_FOUND'}
+        revRows = getReviewablesByType(revType)
+        return {'result': revRows}
 
     return {'error': 'ERROR_SOMETHING_WENT_WRONG'}
 
