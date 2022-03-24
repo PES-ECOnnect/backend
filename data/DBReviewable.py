@@ -52,6 +52,7 @@ def selectByType(revType):
     return selectQuery(q, (typeId,), False)
 
 
+
 def answer(idReviewable, token, chosenOption, questionIndex):
     idUser = getUserIdForToken(token)
 
