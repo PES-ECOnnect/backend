@@ -196,6 +196,7 @@ def reviewProduct(id):
         product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
         product.review(id, token, review)
 
+        product.answerQuestion(questionId, id, token, chosenOption)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
