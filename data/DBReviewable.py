@@ -52,17 +52,34 @@ def selectByType(revType):
     return selectQuery(q, (typeId,), False)
 
 
-def answer(idQuestion, idReviewable, token, chosenOption):
+def answer(idReviewable, token, chosenOption, questionIndex):
     idUser = getUserIdForToken(token)
 
-    q = "SELECT * FROM Answer WHERE idQuestion = (?) AND idReviewable = (?) AND idUser = (?)"
-    answerRow = selectQuery(query=q, args=(idQuestion, idReviewable, idUser,), one=True)
+    q = "SELECT * FROM Reviewable WHERE idReviewable = (?)"
+    TipusRow = selectQuery(query=q, args=(idReviewable,), one=True)
+    idTipus = TipusRow['TypeId']
+
+    q = "SELECT * FROM Answer WHERE idReviewable = (?) AND idUser = (?) AND idTipus = (?) AND QuestionIndex = (?)"
+    answerRow = selectQuery(query=q, args=(idReviewable, idUser, idTipus, questionIndex,), one=True)
     if answerRow is None:
-        q = "INSERT INTO Answer (idQuestion, idReviewable, idUser, chosenOption) VALUES ((?), (?), (?), (?))"
-        return insertQuery(query=q, args=(idQuestion, idReviewable, idUser, chosenOption,))
+        q = "INSERT INTO Answer (idReviewable, idUser, ChosenOption, idTipus, QuestionIndex) VALUES ((?), (?), (?), (?), (?))"
+        return insertQuery(query=q, args=(idReviewable, idUser, chosenOption, idTipus, questionIndex,))
     else:
-        q = "UPDATE Answer SET chosenOption = (?) WHERE idQuestion = (?) AND idReviewable = (?) AND idUser = (?)"
-        return updateQuery(query=q, args=(chosenOption, idQuestion, idReviewable, idUser,))
+        q = "UPDATE Answer SET ChosenOption = (?) WHERE idReviewable = (?) AND idUser = (?) AND idTipus = (?) AND QuestionIndex = (?)"
+        return updateQuery(query=q, args=(chosenOption, idReviewable, idUser, idTipus, questionIndex,))
+
+
+def review(idReviewable, token, review):
+    idUser = getUserIdForToken(token)
+
+    q = "SELECT * FROM Valoration WHERE UserId = (?) AND ReviewableId = (?)"
+    answerRow = selectQuery(query=q, args=(idUser, idReviewable,), one=True)
+    if answerRow is None:
+        q = "INSERT INTO Valoration (UserId, ReviewableId, Stars) VALUES ((?), (?), (?))"
+        return insertQuery(query=q, args=(idUser, idReviewable, review,))
+    else:
+        q = "UPDATE Valoration SET Stars = (?) WHERE UserId = (?) AND ReviewableId = (?)"
+        return updateQuery(query=q, args=(review, idUser, idReviewable,))
 
 
 class FailedToInsertReviewableException(Exception):
