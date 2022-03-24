@@ -6,7 +6,6 @@ from flask import Flask, request
 import domain.Authenticator as auth
 
 from domain.Reviewable import *
-from domain.Product import *
 from domain.Question import *
 
 # Data Layer (TODO - Remove)
