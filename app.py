@@ -186,7 +186,6 @@ def answerQuestion(id):
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-
 @app.route("/companies/<id>/review", methods=['POST'])
 @app.route("/products/<id>/review", methods=['POST'])
 def reviewReviewable(id):
