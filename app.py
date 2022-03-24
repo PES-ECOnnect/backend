@@ -168,6 +168,7 @@ def companies():
         return {'result': revRows}
 
 
+@app.route("/companies/<id>/answer", methods=['POST'])
 @app.route("/products/<id>/answer", methods=['POST'])
 def answerQuestion(id):
     token = request.args.get('token')
@@ -177,25 +178,25 @@ def answerQuestion(id):
         questionIndex = request.args.get('questionIndex')
         chosenOption = request.args.get('chosenOption')
 
-        product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
-        product.answerQuestion(id, token, chosenOption, idTipus, questionIndex)
+        reviewable = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
+        reviewable.answerQuestion(id, token, chosenOption, idTipus, questionIndex)
 
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/products/<id>")
-def reviewProduct(id):
+@app.route("/companies/<id>/review", methods=['POST'])
+@app.route("/products/<id>/review", methods=['POST'])
+def reviewReviewable(id):
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
         review = request.args.get('review')
 
-        product = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
-        product.review(id, token, review)
+        reviewable = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
+        reviewable.review(id, token, review)
 
-        product.answerQuestion(questionId, id, token, chosenOption)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
