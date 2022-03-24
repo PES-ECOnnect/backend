@@ -8,7 +8,6 @@ import domain.Authenticator as auth
 from domain.Reviewable import *
 from domain.Product import *
 
-
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
 import data.DBReviewable as dbp
@@ -22,6 +21,7 @@ app = Flask(__name__)
 @app.route("/")
 def helloWorld():
     return "PES Econnect Root!"
+
 
 @app.route("/account", methods=['POST'])
 def signUp():
@@ -101,6 +101,7 @@ def logout():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
+@app.route("/companies", methods=['POST', 'GET'])
 @app.route("/products", methods=['POST', 'GET'])
 def products():
     if request.method != 'POST' and request.method != 'GET':
@@ -120,52 +121,30 @@ def products():
         # imageURL = request.args.get('image')
         imageURL = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-product-6_large.png'
 
-        newProduct = Reviewable(id=None, name=name, type=revType, imageURL=imageURL, manufacturer=manufacturer, lat=None, lon=None)
+        if revType == "Company":
+            newReviewable = Reviewable(id=None, name=name, type=revType, imageURL=imageURL, manufacturer=None,
+                                       lat=lat,
+                                       lon=lon)
+        else:
+            newReviewable = Reviewable(id=None, name=name, type=revType, imageURL=imageURL,
+                                       manufacturer=manufacturer,
+                                       lat=None, lon=None)
         try:
-            newProduct.insert()
+            newReviewable.insert()
             return {'status': 'success'}
 
         except dbp.FailedToInsertReviewableException:
-            return {'error': 'ERROR_FAILED_TO_CREATE_PRODUCT'}
+            return {'error': 'ERROR_FAILED_TO_CREATE_REVIEWABLE'}
 
     elif request.method == 'GET':
-        revRows = getReviewablesByType(revType)
-        return {'result': revRows}
-
-    return {'error': 'ERROR_NOT_YET_IMPLEMENTED'}
-
-
-@app.route("/companies", methods=['POST', 'GET'])
-def companies():
-    if request.method != 'POST' and request.method != 'GET':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
-    token = request.args.get('token')
-    auth.checkValidToken(token)
-
-    revType = 'Company'
-
-    if request.method == 'POST':
-        # Create company
-
-        name = request.args.get('name')
-        lat = float(request.args.get('lat'))
-        lon = float(request.args.get('lon'))
-        # TODO: Obtain bytes from request body, upload to storage service, obtain URL, save it and return it.
-        # imageURL = request.args.get('image')
-        imageURL = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-product-6_large.png'
-
-        newCompany = Reviewable(id=None, name=name, type=revType, imageURL=imageURL, manufacturer=None, lat=lat, lon=lon)
         try:
-            newCompany.insert()
-            return {'status': 'success'}
+            revRows = getReviewablesByType(revType)
+            return {'result': revRows}
 
-        except dbp.FailedToInsertReviewableException:
-            return {'error': 'ERROR_FAILED_TO_CREATE_COMPANY'}
+        except Exception:
+            return {'error': 'ERROR_NO_REVIEWABLE_FOUND'}
 
-    elif request.method == 'GET':
-        revRows = getReviewablesByType(revType)
-        return {'result': revRows}
+    return {'error': 'ERROR_SOMETHING_WENT_WRONG'}
 
 
 @app.route("/companies/<id>/answer", methods=['POST'])
