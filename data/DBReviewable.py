@@ -52,8 +52,12 @@ def selectByType(revType):
     return selectQuery(q, (typeId,), False)
 
 
-def answer(idReviewable, token, chosenOption, idTipus, questionIndex):
+def answer(idReviewable, token, chosenOption, questionIndex):
     idUser = getUserIdForToken(token)
+
+    q = "SELECT * FROM Reviewable WHERE idReviewable = (?)"
+    TipusRow = selectQuery(query=q, args=(idReviewable,), one=True)
+    idTipus = TipusRow['TypeId']
 
     q = "SELECT * FROM Answer WHERE idReviewable = (?) AND idUser = (?) AND idTipus = (?) AND QuestionIndex = (?)"
     answerRow = selectQuery(query=q, args=(idReviewable, idUser, idTipus, questionIndex,), one=True)
