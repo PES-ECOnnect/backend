@@ -12,7 +12,7 @@ def insertQuestion(typeId, statement, index):
         raise FailedToAddQuestionException()
 
 def getQuestionsFromType(typeId):
-    sQuery = "SELECT Statement, QuestIndex FROM Question WHERE idTipus = (?)"
+    sQuery = "SELECT Statement FROM Question WHERE idTipus = (?)"
     return selectQuery(sQuery, (typeId,), False)
 
 #Returns the Statement, the number of yes answers, and number of no answers

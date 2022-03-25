@@ -214,7 +214,7 @@ def newProductType():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/types", methods=['GET'])
+@app.route("/products/types", methods=['GET'])
 def getProductTypes():
     if request.method != 'GET':
         return {'error': 'INVALID_REQUEST_METHOD'}
