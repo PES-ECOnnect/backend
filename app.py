@@ -6,6 +6,7 @@ from flask import Flask, request
 import domain.Authenticator as auth
 
 from domain.Reviewable import *
+from domain.Question import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -186,6 +187,61 @@ def reviewReviewable(id):
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/types/new", methods=['POST'])
+def newProductType():
+    if request.method != 'POST':
+        return {'error': 'INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    auth.checkValidToken(token)
+    name = request.args.get('name')
+
+    try:
+        q = request.args.get('questions')
+
+
+        createType(name)
+
+        id = getTypeIdByName(name)
+        typeId = id['TypeId']
+            # hardcoded just for test
+        newQuestion = Question(typeId, q, 1)
+        newQuestion.insert()
+
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@app.route("/types", methods=['GET'])
+def getProductTypes():
+    if request.method != 'GET':
+        return {'error': 'INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        result = getAllReviewableTypes()
+        # {'name': 'NOM', 'preguntes': [{'idx': 'b', 'text': 'TEXT'}, {'idx': 'b', 'text': 'TEXT'}]}
+        return {'result':result}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/companies/<id>")
+@app.route("/products/<id>")
+def getReviewable(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        # return name, image, manufacturer, type, ratings[5], vector, questions{text,num_yes, num_no}
+        return getProduct(id)
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbr.IdWrongTypeException:
+        return {'error': 'ID_WRONG_TYPE'}
+    except dbr.IncorrectReviewableTypeException:
+        return {'error': 'ERROR_INCORRECT_ID_REVIEWABLE'}
 
 
 if __name__ == "__main__":

@@ -1,9 +1,65 @@
 import data.DBReviewable as dbr
+import data.DBReviewableType as dbrt
+import data.DBQuestion as dbq
 
 
 def getReviewablesByType(type):
     return dbr.selectByType(type)
 
+def createType(name):
+    return dbrt.insertType(name)
+
+def getTypeIdByName(typeName) ->int:
+    id = dbrt.getReviewableIdForType(typeName)
+    if id is None:
+        raise IncorrectReviewableTypeException()
+    return id
+
+def getAllReviewableTypes():
+    types = dbrt.getAllReviewableTypes()
+    result = []
+    for t in types:
+        #print(t['name'])
+        #print(t['TypeId'])
+        questions = dbq.getQuestionsFromType(int(t['TypeId']))
+        aux = {}
+        aux['name'] = t['name']
+        aux['questions'] = questions
+        result.append(aux)
+    return result
+
+def getProduct(id):
+    attribs = dbr.getReviewableAttributes(id)
+    # ratings MIRAR QUERY
+    Ratings = []
+    for i in range(6):
+        Ratings.append(dbr.getRatings(id, i))
+    # type
+    TypeName = dbr.getTypeName(id)
+    # QUESTIONS
+    Questions = dbq.getQuestions(id,attribs["TypeId"])
+
+    if TypeName["name"] == "Company":
+        localization = dbr.getLocalization(id)
+        return {'name': attribs["name"],
+                'image': attribs["imageURL"],
+                'latitude': localization["lat"],
+                'longitude': localization["lon"],
+                'type': TypeName["name"],
+                'ratings': Ratings,
+                'questions': Questions}
+
+    else:
+        manufacturer = dbr.getManufacturer(id)
+        return {'name': attribs["name"],
+                'image': attribs["imageURL"],
+                'manufacturer': manufacturer["Manufacturer"],
+                'type': TypeName["name"],
+                'ratings': Ratings,
+                'questions': Questions}
+
+def getRatings(idReviewable):
+    return dbr.getRatings(idReviewable)
 
 class Reviewable:
     def __init__(self, id, name, type, imageURL, manufacturer, lat, lon):
@@ -39,3 +95,4 @@ class Reviewable:
 
     def getImageURL(self):
         return self._imageURL
+
