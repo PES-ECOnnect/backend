@@ -19,8 +19,6 @@ def getAllReviewableTypes():
     types = dbrt.getAllReviewableTypes()
     result = []
     for t in types:
-        #print(t['name'])
-        #print(t['TypeId'])
         questions = dbq.getQuestionsFromType(int(t['TypeId']))
         aux = {}
         aux['name'] = t['name']

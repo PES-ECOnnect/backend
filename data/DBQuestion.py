@@ -31,3 +31,9 @@ def getQuestions(idReviewable,TypeId):
             'num_no': no[0]["COUNT()"]
         })
     return Result
+
+
+# EXCEPTIONS
+
+class FailedToAddQuestionException(Exception):
+    pass

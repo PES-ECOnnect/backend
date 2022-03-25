@@ -188,30 +188,33 @@ def reviewReviewable(id):
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
-@app.route("/types/new", methods=['POST'])
+@app.route("/products/types", methods=['POST'])
 def newProductType():
     if request.method != 'POST':
         return {'error': 'INVALID_REQUEST_METHOD'}
-
     token = request.args.get('token')
     auth.checkValidToken(token)
     name = request.args.get('name')
-
+    print(name)
     try:
-        q = request.args.get('questions')
-
-
         createType(name)
-
         id = getTypeIdByName(name)
         typeId = id['TypeId']
-            # hardcoded just for test
-        newQuestion = Question(typeId, q, 1)
-        newQuestion.insert()
+
+        req_data = request.get_json()
+        questions = req_data['questions']
+        print(questions)
+        index = 1
+        for q in questions:
+            newQuestion = Question(typeId, q, index)
+            newQuestion.insert()
+            index+=1
 
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbrt.TypeAlreadyExistsException:
+        return {'error': 'TYPE_EXISTS'}
 
 
 @app.route("/products/types", methods=['GET'])
