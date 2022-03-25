@@ -19,8 +19,6 @@ def getAllReviewableTypes():
     types = dbrt.getAllReviewableTypes()
     result = []
     for t in types:
-        #print(t['name'])
-        #print(t['TypeId'])
         questions = dbq.getQuestionsFromType(int(t['TypeId']))
         aux = {}
         aux['name'] = t['name']
@@ -60,6 +58,11 @@ def getProduct(id):
 
 def getRatings(idReviewable):
     return dbr.getRatings(idReviewable)
+
+def getQuestionsCompany():
+    typeId = dbrt.getReviewableIdForType("Company")
+    id = typeId['TypeId']
+    return dbq.getQuestionsFromType(id)
 
 class Reviewable:
     def __init__(self, id, name, type, imageURL, manufacturer, lat, lon):
