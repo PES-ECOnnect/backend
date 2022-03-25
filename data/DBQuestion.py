@@ -13,7 +13,12 @@ def insertQuestion(typeId, statement, index):
 
 def getQuestionsFromType(typeId):
     sQuery = "SELECT Statement FROM Question WHERE idTipus = (?)"
-    return selectQuery(sQuery, (typeId,), False)
+    qResult = selectQuery(sQuery, (typeId,), False)
+    result = []
+    if qResult is not None:
+        for qr in qResult:
+            result.append(qr['Statement'])
+    return result
 
 #Returns the Statement, the number of yes answers, and number of no answers
 def getQuestions(idReviewable,TypeId):
