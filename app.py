@@ -190,9 +190,13 @@ def getReviewable(id):
     try:
         auth.checkValidToken(token)
         # return name, image, manufacturer, type, ratings[5], vector, questions{text,num_yes, num_no}
-        return
+        return getProduct(id)
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbr.IdWrongTypeException:
+        return {'error': 'ID_WRONG_TYPE'}
+    except dbr.IncorrectReviewableTypeException:
+        return {'error': 'ERROR_INCORRECT_ID_REVIEWABLE'}
 
 if __name__ == "__main__":
     app.debug = True

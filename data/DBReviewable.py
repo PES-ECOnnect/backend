@@ -51,12 +51,45 @@ def selectByType(revType):
 
     return selectQuery(q, (typeId,), False)
 
+
 def getTypeName(idReviewable):
     q = "SELECT t.name FROM ReviewableType t, Reviewable r WHERE r.idReviewable = (?) AND t.TypeId = r.TypeId "
     return selectQuery(q, (idReviewable,), True)
 
-def getRatings(idReviewable):
-    # THINK THIS QUERY
+
+# Returns an integer with the number of times the id of the Reviewable has been valorated with stars Stars.s
+def getRatings(idReviewable, stars):
+    q = "SELECT count() FROM Valoration WHERE ReviewableId = (?) AND Stars = (?)"
+    result = selectQuery(q, (idReviewable, stars,), True)
+    return result['count()']
+
+
+def getLocalization(idReviewable):
+    q = "SELECT lat,lon FROM InstallerCompany WHERE ReviewableId = (?)"
+    result = selectQuery(q, (idReviewable,), True)
+    if result is None:
+        raise IdWrongTypeException()
+    else:
+        return result
+
+
+def getManufacturer(idReviewable):
+    q = "SELECT manufacturer FROM EquipmentProduct WHERE ReviewableId = (?)"
+    result = selectQuery(q, (idReviewable,), True)
+    if result is None:
+        raise IdWrongTypeException()
+    else:
+        return result
+
+
+def getReviewableAttributes(idReviewable):
+    q = "SELECT * FROM Reviewable WHERE idReviewable = (?)"
+    result = selectQuery(q, (idReviewable,), True)
+    if result is None:
+        raise IncorrectReviewableTypeException()
+    else:
+        return result
+
 
 def answer(idQuestion, idReviewable, token, chosenOption):
     idUser = getUserIdForToken(token)
@@ -76,4 +109,12 @@ class FailedToInsertReviewableException(Exception):
 
 
 class IncorrectReviewableTypeException(Exception):
+    pass
+
+
+class IdWrongTypeException(Exception):
+    pass
+
+
+class IncorrectIdReviewableException(Exception):
     pass

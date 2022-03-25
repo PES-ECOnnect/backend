@@ -1,4 +1,5 @@
 import data.DBReviewable as dbr
+import data.DBQuestion as dbq
 
 
 def getReviewablesByType(type):
@@ -17,13 +18,34 @@ def getReviewablesByType(type):
     questions(num_yes num_no) = #select questions from... -> select answers yes + no'''
 
 def getProduct(id):
-    TypeName = dbr.getTypeName(id)
-    if TypeName == "company":
-        # localization
-    else:
-        # manufacturer
+    attribs = dbr.getReviewableAttributes(id)
     # ratings MIRAR QUERY
+    Ratings = []
+    for i in range(6):
+        Ratings.append(dbr.getRatings(id, i))
+    # type
+    TypeName = dbr.getTypeName(id)
     # QUESTIONS
+    Questions = dbq.getQuestions(id,attribs["TypeId"])
+
+    if TypeName["name"] == "Company":
+        localization = dbr.getLocalization(id)
+        return {'name': attribs["name"],
+                'image': attribs["imageURL"],
+                'latitude': localization["lat"],
+                'longitude': localization["lon"],
+                'type': TypeName["name"],
+                'ratings': Ratings,
+                'questions': Questions}
+
+    else:
+        manufacturer = dbr.getManufacturer(id)
+        return {'name': attribs["name"],
+                'image': attribs["imageURL"],
+                'manufacturer': manufacturer["Manufacturer"],
+                'type': TypeName["name"],
+                'ratings': Ratings,
+                'questions': Questions}
 
 def getRatings(idReviewable):
     return dbr.getRatings(idReviewable)
