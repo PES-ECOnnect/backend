@@ -91,8 +91,7 @@ def getReviewableAttributes(idReviewable):
         return result
 
 
-def answer(idQuestion, idReviewable, token, chosenOption):
-
+def answer(idReviewable, token, chosenOption, questionIndex):
     idUser = getUserIdForToken(token)
 
     q = "SELECT * FROM Reviewable WHERE idReviewable = (?)"
