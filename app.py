@@ -246,6 +246,15 @@ def getReviewable(id):
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_INCORRECT_ID_REVIEWABLE'}
 
+@app.route("/companies/questions", methods = ['GET'])
+def getCompanyQuestions():
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        questions = getQuestionsCompany()
+        return {'result': questions}
+    except dbs.InvalidTokenException:
+        return {'error':'ERROR_INVALID_TOKEN'}
 
 if __name__ == "__main__":
     app.debug = True

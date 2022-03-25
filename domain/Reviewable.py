@@ -59,6 +59,11 @@ def getProduct(id):
 def getRatings(idReviewable):
     return dbr.getRatings(idReviewable)
 
+def getQuestionsCompany():
+    typeId = dbrt.getReviewableIdForType("Company")
+    id = typeId['TypeId']
+    return dbq.getQuestionsFromType(id)
+
 class Reviewable:
     def __init__(self, id, name, type, imageURL, manufacturer, lat, lon):
         self._id = id
