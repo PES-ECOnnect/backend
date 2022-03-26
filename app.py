@@ -33,6 +33,7 @@ def signUp():
     password = request.args.get('password')
     enPass = hashlib.sha256(password.encode('UTF-8')).hexdigest()
 
+
     if auth.getUserForEmail(email) is not None:
         return {'error': 'ERROR_USER_EMAIL_EXISTS'}
 
@@ -41,10 +42,15 @@ def signUp():
 
     try:
         auth.signUp(email, username, enPass)
-        return {'status': 'success'}
+        token = auth.logIn(email, password)
+        return {'status': 'success',
+                'token': str(token)}
 
     except sqlite3.Error:
         return {'error': 'ERROR_FAILED_SIGN_UP'}
+
+    except dbs.FailedToOpenSessionException:
+        return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
 
 
 @app.route("/account/login", methods=['GET'])
