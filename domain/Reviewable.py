@@ -40,7 +40,7 @@ def getProduct(id):
     if TypeName["name"] == "Company":
         localization = dbr.getLocalization(id)
         return {'name': attribs["name"],
-                'image': attribs["imageURL"],
+                'imageURL': attribs["imageURL"],
                 'latitude': localization["lat"],
                 'longitude': localization["lon"],
                 'type': TypeName["name"],
@@ -50,7 +50,7 @@ def getProduct(id):
     else:
         manufacturer = dbr.getManufacturer(id)
         return {'name': attribs["name"],
-                'image': attribs["imageURL"],
+                'imageURL': attribs["imageURL"],
                 'manufacturer': manufacturer["Manufacturer"],
                 'type': TypeName["name"],
                 'ratings': Ratings,

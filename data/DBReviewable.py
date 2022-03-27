@@ -39,15 +39,14 @@ def selectByType(revType):
 
     typeId = typeRow['TypeId']
     q = "" \
-        "SELECT *" \
+        "SELECT Manufacturer AS manufacturer, idReviewable AS id, rt.name AS type, imageURL, r.name, IFNULL(AVG(stars), 0.0) AS avgRating" \
         " FROM Reviewable r" \
         " JOIN %s t on t.ReviewableId = r.idReviewable" \
-        " WHERE r.TypeId = ?" % ("InstallerCompany" if revType == "Company" else "EquipmentProduct")
-
-    print("---")
-    print(q)
-    print(typeId)
-    print("---")
+        " JOIN ReviewableType rt on rt.TypeId = r.TypeId" \
+        " LEFT JOIN Valoration v on v.ReviewableId = r.idReviewable" \
+        " WHERE r.TypeId = ?" \
+        " GROUP BY id" \
+        " ORDER BY avgRating DESC" % ("InstallerCompany" if revType == "Company" else "EquipmentProduct")
 
     return selectQuery(q, (typeId,), False)
 
