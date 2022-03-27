@@ -33,6 +33,7 @@ def signUp():
     password = request.args.get('password')
     enPass = hashlib.sha256(password.encode('UTF-8')).hexdigest()
 
+
     if auth.getUserForEmail(email) is not None:
         return {'error': 'ERROR_USER_EMAIL_EXISTS'}
 
@@ -41,10 +42,15 @@ def signUp():
 
     try:
         auth.signUp(email, username, enPass)
-        return {'status': 'success'}
+        token = auth.logIn(email, password)
+        return {'status': 'success',
+                'token': str(token)}
 
     except sqlite3.Error:
         return {'error': 'ERROR_FAILED_SIGN_UP'}
+
+    except dbs.FailedToOpenSessionException:
+        return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
 
 
 @app.route("/account/login", methods=['GET'])
@@ -188,33 +194,36 @@ def reviewReviewable(id):
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
-@app.route("/types/new", methods=['POST'])
+@app.route("/products/types", methods=['POST'])
 def newProductType():
     if request.method != 'POST':
         return {'error': 'INVALID_REQUEST_METHOD'}
-
     token = request.args.get('token')
     auth.checkValidToken(token)
     name = request.args.get('name')
-
+    print(name)
     try:
-        q = request.args.get('questions')
-
-
         createType(name)
-
         id = getTypeIdByName(name)
         typeId = id['TypeId']
-            # hardcoded just for test
-        newQuestion = Question(typeId, q, 1)
-        newQuestion.insert()
+
+        req_data = request.get_json()
+        questions = req_data['questions']
+        print(questions)
+        index = 1
+        for q in questions:
+            newQuestion = Question(typeId, q, index)
+            newQuestion.insert()
+            index+=1
 
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbrt.TypeAlreadyExistsException:
+        return {'error': 'TYPE_EXISTS'}
 
 
-@app.route("/types", methods=['GET'])
+@app.route("/products/types", methods=['GET'])
 def getProductTypes():
     if request.method != 'GET':
         return {'error': 'INVALID_REQUEST_METHOD'}
@@ -243,6 +252,15 @@ def getReviewable(id):
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_INCORRECT_ID_REVIEWABLE'}
 
+@app.route("/companies/questions", methods = ['GET'])
+def getCompanyQuestions():
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        questions = getQuestionsCompany()
+        return {'result': questions}
+    except dbs.InvalidTokenException:
+        return {'error':'ERROR_INVALID_TOKEN'}
 
 if __name__ == "__main__":
     app.debug = True
