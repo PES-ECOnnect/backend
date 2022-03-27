@@ -131,6 +131,8 @@ def products():
     auth.checkValidToken(token)
 
     revType = request.args.get('type')
+    if revType is None:
+        revType = "Company"
     name = request.args.get('name')
 
     if request.method == 'POST':
@@ -157,9 +159,16 @@ def products():
             return {'error': 'ERROR_FAILED_TO_CREATE_REVIEWABLE'}
 
     elif request.method == 'GET':
-        revRows = getReviewablesByType(revType)
+        revRows = []
+        if (revType != ""):
+            revRows = getReviewablesByType(revType)
+        else:
+            types = getAllReviewableTypes()
+            for t in types:
+                typeName = t["name"]
+                typeProducts = getReviewablesByType(typeName)
+                revRows += typeProducts
         return {'result': revRows}
-
     return {'error': 'ERROR_SOMETHING_WENT_WRONG'}
 
 
