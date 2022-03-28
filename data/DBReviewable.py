@@ -6,11 +6,9 @@ import data.DBReviewableType as dbrt
 # If revType == 'Company', we assume that lat and lon are not None
 # If revType != 'Company', we assume that manufacturer is not None
 def insert(name, revType, imageURL, manufacturer=None, lat=None, lon=None):
-    typeRow = dbrt.getReviewableTypeId(revType)
-    if typeRow is None:
+    typeId = dbrt.getReviewableTypeId(revType)
+    if typeId is None:
         raise IncorrectReviewableTypeException()
-
-    typeId = typeRow['TypeId']
 
     con = getCon()
     c = con.cursor()

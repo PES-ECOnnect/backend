@@ -164,9 +164,9 @@ def products():
         try:
             newReviewable.insert()
             return {'status': 'success'}
-
         except dbp.FailedToInsertReviewableException:
             return {'error': 'ERROR_FAILED_TO_CREATE_REVIEWABLE'}
+
 
     elif request.method == 'GET':
         revRows = []
@@ -217,48 +217,48 @@ def reviewReviewable(id):
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/products/types", methods=['POST'])
+@app.route("/products/types", methods=['POST', 'GET'])
 def newProductType():
-    if request.method != 'POST':
-        return {'error': 'INVALID_REQUEST_METHOD'}
-    token = request.args.get('token')
-    auth.checkValidToken(token)
-    name = request.args.get('name')
-    print(name)
-    try:
-        createType(name)
-        revTypeId = getReviewableTypeIdByName(name)
-        typeId = revTypeId['TypeId']
-
-        req_data = request.get_json()
-        questions = req_data['questions']
-        print(questions)
-        index = 1
-        for q in questions:
-            newQuestion = Question(typeId, q, index)
-            newQuestion.insert()
-            index += 1
-
-        return {'status': 'success'}
-    except dbs.InvalidTokenException:
-        return {'error': 'ERROR_INVALID_TOKEN'}
-    except dbrt.TypeAlreadyExistsException:
-        return {'error': 'TYPE_EXISTS'}
-
-
-@app.route("/products/types", methods=['GET'])
-def getProductTypes():
-    if request.method != 'GET':
+    if request.method != 'POST' and request.method != 'GET':
         return {'error': 'INVALID_REQUEST_METHOD'}
 
-    token = request.args.get('token')
-    try:
-        auth.checkValidToken(token)
-        result = getAllReviewableTypes()
-        # {'name': 'NOM', 'preguntes': [{'idx': 'b', 'text': 'TEXT'}, {'idx': 'b', 'text': 'TEXT'}]}
-        return {'result': result}
-    except dbs.InvalidTokenException:
-        return {'error': 'ERROR_INVALID_TOKEN'}
+    if request.method == 'POST':
+
+        token = request.args.get('token')
+        try:
+            auth.checkValidToken(token)
+        except dbs.InvalidTokenException:
+            return {'error': 'ERROR_INVALID_TOKEN'}
+
+        name = request.args.get('name')
+
+        try:
+            createType(name)
+            revTypeId = getReviewableTypeIdByName(name)
+
+            reqData = request.get_json()
+            questions = reqData['questions']
+
+            index = 1
+            for q in questions:
+                newQuestion = Question(revTypeId, q, index)
+                newQuestion.insert()
+                index += 1
+
+            return {'status': 'success'}
+
+        except dbrt.TypeAlreadyExistsException:
+            return {'error': 'TYPE_EXISTS'}
+
+    elif request.method == 'GET':
+        token = request.args.get('token')
+        try:
+            auth.checkValidToken(token)
+            result = getAllReviewableTypes()
+            # {'name': 'NOM', 'preguntes': [{'idx': 'b', 'text': 'TEXT'}, {'idx': 'b', 'text': 'TEXT'}]}
+            return {'result': result}
+        except dbs.InvalidTokenException:
+            return {'error': 'ERROR_INVALID_TOKEN'}
 
 
 @app.route("/companies/<id>")
