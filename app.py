@@ -149,7 +149,9 @@ def products():
 
     # check if the reviewable type is valid (either "Company" or some valid product type)
     try:
-        getReviewableTypeIdByName(revType)
+        if revType != "":
+            getReviewableTypeIdByName(revType)
+
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_TYPE_NOT_EXISTS'}
 
