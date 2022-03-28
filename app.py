@@ -134,7 +134,12 @@ def products():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
     # check if we are working with a company or a product
-    revType = request.args.get('type')
+    if str(request.url_rule) == "/products":
+        revType = request.args.get('type')
+        if revType == "Company":
+            return {'error': 'ERROR_INVALID_ARGUMENTS'}
+    else:
+        revType = "Company"
 
     if revType is None:
         if str(request.url_rule) == "/products":
@@ -179,9 +184,7 @@ def products():
     elif request.method == 'GET':
         revRows = []
 
-        if revType != "":
-            revRows = getReviewablesByType(revType)
-        else:
+        if revType == "":  # All products of all types
             types = getAllReviewableTypes()
             for t in types:
                 typeName = t["name"]
@@ -189,6 +192,9 @@ def products():
                     continue  # don't include companies
                 typeProducts = getReviewablesByType(typeName)
                 revRows += typeProducts
+
+        else:  # All Companies or all Products of type revType
+            revRows = getReviewablesByType(revType)
 
         return {'result': revRows}
 
