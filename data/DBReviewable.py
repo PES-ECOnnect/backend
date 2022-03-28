@@ -25,6 +25,10 @@ def insert(name, revType, imageURL, manufacturer=None, lat=None, lon=None):
                       (reviewableId, manufacturer))
 
         c.execute("commit")
+
+    except con.IntegrityError:
+        c.execute("rollback")
+        raise ReviewableAlreadyExistsException()
     except con.Error:
         c.execute("rollback")
         raise FailedToInsertReviewableException()
@@ -145,4 +149,7 @@ class IdWrongTypeException(Exception):
 
 
 class IncorrectIdReviewableException(Exception):
+    pass
+
+class ReviewableAlreadyExistsException(Exception):
     pass

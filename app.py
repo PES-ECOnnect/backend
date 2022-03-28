@@ -166,7 +166,8 @@ def products():
             return {'status': 'success'}
         except dbp.FailedToInsertReviewableException:
             return {'error': 'ERROR_FAILED_TO_CREATE_REVIEWABLE'}
-
+        except dbp.ReviewableAlreadyExistsException:
+            return {'error': 'ERROR_COMPANY_EXISTS' if revType == 'Company' else 'ERROR_PRODUCT_EXISTS'}
 
     elif request.method == 'GET':
         revRows = []
@@ -181,6 +182,7 @@ def products():
                 typeProducts = getReviewablesByType(typeName)
                 revRows += typeProducts
         return {'result': revRows}
+
     return {'error': 'ERROR_SOMETHING_WENT_WRONG'}
 
 
