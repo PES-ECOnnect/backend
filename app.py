@@ -151,6 +151,7 @@ def products():
     try:
         if revType != "":
             getReviewableTypeIdByName(revType)
+
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_TYPE_NOT_EXISTS'}
 

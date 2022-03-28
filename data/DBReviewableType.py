@@ -7,6 +7,7 @@ def getReviewableTypeId(typeName: str) -> int:
     return None if row is None else row['TypeId']
 
 
+
 def insertType(name):
     con = getCon()
     c = con.cursor()
