@@ -6,16 +6,15 @@ import data.DBReviewableType as dbrt
 # If revType == 'Company', we assume that lat and lon are not None
 # If revType != 'Company', we assume that manufacturer is not None
 def insert(name, revType, imageURL, manufacturer=None, lat=None, lon=None):
-    typeRow = dbrt.getReviewableIdForType(revType)
-    if typeRow is None:
+    typeId = dbrt.getReviewableTypeId(revType)
+    if typeId is None:
         raise IncorrectReviewableTypeException()
-
-    typeId = typeRow['TypeId']
 
     con = getCon()
     c = con.cursor()
     c.execute("begin")
     try:
+        print(typeId, name, imageURL)
         c.execute("INSERT INTO Reviewable (TypeId, name, imageURL) VALUES (?, ?, ?) ", (typeId, name, imageURL))
         reviewableId = c.lastrowid
 
@@ -27,19 +26,22 @@ def insert(name, revType, imageURL, manufacturer=None, lat=None, lon=None):
                       (reviewableId, manufacturer))
 
         c.execute("commit")
+
+    except con.IntegrityError:
+        c.execute("rollback")
+        raise ReviewableAlreadyExistsException()
     except con.Error:
         c.execute("rollback")
         raise FailedToInsertReviewableException()
 
 
 def selectByType(revType):
-    typeRow = dbrt.getReviewableIdForType(revType)
-    if typeRow is None:
+    typeId = dbrt.getReviewableTypeId(revType)
+    if typeId is None:
         raise IncorrectReviewableTypeException()
 
-    typeId = typeRow['TypeId']
+    if revType == "Company":
 
-    if revType == "Company" :
         q = "" \
             "SELECT idReviewable AS id, imageURL, r.name, IFNULL(AVG(stars), 0.0) AS avgRating, lat, lon" \
             " FROM Reviewable r" \
@@ -147,4 +149,8 @@ class IdWrongTypeException(Exception):
 
 
 class IncorrectIdReviewableException(Exception):
+    pass
+
+
+class ReviewableAlreadyExistsException(Exception):
     pass
