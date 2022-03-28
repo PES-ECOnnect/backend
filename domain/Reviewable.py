@@ -6,14 +6,17 @@ import data.DBQuestion as dbq
 def getReviewablesByType(type):
     return dbr.selectByType(type)
 
+
 def createType(name):
     return dbrt.insertType(name)
 
-def getTypeIdByName(typeName) ->int:
-    id = dbrt.getReviewableIdForType(typeName)
-    if id is None:
-        raise IncorrectReviewableTypeException()
-    return id
+
+def getReviewableTypeIdByName(typeName) -> int:
+    revTypeId = dbrt.getReviewableTypeId(typeName)
+    if revTypeId is None:
+        raise dbr.IncorrectReviewableTypeException()
+    return revTypeId
+
 
 def getAllReviewableTypes():
     types = dbrt.getAllReviewableTypes()
@@ -26,6 +29,7 @@ def getAllReviewableTypes():
         result.append(aux)
     return result
 
+
 def getProduct(id):
     attribs = dbr.getReviewableAttributes(id)
     # ratings MIRAR QUERY
@@ -35,7 +39,7 @@ def getProduct(id):
     # type
     TypeName = dbr.getTypeName(id)
     # QUESTIONS
-    Questions = dbq.getQuestions(id,attribs["TypeId"])
+    Questions = dbq.getQuestions(id, attribs["TypeId"])
 
     if TypeName["name"] == "Company":
         localization = dbr.getLocalization(id)
@@ -56,13 +60,16 @@ def getProduct(id):
                 'ratings': Ratings,
                 'questions': Questions}
 
+
 def getRatings(idReviewable):
     return dbr.getRatings(idReviewable)
 
+
 def getQuestionsCompany():
-    typeId = dbrt.getReviewableIdForType("Company")
+    typeId = dbrt.getReviewableTypeId("Company")
     id = typeId['TypeId']
     return dbq.getQuestionsFromType(id)
+
 
 class Reviewable:
     def __init__(self, id, name, type, imageURL, manufacturer, lat, lon):
@@ -98,4 +105,3 @@ class Reviewable:
 
     def getImageURL(self):
         return self._imageURL
-
