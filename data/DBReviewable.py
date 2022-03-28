@@ -41,6 +41,7 @@ def selectByType(revType):
         raise IncorrectReviewableTypeException()
 
     if revType == "Company":
+
         q = "" \
             "SELECT idReviewable AS id, imageURL, r.name, IFNULL(AVG(stars), 0.0) AS avgRating, lat, lon" \
             " FROM Reviewable r" \

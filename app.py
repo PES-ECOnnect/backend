@@ -197,7 +197,6 @@ def products():
             revRows = getReviewablesByType(revType)
 
         return {'result': revRows}
-
     return {'error': 'ERROR_SOMETHING_WENT_WRONG'}
 
 
