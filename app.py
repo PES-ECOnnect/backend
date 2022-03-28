@@ -126,22 +126,29 @@ def products():
     if request.method != 'POST' and request.method != 'GET':
         return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
 
+    # check if token is valid
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+    # check if we are working with a company or a product
     revType = request.args.get('type')
-    if revType is None:
-        revType = "Company"
 
+    if revType is None:
+        if str(request.url_rule) == "/products":
+            return {'error': 'ERROR_INVALID_ARGUMENTS'}  # missing the type argument
+        else:
+            revType = "Company"
+
+    # check if the reviewable type is valid (either "Company" or some valid product type)
     try:
         getReviewableTypeIdByName(revType)
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_TYPE_NOT_EXISTS'}
 
-    name = request.args.get('name')
+    reviewableName = request.args.get('name')
 
     if request.method == 'POST':
         # Create product
@@ -154,11 +161,11 @@ def products():
         if revType == "Company":
             lat = request.args.get('lat')
             lon = request.args.get('lon')
-            newReviewable = Reviewable(id=None, name=name, type=revType, imageURL=imageURL, manufacturer=None,
+            newReviewable = Reviewable(id=None, name=reviewableName, type=revType, imageURL=imageURL, manufacturer=None,
                                        lat=lat,
                                        lon=lon)
         else:
-            newReviewable = Reviewable(id=None, name=name, type=revType, imageURL=imageURL,
+            newReviewable = Reviewable(id=None, name=reviewableName, type=revType, imageURL=imageURL,
                                        manufacturer=manufacturer,
                                        lat=None, lon=None)
         try:
@@ -171,6 +178,7 @@ def products():
 
     elif request.method == 'GET':
         revRows = []
+
         if revType != "":
             revRows = getReviewablesByType(revType)
         else:
@@ -181,6 +189,7 @@ def products():
                     continue  # don't include companies
                 typeProducts = getReviewablesByType(typeName)
                 revRows += typeProducts
+
         return {'result': revRows}
 
     return {'error': 'ERROR_SOMETHING_WENT_WRONG'}
