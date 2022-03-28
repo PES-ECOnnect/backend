@@ -14,6 +14,7 @@ def insert(name, revType, imageURL, manufacturer=None, lat=None, lon=None):
     c = con.cursor()
     c.execute("begin")
     try:
+        print(typeId, name, imageURL)
         c.execute("INSERT INTO Reviewable (TypeId, name, imageURL) VALUES (?, ?, ?) ", (typeId, name, imageURL))
         reviewableId = c.lastrowid
 
@@ -35,13 +36,11 @@ def insert(name, revType, imageURL, manufacturer=None, lat=None, lon=None):
 
 
 def selectByType(revType):
-    typeRow = dbrt.getReviewableTypeId(revType)
-    if typeRow is None:
+    typeId = dbrt.getReviewableTypeId(revType)
+    if typeId is None:
         raise IncorrectReviewableTypeException()
 
-    typeId = typeRow['TypeId']
-
-    if revType == "Company" :
+    if revType == "Company":
         q = "" \
             "SELECT idReviewable AS id, imageURL, r.name, IFNULL(AVG(stars), 0.0) AS avgRating, lat, lon" \
             " FROM Reviewable r" \
@@ -150,6 +149,7 @@ class IdWrongTypeException(Exception):
 
 class IncorrectIdReviewableException(Exception):
     pass
+
 
 class ReviewableAlreadyExistsException(Exception):
     pass
