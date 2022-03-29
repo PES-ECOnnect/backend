@@ -7,6 +7,10 @@ def getReviewablesByType(type):
     return dbr.selectByType(type)
 
 
+def getAllProducts():
+    return dbr.selectProducts()
+
+
 def createType(name):
     return dbrt.insertType(name)
 

@@ -187,13 +187,7 @@ def products():
         revRows = []
 
         if revType == "":  # All products of all types
-            types = getAllReviewableTypes()
-            for t in types:
-                typeName = t["name"]
-                if typeName == "Company":
-                    continue  # don't include companies
-                typeProducts = getReviewablesByType(typeName)
-                revRows += typeProducts
+            revRows = getAllProducts()
 
         else:  # All Companies or all Products of type revType
             revRows = getReviewablesByType(revType)
@@ -257,7 +251,7 @@ def newProductType():
             reqData = request.get_json()
             questions = reqData['questions']
 
-            index = 1
+            index = 0
             for q in questions:
                 newQuestion = Question(revTypeId, q, index)
                 newQuestion.insert()

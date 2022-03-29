@@ -35,6 +35,20 @@ def insert(name, revType, imageURL, manufacturer=None, lat=None, lon=None):
         raise FailedToInsertReviewableException()
 
 
+def selectProducts():
+    q = "" \
+        "SELECT Manufacturer AS manufacturer, idReviewable AS id, rt.name AS type, imageURL, r.name," \
+        " IFNULL(AVG(stars), 0.0) AS avgRating" \
+        " FROM Reviewable r" \
+        " JOIN EquipmentProduct t on t.ReviewableId = r.idReviewable" \
+        " JOIN ReviewableType rt on rt.TypeId = r.TypeId" \
+        " LEFT JOIN Valoration v on v.ReviewableId = r.idReviewable" \
+        " GROUP BY id" \
+        " ORDER BY avgRating DESC"
+
+    return selectQuery(q, (), False)
+
+
 def selectByType(revType):
     typeId = dbrt.getReviewableTypeId(revType)
     if typeId is None:
