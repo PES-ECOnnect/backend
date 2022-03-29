@@ -1,9 +1,11 @@
 from data.DBUtils import *
 
 
-def getReviewableIdForType(typeName: str) -> int:
+def getReviewableTypeId(typeName: str) -> int:
     q = "SELECT TypeId FROM ReviewableType WHERE name = ?"
-    return selectQuery(q, (typeName,), True)
+    row = selectQuery(q, (typeName,), True)
+    return None if row is None else row['TypeId']
+
 
 
 def insertType(name):
