@@ -49,7 +49,9 @@ def insert(query, args=()):
         cur.execute(query, args)
         conn.commit()
         print("Successfully inserted.")
+
         return True
+
 
     except psycopg2.Error:
         return False
