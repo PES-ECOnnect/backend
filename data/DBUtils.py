@@ -1,65 +1,76 @@
-import sqlite3
+import psycopg2
+import psycopg2.extras
 
 
-# Make Query results associative.
-# - Source: https://stackoverflow.com/questions/3300464/how-can-i-get-dict-from-sqlite-query
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+def getConnection():
+    conn = psycopg2.connect(
+        host="localhost",
+        database="econnect",
+        user="pol",
+        password="111111"
+    )
+
+    return conn
 
 
-def getCon():
-    con = sqlite3.connect('data/main.db')
-    con.row_factory = dict_factory
-    return con
+def select(query, args=(), one=False):
+    conn = getConnection()
 
-
-def selectQuery(query, args=(), one=False):
-    con = sqlite3.connect('data/main.db')
-    con.row_factory = dict_factory
-    cur = con.execute(query, args)
+    # result rows represented by a list of python dicts
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute(query, args)
     rv = cur.fetchall()
+
     cur.close()
-    con.commit()
-    
+    conn.close()
+
     return (rv[0] if rv else None) if one else rv
 
 
-def insertQuery(query, args=()):
-    #try:
-    con = sqlite3.connect('data/main.db')
-    cur = con.execute(query, args)
-    con.commit()
-    return cur.lastrowid
+def insert(query, args=()):
+    conn = getConnection()
+    cur = conn.cursor()
 
-    #except sqlite3.exc:
-    #return False
-
-def updateQuery(query, args=()):
     try:
-        con = sqlite3.connect('data/main.db')
-        cur = con.execute(query, args)
-        con.commit()
+        cur.execute(query, args)
+        conn.commit()
+        return cur.lastrowid
 
-        return True
-
-    except:
+    except psycopg2.Error:
         return False
 
+    finally:
+        cur.close()
+        conn.close()
 
-def deleteQuery(query, args=()):
+
+def update(query, args=()):
+    conn = getConnection()
+    cur = conn.cursor()
     try:
-        con = sqlite3.connect('data/main.db')
-        cur = con.execute(query, args)
-        con.commit()
+        cur.execute(query, args)
+        conn.commit()
         return True
-    
-    except:
+
+    except psycopg2.Error:
         return False
 
+    finally:
+        cur.close()
+        conn.close()
 
 
+def delete(query, args=()):
+    conn = getConnection()
+    cur = conn.cursor()
+    try:
+        cur.execute(query, args)
+        conn.commit()
+        return True
 
+    except psycopg2.Error:
+        return False
 
+    finally:
+        cur.close()
+        conn.close()

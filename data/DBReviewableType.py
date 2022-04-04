@@ -3,13 +3,13 @@ from data.DBUtils import *
 
 def getReviewableTypeId(typeName: str) -> int:
     q = "SELECT TypeId FROM ReviewableType WHERE name = ?"
-    row = selectQuery(q, (typeName,), True)
+    row = select(q, (typeName,), True)
     return None if row is None else row['TypeId']
 
 
 
 def insertType(name):
-    con = getCon()
+    con = getConnection()
     c = con.cursor()
     c.execute("begin")
     try:
@@ -24,7 +24,7 @@ def getAllReviewableTypes():
     # TODO: Add questions
     # select r.name, q.QuestIndex, q.Statement from Question q, ReviewableType r where r.TypeId = q.idTipus
     sQuery = "SELECT * FROM ReviewableType WHERE name <>'Company'"
-    return selectQuery(sQuery, (), False)
+    return select(sQuery, (), False)
 
 
 # EXCEPTIONS

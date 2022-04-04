@@ -10,7 +10,7 @@ def insert(name, revType, imageURL, manufacturer=None, lat=None, lon=None):
     if typeId is None:
         raise IncorrectReviewableTypeException()
 
-    con = getCon()
+    con = getConnection()
     c = con.cursor()
     c.execute("begin")
     try:
@@ -46,7 +46,7 @@ def selectProducts():
         " GROUP BY id" \
         " ORDER BY avgRating DESC"
 
-    return selectQuery(q, (), False)
+    return select(q, (), False)
 
 
 def selectByType(revType):
@@ -78,24 +78,24 @@ def selectByType(revType):
             " GROUP BY id" \
             " ORDER BY avgRating DESC"
 
-    return selectQuery(q, (typeId,), False)
+    return select(q, (typeId,), False)
 
 
 def getTypeName(idReviewable):
     q = "SELECT t.name FROM ReviewableType t, Reviewable r WHERE r.idReviewable = (?) AND t.TypeId = r.TypeId "
-    return selectQuery(q, (idReviewable,), True)
+    return select(q, (idReviewable,), True)
 
 
 # Returns an integer with the number of times the id of the Reviewable has been valorated with stars Stars.s
 def getRatings(idReviewable, stars):
     q = "SELECT count() FROM Valoration WHERE ReviewableId = (?) AND Stars = (?)"
-    result = selectQuery(q, (idReviewable, stars,), True)
+    result = select(q, (idReviewable, stars,), True)
     return result['count()']
 
 
 def getLocalization(idReviewable):
     q = "SELECT lat,lon FROM InstallerCompany WHERE ReviewableId = (?)"
-    result = selectQuery(q, (idReviewable,), True)
+    result = select(q, (idReviewable,), True)
     if result is None:
         raise IdWrongTypeException()
     else:
@@ -104,7 +104,7 @@ def getLocalization(idReviewable):
 
 def getManufacturer(idReviewable):
     q = "SELECT manufacturer FROM EquipmentProduct WHERE ReviewableId = (?)"
-    result = selectQuery(q, (idReviewable,), True)
+    result = select(q, (idReviewable,), True)
     if result is None:
         raise IdWrongTypeException()
     else:
@@ -113,7 +113,7 @@ def getManufacturer(idReviewable):
 
 def getReviewableAttributes(idReviewable):
     q = "SELECT * FROM Reviewable WHERE idReviewable = (?)"
-    result = selectQuery(q, (idReviewable,), True)
+    result = select(q, (idReviewable,), True)
     if result is None:
         raise IncorrectReviewableTypeException()
     else:
@@ -124,30 +124,30 @@ def answer(idReviewable, token, chosenOption, questionIndex):
     idUser = getUserIdForToken(token)
 
     q = "SELECT * FROM Reviewable WHERE idReviewable = (?)"
-    TipusRow = selectQuery(query=q, args=(idReviewable,), one=True)
+    TipusRow = select(query=q, args=(idReviewable,), one=True)
     idTipus = TipusRow['TypeId']
 
     q = "SELECT * FROM Answer WHERE idReviewable = (?) AND idUser = (?) AND idTipus = (?) AND QuestionIndex = (?)"
-    answerRow = selectQuery(query=q, args=(idReviewable, idUser, idTipus, questionIndex,), one=True)
+    answerRow = select(query=q, args=(idReviewable, idUser, idTipus, questionIndex,), one=True)
     if answerRow is None:
         q = "INSERT INTO Answer (idReviewable, idUser, ChosenOption, idTipus, QuestionIndex) VALUES ((?), (?), (?), (?), (?))"
-        return insertQuery(query=q, args=(idReviewable, idUser, chosenOption, idTipus, questionIndex,))
+        return insert(query=q, args=(idReviewable, idUser, chosenOption, idTipus, questionIndex,))
     else:
         q = "UPDATE Answer SET ChosenOption = (?) WHERE idReviewable = (?) AND idUser = (?) AND idTipus = (?) AND QuestionIndex = (?)"
-        return updateQuery(query=q, args=(chosenOption, idReviewable, idUser, idTipus, questionIndex,))
+        return update(query=q, args=(chosenOption, idReviewable, idUser, idTipus, questionIndex,))
 
 
 def review(idReviewable, token, review):
     idUser = getUserIdForToken(token)
 
     q = "SELECT * FROM Valoration WHERE UserId = (?) AND ReviewableId = (?)"
-    answerRow = selectQuery(query=q, args=(idUser, idReviewable,), one=True)
+    answerRow = select(query=q, args=(idUser, idReviewable,), one=True)
     if answerRow is None:
         q = "INSERT INTO Valoration (UserId, ReviewableId, Stars) VALUES ((?), (?), (?))"
-        return insertQuery(query=q, args=(idUser, idReviewable, review,))
+        return insert(query=q, args=(idUser, idReviewable, review,))
     else:
         q = "UPDATE Valoration SET Stars = (?) WHERE UserId = (?) AND ReviewableId = (?)"
-        return updateQuery(query=q, args=(review, idUser, idReviewable,))
+        return update(query=q, args=(review, idUser, idReviewable,))
 
 
 class FailedToInsertReviewableException(Exception):

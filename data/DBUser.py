@@ -4,7 +4,7 @@ from domain.User import *
 
 def selectByEmail(email):
     q = "SELECT * FROM User WHERE email = (?)"
-    userRow = selectQuery(query=q, args=(email,), one=True)
+    userRow = select(query=q, args=(email,), one=True)
 
     if userRow is None:
         return None
@@ -14,7 +14,7 @@ def selectByEmail(email):
 
 def selectById(userId):
     q = "SELECT * FROM User WHERE idUser = (?)"
-    userRow = selectQuery(query=q, args=(userId,), one=True)
+    userRow = select(query=q, args=(userId,), one=True)
 
     if userRow is None:
         return None
@@ -24,7 +24,7 @@ def selectById(userId):
 
 def selectByUsername(username):
     q = "SELECT * FROM User WHERE name = (?)"
-    userRow = selectQuery(query=q, args=(username,), one=True)
+    userRow = select(query=q, args=(username,), one=True)
 
     if userRow is None:
         return None
@@ -48,7 +48,7 @@ def userFromRow(userRow) -> User:
 
 def insert(email, username, enPass):
     q = "INSERT INTO user (name, email, password) VALUES (?, ?, ?)"
-    return insertQuery(query=q, args=(username, email, enPass))
+    return insert(query=q, args=(username, email, enPass))
 
 
 def delete(user):
