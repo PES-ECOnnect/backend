@@ -32,6 +32,9 @@ def signUp():
     email = request.args.get('email')
     username = request.args.get('username')
     password = request.args.get('password')
+    if email is None or username is None or password is None:
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     enPass = hashlib.sha256(password.encode('UTF-8')).hexdigest()
 
     if auth.getUserForEmail(email) is not None:
