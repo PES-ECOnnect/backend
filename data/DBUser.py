@@ -3,8 +3,8 @@ from domain.User import *
 
 
 def selectByEmail(email):
-    q = "SELECT * FROM User WHERE email = (?)"
-    userRow = selectQuery(query=q, args=(email,), one=True)
+    q = "SELECT * FROM users WHERE email = %s"
+    userRow = select(query=q, args=(email,), one=True)
 
     if userRow is None:
         return None
@@ -13,8 +13,8 @@ def selectByEmail(email):
 
 
 def selectById(userId):
-    q = "SELECT * FROM User WHERE idUser = (?)"
-    userRow = selectQuery(query=q, args=(userId,), one=True)
+    q = "SELECT * FROM users WHERE iduser = %s"
+    userRow = select(query=q, args=(userId,), one=True)
 
     if userRow is None:
         return None
@@ -23,8 +23,8 @@ def selectById(userId):
 
 
 def selectByUsername(username):
-    q = "SELECT * FROM User WHERE name = (?)"
-    userRow = selectQuery(query=q, args=(username,), one=True)
+    q = "SELECT * FROM users WHERE name = %s"
+    userRow = select(query=q, args=(username,), one=True)
 
     if userRow is None:
         return None
@@ -34,21 +34,21 @@ def selectByUsername(username):
 
 def userFromRow(userRow) -> User:
     return User(
-        int(userRow['idUser']),
+        int(userRow['iduser']),
         str(userRow['name']),
         str(userRow['email']),
         str(userRow['password']),
-        str(userRow['address']),
-        str(userRow['banned']),
-        bool(userRow['privateProfile']),
-        (int(userRow['idActiveMedal']) if userRow['idActiveMedal'] is not None else None),
-        (True if userRow['isAdmin'] == 'true' else False)
+        (str(userRow['address']) if userRow['address'] is not None else None),
+        (str(userRow['banned']) if userRow['banned'] is not None else None),
+        (bool(userRow['privateprofile']) if userRow['privateprofile'] is not None else None),
+        (int(userRow['idactivemedal']) if userRow['idactivemedal'] is not None else None),
+        (True if userRow['isadmin'] == 1 else False)
     )
 
 
 def insert(email, username, enPass):
-    q = "INSERT INTO user (name, email, password) VALUES (?, ?, ?)"
-    return insertQuery(query=q, args=(username, email, enPass))
+    q = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
+    return insert(query=q, args=(username, email, enPass))
 
 
 def delete(user):

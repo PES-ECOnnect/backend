@@ -1,65 +1,91 @@
-import sqlite3
+import psycopg2
+import psycopg2.extras
+from configparser import ConfigParser
 
 
-# Make Query results associative.
-# - Source: https://stackoverflow.com/questions/3300464/how-can-i-get-dict-from-sqlite-query
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+def config(filename='data/database.ini', section='postgresql'):
+    # create a parser
+    parser = ConfigParser()
+    # read config file
+    parser.read(filename)
+
+    # get section, default to postgresql
+    db = {}
+    if parser.has_section(section):
+        params = parser.items(section)
+        for param in params:
+            db[param[0]] = param[1]
+    else:
+        raise Exception('Section {0} not found in the {1} file'.format(section, filename))
+
+    return db
 
 
-def getCon():
-    con = sqlite3.connect('data/main.db')
-    con.row_factory = dict_factory
-    return con
+def getConnection():
+    params = config()
+    conn = psycopg2.connect(**params)
+    return conn
 
 
-def selectQuery(query, args=(), one=False):
-    con = sqlite3.connect('data/main.db')
-    con.row_factory = dict_factory
-    cur = con.execute(query, args)
+def select(query, args=(), one=False):
+    conn = getConnection()
+
+    # result rows represented by a list of python dicts
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute(query, args)
     rv = cur.fetchall()
+
     cur.close()
-    con.commit()
-    
+    conn.close()
+
     return (rv[0] if rv else None) if one else rv
 
 
-def insertQuery(query, args=()):
-    #try:
-    con = sqlite3.connect('data/main.db')
-    cur = con.execute(query, args)
-    con.commit()
-    return cur.lastrowid
+def insert(query, args=()):
+    conn = getConnection()
+    cur = conn.cursor()
 
-    #except sqlite3.exc:
-    #return False
-
-def updateQuery(query, args=()):
     try:
-        con = sqlite3.connect('data/main.db')
-        cur = con.execute(query, args)
-        con.commit()
+        cur.execute(query, args)
+        conn.commit()
+        print("Successfully inserted.")
+        return cur.lastrowid
 
-        return True
-
-    except:
+    except psycopg2.Error:
         return False
 
+    finally:
+        cur.close()
+        conn.close()
 
-def deleteQuery(query, args=()):
+
+def update(query, args=()):
+    conn = getConnection()
+    cur = conn.cursor()
     try:
-        con = sqlite3.connect('data/main.db')
-        cur = con.execute(query, args)
-        con.commit()
+        cur.execute(query, args)
+        conn.commit()
         return True
-    
-    except:
+
+    except psycopg2.Error:
         return False
 
+    finally:
+        cur.close()
+        conn.close()
 
 
+def delete(query, args=()):
+    conn = getConnection()
+    cur = conn.cursor()
+    try:
+        cur.execute(query, args)
+        conn.commit()
+        return True
 
+    except psycopg2.Error:
+        return False
 
+    finally:
+        cur.close()
+        conn.close()
