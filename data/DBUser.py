@@ -1,10 +1,11 @@
-from data.DBUtils import *
+import data.DBUtils as db
 from domain.User import *
 
 
 def selectByEmail(email):
     q = "SELECT * FROM users WHERE email = %s"
-    userRow = select(query=q, args=(email,), one=True)
+
+    userRow = db.select(query=q, args=(email,), one=True)
 
     if userRow is None:
         return None
@@ -14,7 +15,8 @@ def selectByEmail(email):
 
 def selectById(userId):
     q = "SELECT * FROM users WHERE iduser = %s"
-    userRow = select(query=q, args=(userId,), one=True)
+
+    userRow = db.select(query=q, args=(userId,), one=True)
 
     if userRow is None:
         return None
@@ -24,7 +26,8 @@ def selectById(userId):
 
 def selectByUsername(username):
     q = "SELECT * FROM users WHERE name = %s"
-    userRow = select(query=q, args=(username,), one=True)
+
+    userRow = db.select(query=q, args=(username,), one=True)
 
     if userRow is None:
         return None
@@ -48,7 +51,8 @@ def userFromRow(userRow) -> User:
 
 def insert(email, username, enPass):
     q = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
-    return insert(query=q, args=(username, email, enPass))
+    return db.insert(query=q, args=(username, email, enPass))
+
 
 
 def delete(user):
