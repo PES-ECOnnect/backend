@@ -26,10 +26,8 @@ def getAllReviewableTypes():
     types = dbrt.getAllReviewableTypes()
     result = []
     for t in types:
-        questions = dbq.getQuestionsFromType(int(t['TypeId']))
-        aux = {}
-        aux['name'] = t['name']
-        aux['questions'] = questions
+        questions = dbq.getQuestionsFromType(int(t['typeid']))
+        aux = {'name': t['name'], 'questions': questions}
         result.append(aux)
     return result
 
@@ -43,7 +41,7 @@ def getProduct(id):
     # type
     TypeName = dbr.getTypeName(id)
     # QUESTIONS
-    Questions = dbq.getQuestions(id, attribs["TypeId"])
+    Questions = dbq.getQuestions(id, attribs["typeid"])
 
     if TypeName["name"] == "Company":
         localization = dbr.getLocalization(id)

@@ -185,7 +185,6 @@ def products():
             return {'error': 'ERROR_COMPANY_EXISTS' if revType == 'Company' else 'ERROR_PRODUCT_EXISTS'}
 
     elif request.method == 'GET':
-        revRows = []
 
         if revType == "":  # All products of all types
             revRows = getAllProducts()
@@ -194,6 +193,7 @@ def products():
             revRows = getReviewablesByType(revType)
 
         return {'result': revRows}
+
     return {'error': 'ERROR_SOMETHING_WENT_WRONG'}
 
 
@@ -210,6 +210,7 @@ def answerQuestion(id):
         reviewable.answerQuestion(id, token, chosenOption, questionIndex)
 
         return {'status': 'success'}
+
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -226,6 +227,7 @@ def reviewReviewable(id):
         reviewable.review(id, token, review)
 
         return {'status': 'success'}
+
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -240,6 +242,7 @@ def newProductType():
         token = request.args.get('token')
         try:
             auth.checkValidToken(token)
+
         except dbs.InvalidTokenException:
             return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -332,14 +335,14 @@ def test():
     import time
     testPass = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"  # password 'test'
     q = "INSERT INTO users (name, email, password, address) VALUES (%s, %s, %s, %s)"
-    lastRowId = db.insert(q, ('test' + str(time.time())[0:15], 'test@gmail.com', testPass, 'testAddress'))
+    lastRowId = db.insert(q, ('test' + str(time.time())[0:15], 'test@gmail.com' + str(time.time())[0:15] , testPass, 'testAddress'))
     testRes['3.- Insert 1: Success'] = str(lastRowId) + " (TEST PASSES)"
 
     # 4. Insert with Integrity error (Duplicate key)
     testPass = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"  # password 'test'
     q = "INSERT INTO users (name, email, password, address) VALUES (%s, %s, %s, %s)"
     try:
-        lastRowId = db.insert(q, ('test', 'test@gmail.com', testPass, 'testAddress'))
+        lastRowId = db.insert(q, ('test', 'test@gmail.com' + str(time.time())[0:15], testPass, 'testAddress'))
         testRes['4.- Insert 2: Error'] = lastRowId
     except psycopg2.IntegrityError:
         testRes['4.- Insert 2: Error'] = "User already exists (TEST PASSES)"
