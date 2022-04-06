@@ -1,4 +1,6 @@
 from app import app
+import json
+import hashlib
 
 def test_homePage():
     response = app.test_client().get("/")
@@ -17,6 +19,9 @@ def test_isAdminIncorrectPassword():
     response = app.test_client().get("/account/isadmin", data=dict(email="admin@econnect.com", password="hola"))
     assert response.data == b'{"error":"ERROR_INVALID_TOKEN"}\n'
 
+def test_signUp():
+    response = app.test_client().post('/account', data=dict(email="test@test.com", username="test", password="pwdtest"))
+    assert response.status_code == 200
 
 
 '''
