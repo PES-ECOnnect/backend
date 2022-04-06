@@ -286,8 +286,8 @@ def getReviewable(id):
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
-        # return name, image, manufacturer, type, ratings[5], vector, questions{text,num_yes, num_no}
-        return getProduct(id)
+        # return name, image, manufacturer, type, ratings[5], vector, questions{text,num_yes, num_no, user_answer}
+        return getProduct(id, token)
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
     except dbr.IdWrongTypeException:

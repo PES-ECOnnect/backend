@@ -32,7 +32,7 @@ def getAllReviewableTypes():
     return result
 
 
-def getProduct(id):
+def getProduct(id, token):
     attribs = dbr.getReviewableAttributes(id)
     # ratings MIRAR QUERY
     Ratings = []
@@ -41,12 +41,12 @@ def getProduct(id):
     # type
     TypeName = dbr.getTypeName(id)
     # QUESTIONS
-    Questions = dbq.getQuestions(id, attribs["typeid"])
+    Questions = dbq.getQuestions(id, attribs["typeid"], token)
 
     if TypeName["name"] == "Company":
         localization = dbr.getLocalization(id)
         return {'name': attribs["name"],
-                'imageURL': attribs["imageURL"],
+                'imageURL': attribs["imageurl"],
                 'latitude': localization["lat"],
                 'longitude': localization["lon"],
                 'type': TypeName["name"],
@@ -56,8 +56,8 @@ def getProduct(id):
     else:
         manufacturer = dbr.getManufacturer(id)
         return {'name': attribs["name"],
-                'imageURL': attribs["imageURL"],
-                'manufacturer': manufacturer["Manufacturer"],
+                'imageURL': attribs["imageurl"],
+                'manufacturer': manufacturer["manufacturer"],
                 'type': TypeName["name"],
                 'ratings': Ratings,
                 'questions': Questions}
@@ -69,8 +69,7 @@ def getRatings(idReviewable):
 
 def getQuestionsCompany():
     typeId = dbrt.getReviewableTypeId("Company")
-    id = typeId['TypeId']
-    return dbq.getQuestionsFromType(id)
+    return dbq.getQuestionsFromType(typeId)
 
 
 class Reviewable:

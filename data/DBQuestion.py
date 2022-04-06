@@ -1,4 +1,5 @@
 from data.DBUtils import *
+from data.DBSession import getUserIdForToken
 
 
 # def modifyQuestion()
@@ -23,23 +24,38 @@ def getQuestionsFromType(typeId):
     return result
 
 
-# Returns the Statement, the number of yes answers, and number of no answers
-def getQuestions(idReviewable, TypeId):
+# Returns the Statement, the number of yes answers, and number of no answers. Also return the answer of the logged user
+def getQuestions(idReviewable, TypeId, token):
     Result = []
+    idUser = getUserIdForToken(token)
     q = "SELECT questionindex, statement FROM question WHERE typeid = %s"
-    quest = select(q, (TypeId,), False)
+    quest = select(q, (TypeId,), one=False)
     for i in quest:
-        q = "SELECT COUNT() from answer where idreviewable = %s AND questionindex = %s AND typeid = %s AND " \
+        questionIndex = i['questionindex']
+        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionindex = %s AND typeid = %s AND " \
             "chosenoption = 1 "
-        yes = select(q, (idReviewable, i["questionindex"], TypeId), False)
-        q = "SELECT COUNT() from answer where idreviewable = %s AND questionindex = %s AND typeid = %s AND " \
+        yes = select(q, (idReviewable, questionIndex, TypeId), one=True)
+        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionindex = %s AND typeid = %s AND " \
             "chosenoption = 0 "
-        no = select(q, (idReviewable, i["questionindex"], TypeId), False)
+        no = select(q, (idReviewable, questionIndex, TypeId), one=True)
+        
+        q = "SELECT chosenoption FROM answer WHERE idreviewable = %s AND iduser = %s AND questionindex = %s AND typeid = %s"
+        userAns = select(q, (idReviewable, idUser, questionIndex, TypeId), one=True)
+        
+        if userAns is None:
+            userAns_str = "none"
+        elif userAns['chosenoption'] == 1:
+            userAns_str = "yes"
+        elif userAns['chosenoption'] == 0:
+            userAns_str = "no"
+        else:
+            raise InvalidAnswerException()
 
         Result.append({
-            'text': i["statement"],
-            'num_yes': yes[0]["COUNT()"],
-            'num_no': no[0]["COUNT()"]
+            'text': i["statement"].strip(),
+            'num_yes': yes["count"],
+            'num_no': no["count"],
+            'user_answer': userAns_str
         })
     return Result
 
@@ -47,4 +63,7 @@ def getQuestions(idReviewable, TypeId):
 # EXCEPTIONS
 
 class FailedToAddQuestionException(Exception):
+    pass
+
+class InvalidAnswerException(Exception):
     pass

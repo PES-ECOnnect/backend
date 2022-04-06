@@ -37,13 +37,13 @@ def insert(name, revType, imageURL, manufacturer=None, lat=None, lon=None):
 
 def selectProducts():
     q = "" \
-        "SELECT Manufacturer AS manufacturer, idReviewable AS id, rt.name AS type, imageURL, r.name," \
-        " IFNULL(AVG(stars), 0.0) AS avgRating" \
+        "SELECT Manufacturer AS manufacturer, r.idReviewable AS id, rt.name AS type, imageURL, r.name," \
+        " COALESCE(AVG(stars), 0.0) AS avgRating" \
         " FROM reviewable r" \
-        " JOIN EquipmentProduct t on t.ReviewableId = r.idReviewable" \
+        " JOIN EquipmentProduct t on t.idReviewable = r.idReviewable" \
         " JOIN reviewabletype rt on rt.TypeId = r.TypeId" \
-        " LEFT JOIN valoration v on v.ReviewableId = r.idReviewable" \
-        " GROUP BY id" \
+        " LEFT JOIN valoration v on v.idReviewable = r.idReviewable" \
+        " GROUP BY manufacturer, id, type, imageURL, r.name" \
         " ORDER BY avgRating DESC"
 
     return db.select(q, (), False)
@@ -88,9 +88,9 @@ def getTypeName(idReviewable):
 
 # Returns an integer with the number of times the id of the Reviewable has been valorated with stars Stars.s
 def getRatings(idReviewable, stars):
-    q = "SELECT count() FROM valoration WHERE idreviewable = %s AND stars = %s"
+    q = "SELECT count(*) FROM valoration WHERE idreviewable = %s AND stars = %s"
     result = db.select(q, (idReviewable, stars,), True)
-    return result['count()']
+    return result['count']
 
 
 def getLocalization(idReviewable):
@@ -133,10 +133,13 @@ def answer(idReviewable, token, chosenOption, questionIndex):
         q = "INSERT INTO answer (idreviewable, iduser, chosenoption, typeid, questionindex) VALUES (%s, %s, %s, %s, " \
             "%s) "
         return db.insert(query=q, args=(idReviewable, idUser, chosenOption, idTipus, questionIndex,))
-    else:
+    elif chosenOption != "none":
         q = "UPDATE answer SET chosenoption = %s WHERE idreviewable = %s AND iduser = %s AND typeid = %s AND " \
             "questionindex = %s "
         return db.update(query=q, args=(chosenOption, idReviewable, idUser, idTipus, questionIndex,))
+    else:
+        q = "DELETE FROM answer WHERE idreviewable = %s AND iduser = %s AND typeid = %s AND questionindex = %s "
+        return db.delete(query=q, args=(idReviewable, idUser, idTipus, questionIndex,))
 
 
 def review(idReviewable, token, review):
