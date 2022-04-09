@@ -314,13 +314,30 @@ def NewPost():
         auth.checkValidToken(token)
         text = request.args.get('text')
         image = request.args.get('image')
-        dbf.newPost(token,text,image)
+        newPost(token,text,image)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
-    except dbf.InsertionError:
+    except dbf.InsertionErrorException:
         return {'error': 'ERROR_INCORRECT_INSERTION'}
 
+@app.route("/posts/<id>",methods=['DELETE'])
+def DeletePost(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        deletePost(token,id)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbf.UserNotPostOwnerException:
+        return {'error': 'ERROR_USER_NOT_POST_OWNER'}
+    except dbf.DeletingLikesDislikesException:
+        return {'error': 'ERROR_DELETING_LIKES_DISLIKES'}
+    except dbf.DeletingPostHashtagsException:
+        return {'error': 'ERROR_DELETING_LIKES_DISLIKES'}
+    except dbf.DeletingPostException:
+        return {'error': 'ERROR_DELETING_POST'}
 
 @app.route("/test")
 def test():

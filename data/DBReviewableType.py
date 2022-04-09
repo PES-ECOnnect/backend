@@ -23,7 +23,7 @@ def getAllReviewableTypes():
     # TODO: Add questions
     # select r.name, q.QuestIndex, q.Statement from Question q, ReviewableType r where r.TypeId = q.idTipus
     sQuery = "SELECT * FROM ReviewableType WHERE name <>'Company'"
-    return selectQuery(sQuery, (), False)
+    return select(sQuery, (), False)
 
 
 # EXCEPTIONS
