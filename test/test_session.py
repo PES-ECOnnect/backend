@@ -1,10 +1,7 @@
 from app import app
 import json
-import hashlib
 
 import data.DBUtils as db
-
-global token
 
 def test_homePage():
     response = app.test_client().get("/")
