@@ -8,6 +8,7 @@ import domain.Authenticator as auth
 
 from domain.Reviewable import *
 from domain.Question import *
+from domain.Forum import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -305,6 +306,20 @@ def getCompanyQuestions():
         return {'result': questions}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/posts", methods=['POST'])
+def NewPost():
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        text = request.args.get('text')
+        image = request.args.get('image')
+        dbf.newPost(token,text,image)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbf.InsertionError:
+        return {'error': 'ERROR_INCORRECT_INSERTION'}
 
 
 @app.route("/test")
