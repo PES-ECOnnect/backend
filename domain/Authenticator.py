@@ -44,6 +44,8 @@ def getUserForEmail(email):
 def getUserForUsername(username):
     return dbu.selectByUsername(username)
 
+def getUserForId(id):
+    return dbu.selectById(id)
 
 def signUp(email, username, enPass):
     dbu.insert(email, username, enPass)
