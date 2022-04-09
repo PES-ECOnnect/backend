@@ -109,6 +109,23 @@ def logout():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+@app.route("/users/<id>", methods=['GET'])
+def getUserInfo(id):
+    if request.method != 'GET':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    try:
+
+        user = auth.getUserForId(id)
+        if (user.getIsPrivate()==True):
+            return {'error': 'ERROR_PRIVATE_USER'}
+        result = {
+            'username': user.getName(),
+            'medals': user.getUnlockedMedals()
+        }
+        return result
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
 
 '''
 products

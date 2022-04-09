@@ -1,3 +1,5 @@
+import data.DBUser as dbu
+
 class User:
 
     def __init__(self, id, name, email, enPass, addr, bann, priv, acMedId, isAdmin):
@@ -37,3 +39,6 @@ class User:
 
     def isAdmin(self):
         return self._isAdmin
+
+    def getUnlockedMedals(self):
+        return dbu.getUnlockedMedals(self._id)

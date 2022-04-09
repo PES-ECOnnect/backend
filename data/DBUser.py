@@ -48,6 +48,9 @@ def userFromRow(userRow) -> User:
         (True if userRow['isadmin'] == 1 else False)
     )
 
+def getUnlockedMedals(userId):
+    medals = db.select("SELECT idmedal FROM unlockedmedals WHERE iduser = %s", (userId,))
+    return medals
 
 def insert(email, username, enPass):
     q = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
