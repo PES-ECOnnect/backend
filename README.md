@@ -20,3 +20,9 @@ pip3 install -r requirements.txt
 
 python3 app.py
  
+## Execute tests:
+execute all tests:
+python -m pytest -v
+
+execute tests from an especific file:
+python -m pytest test/file.py -v
