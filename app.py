@@ -346,7 +346,7 @@ def likePost(id):
         auth.checkValidToken(token)
         isLike = request.args.get('isLike') == "True"
         remove = request.args.get('remove') == "True"
-        like(id, token, isLike, remove)
+        like(token, id, isLike, remove)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}

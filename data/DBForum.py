@@ -45,15 +45,39 @@ def ownsPost(userid,postid):
 
 
 def likePost(userId, postId):
-    # comprovar si hi ha dislike i esborrar
-    q = 'INSERT INTO likes (idpost, iduser) VALUES (%s,%s)'
+    q = 'SELECT FROM likes WHERE idpost = %s AND iduser = %s'
+    result = select(q, args=(postId, userId), one=True)
+    if result is not None:
+        raise LikeExistsException()
+
+    q = 'SELECT FROM dislikes WHERE idpost = %s AND iduser = %s'
+    result = select(q, args=(postId, userId), one=True)
+    if result is not None:
+        q = 'DELETE FROM dislikes WHERE idpost = %s AND iduser = %s'
+        result = delete(q, args=(postId, userId))
+        if not result:
+            raise RemoveDislikePostException()
+
+    q = 'INSERT INTO likes (idpost, iduser) VALUES (%s, %s)'
     result = insert(q, args=(postId, userId))
     if not result:
         raise LikePostException()
 
 
 def dislikePost(userId, postId):
-    # comprovar si hi ha like i esborrar
+    q = 'SELECT FROM dislikes WHERE idpost = %s AND iduser = %s'
+    result = select(q, args=(postId, userId), one=True)
+    if result is not None:
+        raise DislikeExistsException()
+
+    q = 'SELECT FROM likes WHERE idpost = %s AND iduser = %s'
+    result = select(q, args=(postId, userId), one=True)
+    if result is not None:
+        q = 'DELETE FROM likes WHERE idpost = %s AND iduser = %s'
+        result = delete(q, args=(postId, userId))
+        if not result:
+            raise RemoveLikePostException()
+
     q = 'INSERT INTO dislikes (idpost, iduser) VALUES (%s, %s)'
     result = insert(q, args=(postId, userId))
     if not result:
@@ -61,7 +85,11 @@ def dislikePost(userId, postId):
 
 
 def removeLikePost(userId, postId):
-    # comprovar que hi ha like
+    q = 'SELECT FROM likes WHERE idpost = %s AND iduser = %s'
+    result = select(q, args=(postId, userId), one=True)
+    if result is None:
+        raise LikeDoesntExistException()
+
     q = 'DELETE FROM likes WHERE idpost = %s AND iduser = %s'
     result = delete(q, args=(postId, userId))
     if not result:
@@ -69,7 +97,11 @@ def removeLikePost(userId, postId):
 
 
 def removeDislikePost(userId, postId):
-    # comprovar que hi ha dislike
+    q = 'SELECT FROM dislikes WHERE idpost = %s AND iduser = %s'
+    result = select(q, args=(postId, userId), one=True)
+    if result is None:
+        raise DislikeDoesntExistException()
+
     q = 'DELETE FROM dislikes WHERE idpost = %s AND iduser = %s'
     result = delete(q, args=(postId, userId))
     if not result:
@@ -101,4 +133,16 @@ class RemoveLikePostException(Exception):
     pass
 
 class RemoveDislikePostException(Exception):
+    pass
+
+class LikeExistsException(Exception):
+    pass
+
+class DislikeExistsException(Exception):
+    pass
+
+class LikeDoesntExistException(Exception):
+    pass
+
+class DislikeDoesntExistException(Exception):
     pass
