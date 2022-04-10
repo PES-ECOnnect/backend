@@ -1,12 +1,12 @@
 import data.DBQuestion as dbq
 
-class Question:
 
-    '''
+class Question:
+    """
     @def modifyQuestion()
     @def deleteQuestion()
     @def getInfo()
-    '''
+    """
 
     def __init__(self, typeId, statement, index):
         self._typeId = typeId

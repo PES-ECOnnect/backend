@@ -1,39 +1,61 @@
 from data.DBUtils import *
+from data.DBSession import getUserIdForToken
 
-#def modifyQuestion()
-#def deleteQuestion()
+
+# def modifyQuestion()
+# def deleteQuestion()
 # @def getInfo()
 
 
 def insertQuestion(typeId, statement, index):
-    iQuery = "INSERT INTO Question (idTipus, Statement, QuestIndex) VALUES ((?), (?), (?))"
-    res = insertQuery(query=iQuery, args=(str(typeId), statement, index))
-    if res == False:
+    iQuery = "INSERT INTO question (typeid, statement, questionindex) VALUES (%s, %s, %s)"
+    res = insert(query=iQuery, args=(str(typeId), statement, index))
+    if type(res) == bool and not res:
         raise FailedToAddQuestionException()
 
+
 def getQuestionsFromType(typeId):
-    sQuery = "SELECT Statement FROM Question WHERE idTipus = (?)"
-    qResult = selectQuery(sQuery, (typeId,), False)
+    sQuery = "SELECT statement FROM question WHERE typeid = %s"
+    qResult = select(sQuery, (typeId,), False)
     result = []
     if qResult is not None:
         for qr in qResult:
-            result.append(qr['Statement'])
+            result.append(qr['statement'])
     return result
 
-#Returns the Statement, the number of yes answers, and number of no answers
-def getQuestions(idReviewable,TypeId):
+
+# Returns the Statement, the number of yes answers, and number of no answers. Also return the answer of the logged user
+def getQuestions(idReviewable, TypeId, token):
     Result = []
-    q = "SELECT QuestIndex, Statement FROM Question WHERE idTipus = (?)"
-    quest = selectQuery(q, (TypeId,), False)
+    idUser = getUserIdForToken(token)
+    q = "SELECT questionindex, statement FROM question WHERE typeid = %s"
+    quest = select(q, (TypeId,), one=False)
     for i in quest:
-        q = "SELECT COUNT() from Answer where idReviewable = (?) AND QuestionIndex = (?) AND idTipus = (?) AND ChosenOption = 1"
-        yes = selectQuery(q,(idReviewable,i["QuestIndex"],TypeId),False)
-        q = "SELECT COUNT() from Answer where idReviewable = (?) AND QuestionIndex = (?) AND idTipus = (?) AND ChosenOption = 0"
-        no = selectQuery(q, (idReviewable, i["QuestIndex"], TypeId), False)
+        questionIndex = i['questionindex']
+        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionindex = %s AND typeid = %s AND " \
+            "chosenoption = 1 "
+        yes = select(q, (idReviewable, questionIndex, TypeId), one=True)
+        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionindex = %s AND typeid = %s AND " \
+            "chosenoption = 0 "
+        no = select(q, (idReviewable, questionIndex, TypeId), one=True)
+        
+        q = "SELECT chosenoption FROM answer WHERE idreviewable = %s AND iduser = %s AND questionindex = %s AND typeid = %s"
+        userAns = select(q, (idReviewable, idUser, questionIndex, TypeId), one=True)
+        
+        if userAns is None:
+            userAns_str = "none"
+        elif userAns['chosenoption'] == 1:
+            userAns_str = "yes"
+        elif userAns['chosenoption'] == 0:
+            userAns_str = "no"
+        else:
+            raise InvalidAnswerException()
+
         Result.append({
-            'text': i["Statement"],
-            'num_yes': yes[0]["COUNT()"],
-            'num_no': no[0]["COUNT()"]
+            'text': i["statement"].strip(),
+            'num_yes': yes["count"],
+            'num_no': no["count"],
+            'user_answer': userAns_str
         })
     return Result
 
@@ -41,4 +63,7 @@ def getQuestions(idReviewable,TypeId):
 # EXCEPTIONS
 
 class FailedToAddQuestionException(Exception):
+    pass
+
+class InvalidAnswerException(Exception):
     pass

@@ -1,6 +1,3 @@
-import json
-
-
 class User:
 
     def __init__(self, id, name, email, enPass, addr, bann, priv, acMedId, isAdmin):
@@ -39,5 +36,4 @@ class User:
         return self._acMedId
 
     def isAdmin(self):
-    	return self._isAdmin
-    	
+        return self._isAdmin
