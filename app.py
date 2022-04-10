@@ -12,6 +12,7 @@ from domain.Question import *
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
 import data.DBReviewable as dbp
+import data.DBUser as dbu
 
 import json
 import hashlib
@@ -126,6 +127,25 @@ def getUserInfo(id):
         return result
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/account/email", methods=['PUT'])
+def updateEmail():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD '}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        newEmail = request.args.get('newEmail')
+        user = auth.getUserForToken(token)
+        user.setEmail(newEmail)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbu.EmailExistsException:
+        return {'error': 'ERROR_EMAIL_EXISTS'}
+    except dbu.InvalidEmailException:
+        return {'error': 'ERROR_INVALID_EMAIL'}
 
 '''
 products

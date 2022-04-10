@@ -42,3 +42,6 @@ class User:
 
     def getUnlockedMedals(self):
         return dbu.getUnlockedMedals(self._id)
+
+    def setEmail(self, newEmail):
+        return dbu.setEmail(self._id, newEmail)
