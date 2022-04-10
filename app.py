@@ -339,6 +339,19 @@ def DeletePost(id):
     except dbf.DeletingPostException:
         return {'error': 'ERROR_DELETING_POST'}
 
+@app.route("/posts/<id>/like", methods=['POST'])
+def likePost(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        isLike = request.args.get('isLike') == "True"
+        remove = request.args.get('remove') == "True"
+        like(token, id, isLike, remove)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
 @app.route("/test")
 def test():
     import data.DBUtils as db
