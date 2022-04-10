@@ -22,4 +22,13 @@ def deletePost(token,postid):
 
 
 def like(token, postId, isLike, remove):
-    return dbf.likePost(token, postId, isLike, remove)
+    userId = getUserIdForToken(token)
+
+    if isLike and not remove:
+        return dbf.likePost(userId, postId)
+    elif not isLike and not remove:
+        return dbf.dislikePost(userId, postId)
+    elif isLike and remove:
+        return dbf.removeLikePost(userId, postId)
+    else:
+        return dbf.removeDislikePost(userId, postId)
