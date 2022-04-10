@@ -34,7 +34,15 @@ def test_emailInvalid():
     response = app.test_client().put("account/email?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&newEmail=testuserumail2@hola@com")
     assert response.data == b'{"error":"ERROR_INVALID_EMAIL"}\n'
 
+def test_updateUsername():
+    response = app.test_client().put("account/username?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&newUsername=newTestName")
+    assert response.data == b'{"status":"success"}\n'
+
+def test_usernameExists():
+    response = app.test_client().put("account/username?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&newUsername=testname2")
+    assert response.data == b'{"error":"ERROR_USERNAME_EXISTS"}\n'
+
 def test_cleanDB():
     db.delete("DELETE FROM sessiontoken where token = '93003eec-b589-11ec-a4e2-00155d3ce0fa'")
-    db.delete("DELETE FROM users where name in ('testname', 'testname2')")
+    db.delete("DELETE FROM users where name in ('testname', 'testname2', 'newTestName')")
 

@@ -68,6 +68,17 @@ def setEmail(userId, newEmail):
     else:
         raise InvalidEmailException()
 
+def setUsername(userId, newUsername):
+    con = db.getConnection()
+    c = con.cursor()
+    c.execute("begin")
+    try:
+        c.execute("UPDATE users SET name = %s WHERE iduser = %s", (newUsername, userId))
+        c.execute('commit')
+    except con.Error:
+        c.execute('rollback')
+        raise UsernameExistsException()
+
 def insert(email, username, enPass):
     q = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
     return db.insert(query=q, args=(username, email, enPass))
@@ -90,4 +101,7 @@ class EmailExistsException(Exception):
     pass
 
 class InvalidEmailException(Exception):
+    pass
+
+class UsernameExistsException(Exception):
     pass

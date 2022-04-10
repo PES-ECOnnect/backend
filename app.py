@@ -147,6 +147,25 @@ def updateEmail():
     except dbu.InvalidEmailException:
         return {'error': 'ERROR_INVALID_EMAIL'}
 
+@app.route("/account/username", methods=['PUT'])
+def updateUsername():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        newUsername = request.args.get('newUsername')
+        user = auth.getUserForToken(token)
+        user.setUsername(newUsername)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbu.UsernameExistsException:
+        return {'error': 'ERROR_USERNAME_EXISTS'}
+
+
+
 '''
 products
 - invalid token

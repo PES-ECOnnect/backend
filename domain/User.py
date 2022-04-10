@@ -45,3 +45,6 @@ class User:
 
     def setEmail(self, newEmail):
         return dbu.setEmail(self._id, newEmail)
+
+    def setUsername(self, newUsername):
+        return dbu.setUsername(self._id, newUsername)
