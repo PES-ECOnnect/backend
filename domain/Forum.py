@@ -36,6 +36,7 @@ def like(token, postId, isLike, remove):
 
 def getNPosts(token, number):
     #comprovar que user token no està banejat
-    posts = dbf.getPosts(number)
+    userId = getUserIdForToken(token)
+    posts = dbf.getPosts(userId, number)
     return {'result': posts}
 
