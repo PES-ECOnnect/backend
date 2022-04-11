@@ -72,4 +72,5 @@ class User:
     def setActiveMedal(self, medalId):
         return dbu.setActiveMedal(self._id, medalId)
 
-
+    def hasUnlockedMedal(self, medalId):
+        return dbu.hasUnlockedMedal(self._id, medalId)

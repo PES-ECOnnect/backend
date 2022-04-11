@@ -105,6 +105,13 @@ def newMedal(name):
         c.execute('rollback')
         raise MedalExistsException()
 
+def hasUnlockedMedal(userId, medalId):
+    result = db.select("SELECT * FROM unlockedmedals WHERE iduser=(%s) AND idmedal=(%s)", (userId, medalId))
+    if result:
+        return True
+    else:
+        return False
+
 def insert(email, username, enPass):
     q = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
     return db.insert(query=q, args=(username, email, enPass))

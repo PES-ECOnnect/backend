@@ -226,9 +226,13 @@ def updateActiveMedal():
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
+        medalId = request.args.get('medalId')
         user = auth.getUserForToken(token)
-        user.setActiveMedal()
-        return {'status': 'success'}
+        if user.hasUnlockedMedal(medalId) == True:
+            user.setActiveMedal(medalId)
+            return {'status': 'success'}
+        else:
+            return {'error': 'ERROR_USER_INVALID_MEDAL'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
