@@ -42,3 +42,11 @@ def getUsedTags():
         result[tag] = dbf.tagUsages(tag)
 
     return result
+
+  
+def getNPosts(token, number):
+    #comprovar que user token no està banejat
+    userId = getUserIdForToken(token)
+    posts = dbf.getPosts(userId, number)
+    return {'result': posts}
+
