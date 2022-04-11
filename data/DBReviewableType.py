@@ -8,7 +8,7 @@ def getReviewableTypeId(typeName: str) -> int:
 
 
 def insertType(name):
-    con = getConnection()
+    con = getCon()
     c = con.cursor()
     c.execute("begin")
     try:
@@ -21,8 +21,8 @@ def insertType(name):
 
 def getAllReviewableTypes():
     # TODO: Add questions
-    # select r.name, q.QuestIndex, q.Statement from question q, reviewabletype r where r.TypeId = q.idTipus
-    sQuery = "SELECT * FROM reviewabletype WHERE name <>'Company'"
+    # select r.name, q.QuestIndex, q.Statement from Question q, ReviewableType r where r.TypeId = q.idTipus
+    sQuery = "SELECT * FROM ReviewableType WHERE name <>'Company'"
     return select(sQuery, (), False)
 
 

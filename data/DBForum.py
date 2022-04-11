@@ -47,10 +47,13 @@ def getTagId(tag: str) -> int:
     return res["idtag"]
 
 
+
 # Deletes all likes and dislikes of the post with id postid
 def deletelikesDislikes(postid):
     q = "DELETE FROM likes WHERE idPost = %s"
+
     result = delete(q, args=(postid))
+
     if result == False:
         raise DeletingLikesDislikesException()
     q = "DELETE FROM dislikes WHERE idPost = %s"
@@ -79,6 +82,7 @@ def deletePost(postid):
 def ownsPost(userid, postid):
     q = "SELECT FROM post WHERE idpost = %s AND iduser = %s"
     result = select(q, args=(postid, userid), one=True)
+
     if result is None:
         return False
     else:
@@ -230,11 +234,12 @@ def getLatestNPostsWithTag(n: int, tag: str) -> list:
 
 
 
+
 # Exceptions
 class InsertionErrorException(Exception):
     pass
 
-
+  
 class DeletingLikesDislikesException(Exception):
     pass
 
@@ -284,4 +289,5 @@ class DislikeDoesntExistException(Exception):
 
 
 class TagDoesntExistException(Exception):
+
     pass
