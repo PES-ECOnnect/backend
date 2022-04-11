@@ -108,6 +108,7 @@ def removeDislikePost(userId, postId):
         raise RemoveDislikePostException()
 
 
+
 def getUsedTags() -> list:
     q = "SELECT DISTINCT tag " \
         "FROM hashtag h " \
@@ -125,6 +126,24 @@ def tagUsages(tag: str) -> int:
 
     res = select(q, (tag,), True)
     return None if res is None else res['count']
+
+  
+def getPosts(userId, n):
+    q = 'SELECT p.idpost AS postId, u.name AS username, p.iduser AS userId, u.idactivemedal AS medal, ' \
+        'p.text AS text, p.imageurl AS imageUrl,' \
+        '(SELECT COUNT(*) FROM likes l WHERE l.idpost = p.idpost) AS likes, ' \
+        '(SELECT COUNT(*) FROM dislikes l WHERE l.idpost = p.idpost) AS dislikes, ' \
+        'TRUNC(EXTRACT(EPOCH FROM temps)) as timestamp, ' \
+        '((SELECT COUNT(*) FROM likes l WHERE l.iduser = %s AND l.idpost = p.idpost)*2 + ' \
+        '(SELECT COUNT(*) FROM dislikes d WHERE d.iduser = %s AND d.idpost = p.idpost)) AS userOption ' \
+        'FROM post p, users u ' \
+        'WHERE p.iduser = u.iduser ' \
+        'ORDER BY temps DESC LIMIT %s'
+    result = select(q, (userId, userId, n,), False)
+    if result is None:
+        raise NoPostsException()
+    return result
+
 
 # Exceptions
 class InsertionErrorException(Exception):
@@ -164,4 +183,7 @@ class LikeDoesntExistException(Exception):
     pass
 
 class DislikeDoesntExistException(Exception):
+    pass
+
+class NoPostsException(Exception):
     pass
