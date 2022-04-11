@@ -352,6 +352,17 @@ def likePost(id):
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
+@app.route("/posts", methods=['GET'])
+def getPosts():
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        num = request.args.get('n')
+        return getNPosts(token, num)
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
 @app.route("/test")
 def test():
     import data.DBUtils as db

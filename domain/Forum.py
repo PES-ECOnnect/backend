@@ -32,3 +32,10 @@ def like(token, postId, isLike, remove):
         return dbf.removeLikePost(userId, postId)
     else:
         return dbf.removeDislikePost(userId, postId)
+
+
+def getNPosts(token, number):
+    #comprovar que user token no està banejat
+    posts = dbf.getPosts(number)
+    return {'result': posts}
+
