@@ -107,6 +107,25 @@ def removeDislikePost(userId, postId):
     if not result:
         raise RemoveDislikePostException()
 
+
+def getUsedTags() -> list:
+    q = "SELECT DISTINCT tag " \
+        "FROM hashtag h " \
+        "JOIN posthashtag ph ON h.idtag = ph.idtag"
+
+    rows = select(q)
+    return [] if rows is None else list(row['tag'] for row in rows)
+
+
+def tagUsages(tag: str) -> int:
+    q = "SELECT COUNT(*) " \
+        "FROM posthashtag ph " \
+        "JOIN hashtag h on h.idtag = ph.idtag " \
+        "WHERE h.tag = %s"
+
+    res = select(q, (tag,), True)
+    return None if res is None else res['count']
+
 # Exceptions
 class InsertionErrorException(Exception):
     pass

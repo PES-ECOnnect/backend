@@ -111,18 +111,6 @@ def logout():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-'''
-products
-- invalid token
-- if no type -> all except company
-- if type -> all of type, empty if none
-    - error: ERROR_TYPE_NOT_EXISTS
-create
-- product exists -> ERROR_PRODUCT_EXISTS / ERROR_COMPANY_EXISTS
-- si type no existeix -> ERROR_TYPE_NOT_EXISTS
-'''
-
-
 @app.route("/companies", methods=['POST', 'GET'])
 @app.route("/products", methods=['POST', 'GET'])
 def products():
@@ -305,6 +293,7 @@ def getCompanyQuestions():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+
 @app.route("/posts", methods=['POST'])
 def NewPost():
     token = request.args.get('token')
@@ -312,19 +301,20 @@ def NewPost():
         auth.checkValidToken(token)
         text = request.args.get('text')
         image = request.args.get('image')
-        newPost(token,text,image)
+        newPost(token, text, image)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
     except dbf.InsertionErrorException:
         return {'error': 'ERROR_INCORRECT_INSERTION'}
 
-@app.route("/posts/<id>",methods=['DELETE'])
+
+@app.route("/posts/<id>", methods=['DELETE'])
 def DeletePost(id):
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
-        deletePost(token,id)
+        deletePost(token, id)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
@@ -336,6 +326,7 @@ def DeletePost(id):
         return {'error': 'ERROR_DELETING_LIKES_DISLIKES'}
     except dbf.DeletingPostException:
         return {'error': 'ERROR_DELETING_POST'}
+
 
 @app.route("/posts/<id>/like", methods=['POST'])
 def likePost(id):
@@ -349,6 +340,16 @@ def likePost(id):
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+
+@app.route("/posts/tags", methods=['GET'])
+def getAllTags():
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        x = getUsedTags()
+        return {'result': x}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
 
 @app.route("/test")
 def test():
@@ -381,7 +382,8 @@ def test():
     import time
     testPass = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"  # password 'test'
     q = "INSERT INTO users (name, email, password, address) VALUES (%s, %s, %s, %s)"
-    lastRowId = db.insert(q, ('test' + str(time.time())[0:15], 'test@gmail.com' + str(time.time())[0:15] , testPass, 'testAddress'))
+    lastRowId = db.insert(q, (
+    'test' + str(time.time())[0:15], 'test@gmail.com' + str(time.time())[0:15], testPass, 'testAddress'))
     testRes['3.- Insert 1: Success'] = str(lastRowId) + " (TEST PASSES)"
 
     # 4. Insert with Integrity error (Duplicate key)
@@ -402,7 +404,7 @@ def test():
     # 5. Delete success
 
     q = "DELETE FROM users WHERE name = %s"
-    deleted = db.delete(q, ('testDelete', ))
+    deleted = db.delete(q, ('testDelete',))
     testRes['5.- Delete 1: Success'] = "(TEST PASSES)" if deleted else "Error, something went wrong deleting."
 
     # If no row is deleted, no error is returned.
