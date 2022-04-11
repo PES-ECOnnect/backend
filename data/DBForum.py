@@ -229,11 +229,11 @@ def getLatestNPostsWithTag(n: int, tag: str) -> list:
     return [] if rows is None else rows
 
 
-
 # Exceptions
 class InsertionErrorException(Exception):
     pass
 
+  
 class DeletingLikesDislikesException(Exception):
     pass
 
