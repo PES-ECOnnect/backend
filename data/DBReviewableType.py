@@ -31,5 +31,7 @@ def getAllReviewableTypes():
 class TypeAlreadyExistsException(Exception):
     pass
 
+  
 class InvalidTypeNameException(Exception):
     pass
+

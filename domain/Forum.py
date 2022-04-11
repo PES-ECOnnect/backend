@@ -27,6 +27,7 @@ def createPost(token, text, image, tags):
 
 def deletePost(token, postid):
     userid = dbu.getUserIdForToken(token)
+
     # check userid owns this post
     if dbf.ownsPost(userid, postid) == False:
         raise dbf.UserNotPostOwnerException()
@@ -100,3 +101,4 @@ def getNPosts(token, number, tag):
         })
 
     return result
+
