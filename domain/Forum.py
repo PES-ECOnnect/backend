@@ -1,23 +1,32 @@
 import data.DBForum as dbf
 import data.DBUtils as db
 import data.DBUser as dbu
-
+import re
 from data.DBSession import getUserIdForToken
 
 
-def newPost(token, text, image, tags):
-    postId = dbf.newPost(token, text, image)
+def obtainTags(text: str) -> list:
+    return re.findall(r"#(\w+)", text)
+
+
+def saveTags(tags: list) -> None:
+    for tag in tags:
+        dbf.insertTag(tag)
+
+    return tags
+
+def createPost(token, text, image, tags):
+    postId = dbf.insertPost(token, text, image)
 
     for tag in tags:
         tagId = dbf.getTagId(tag)
+        dbf.assignTagToPost(postId, tagId)
 
-
-
-
+    return postId
 
 
 def deletePost(token, postid):
-    userid = getUserIdForToken(token)
+    userid = dbu.getUserIdForToken(token)
     # check userid owns this post
     if dbf.ownsPost(userid, postid) == False:
         raise dbf.UserNotPostOwnerException()
@@ -54,8 +63,7 @@ def getUsedTags():
 
 
 def getNPosts(token, number, tag):
-    userId = getUserIdForToken(token)
-    userInfo = dbu.getPostDisplayInfo(userId)
+    currentUserId = getUserIdForToken(token)
 
     if tag is None:
         posts = dbf.getLatestNPosts(number)
@@ -65,12 +73,15 @@ def getNPosts(token, number, tag):
     result = []
     for postInfo in posts:
         postId = postInfo["idpost"]
+        authorId = postInfo["authorid"]
+
         likes = dbf.getPostLikes(postId)
         dislikes = dbf.getPostDislikes(postId)
+        authorInfo = dbu.getPostDisplayInfo(authorId)
 
-        if dbf.userLikesPost(userId, postId):
+        if dbf.userLikesPost(currentUserId, postId):
             userOption = 2
-        elif dbf.userDislikesPost(userId, postId):
+        elif dbf.userDislikesPost(currentUserId, postId):
             userOption = 1
         else:
             userOption = 0
@@ -82,10 +93,10 @@ def getNPosts(token, number, tag):
             "dislikes": dislikes,
             "imageurl": postInfo["imageurl"],
             "timestamp": postInfo["timestamp"],
-            "userid": userInfo["iduser"],
-            "username": userInfo["name"],
+            "userid": authorInfo["iduser"],
+            "username": authorInfo["name"],
             "useroption": userOption,
-            "medal": userInfo["idactivemedal"],
+            "medal": authorInfo["idactivemedal"],
         })
 
     return result

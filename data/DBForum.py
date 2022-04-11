@@ -2,14 +2,49 @@ from data.DBSession import *
 from data.DBUtils import *
 
 
-def newPost(token, text, image):
-    idUser = getUserIdForToken(token)
-    q = "INSERT INTO post (idUser,temps,text,imageurl) values (%s,current_timestamp,%s,%s)"
-    result = insert(q, args=(idUser, text, image))
-    if result == False:
-        raise InsertionErrorException()
+def insertPost(token, text, image):
+    userId = getUserIdForToken(token)
 
-    return result
+    conn = getConnection()
+    c = conn.cursor()
+    try:
+        c.execute("INSERT INTO post (idUser,temps,text,imageurl) VALUES (%s,current_timestamp,%s,%s) RETURNING idpost;",
+                  (userId, text, image))
+        conn.commit()
+
+        lastInsertedPostId = c.fetchone()[0]
+        return lastInsertedPostId
+
+    except conn.IntegrityError:
+        c.execute("rollback")
+        raise PostAlreadyExistsException()
+    except conn.Error:
+        c.execute("rollback")
+        raise FailedToInsertPostException()
+
+
+def assignTagToPost(postId: int, tagId: int) -> None:
+    q = "INSERT INTO posthashtag (idpost, idtag) VALUES (%s, %s) ON CONFLICT DO NOTHING"
+    insert(q, (postId, tagId, ))
+
+
+def insertTag(tag):
+    q = "INSERT INTO hashtag (tag) " \
+        "VALUES (%s) " \
+        "ON CONFLICT (tag) DO NOTHING"
+
+    insert(q, (tag,))
+
+
+def getTagId(tag: str) -> int:
+    q = "SELECT idtag " \
+        "FROM hashtag h " \
+        "WHERE tag = %s"
+    res = select(q, (tag,), True)
+    if res is None:
+        raise TagDoesntExistException()
+
+    return res["idtag"]
 
 
 # Deletes all likes and dislikes of the post with id postid
@@ -161,7 +196,7 @@ def userLikesPost(userId: int, postId: int) -> int:
 
 
 def userDislikesPost(userId: int, postId: int) -> int:
-    q = "SELECT 1 " \
+    q = "SELECT 1 as exists " \
         "WHERE EXISTS ( " \
         "   SELECT * " \
         "   FROM dislikes " \
@@ -173,7 +208,7 @@ def userDislikesPost(userId: int, postId: int) -> int:
 
 # Get latest N posts ordered chronologically
 def getLatestNPosts(n: int) -> list:
-    q = "SELECT idpost, temps as timestamp, text, imageurl " \
+    q = "SELECT idpost, temps as timestamp, text, imageurl, iduser as authorid " \
         "FROM post p " \
         "ORDER BY temps DESC LIMIT %s"
 
@@ -183,7 +218,7 @@ def getLatestNPosts(n: int) -> list:
 
 # Get latest N posts that contain a given tag ordered chronologically
 def getLatestNPostsWithTag(n: int, tag: str) -> list:
-    q = "SELECT p.idpost, p.temps as timestamp, p.text, p.imageurl " \
+    q = "SELECT p.idpost, p.temps as timestamp, p.text, p.imageurl, iduser as authorid " \
         "FROM post p " \
         "JOIN posthashtag ph on ph.idpost = p.idpost " \
         "JOIN hashtag h on h.idtag = ph.idtag " \
@@ -244,4 +279,8 @@ class LikeDoesntExistException(Exception):
 
 
 class DislikeDoesntExistException(Exception):
+    pass
+
+
+class TagDoesntExistException(Exception):
     pass

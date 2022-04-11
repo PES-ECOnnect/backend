@@ -1,4 +1,4 @@
-import sqlite3
+import traceback
 
 import psycopg2
 from flask import Flask, request
@@ -301,15 +301,19 @@ def NewPost():
         auth.checkValidToken(token)
         text = request.args.get('text')
 
-        tags = processTags(text)
+        tags = obtainTags(text)
+        saveTags(tags)
 
         image = request.args.get('image')
-        newPost(token, text, image, tags)
+        createPost(token, text, image, tags)
         return {'status': 'success'}
+
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
     except dbf.InsertionErrorException:
         return {'error': 'ERROR_INCORRECT_INSERTION'}
+    except Exception:
+        return {'error': 'ERROR_SOMETHING_WENT_WRONG', 'traceback': traceback.format_exc()}
 
 
 @app.route("/posts/<id>", methods=['DELETE'])
@@ -368,7 +372,7 @@ def getPosts():
         tag = request.args.get('tag') if 'tag' in request.args.keys() else None
 
         return {
-            'result' : getNPosts(token, num, tag)
+            'result': getNPosts(token, num, tag)
         }
 
     except dbs.InvalidTokenException:
@@ -407,7 +411,7 @@ def test():
     testPass = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"  # password 'test'
     q = "INSERT INTO users (name, email, password, address) VALUES (%s, %s, %s, %s)"
     lastRowId = db.insert(q, (
-    'test' + str(time.time())[0:15], 'test@gmail.com' + str(time.time())[0:15], testPass, 'testAddress'))
+        'test' + str(time.time())[0:15], 'test@gmail.com' + str(time.time())[0:15], testPass, 'testAddress'))
     testRes['3.- Insert 1: Success'] = str(lastRowId) + " (TEST PASSES)"
 
     # 4. Insert with Integrity error (Duplicate key)
