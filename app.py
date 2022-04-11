@@ -8,6 +8,7 @@ import domain.Authenticator as auth
 
 from domain.Reviewable import *
 from domain.Question import *
+from domain.User import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -164,8 +165,87 @@ def updateUsername():
     except dbu.UsernameExistsException:
         return {'error': 'ERROR_USERNAME_EXISTS'}
 
+@app.route("/account/home", methods=['PUT'])
+def setHome():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
 
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        newHome = request.args.get('newHome')
+        user = auth.getUserForToken(token)
+        user.setHome(newHome)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
 
+@app.route("/account/password", methods=['PUT'])
+def updatePassword():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        oldPassword = request.args.get('oldPassword')
+        oldEncryptedPwd = hashlib.sha256(oldPassword.encode('UTF-8')).hexdigest()
+        user = auth.getUserForToken(token)
+
+        if user.validatePassword(oldEncryptedPwd):
+            newPassword = request.args.get('newPassword')
+            enNewPass = hashlib.sha256(newPassword.encode('UTF-8')).hexdigest()
+            user.setPassword(enNewPass)
+            return {'status': 'success'}
+        else:
+            return {'error': 'ERROR_INCORRECT_PASSWORD'}
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/account/visibility", methods=['PUT'])
+def updateVisibility():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        user = auth.getUserForToken(token)
+        user.setVisibility()
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/account/medal", methods=['PUT'])
+def updateActiveMedal():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        user = auth.getUserForToken(token)
+        user.setActiveMedal()
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/medals", methods=['POST'])
+def createMedal():
+    if request.method != 'POST':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        medalName = request.args.get('medalName')
+        newMedal(medalName)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbu.MedalExistsException:
+        return {'error': 'ERROR_MEDAL_EXISTS'}
 '''
 products
 - invalid token

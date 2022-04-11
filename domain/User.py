@@ -1,5 +1,8 @@
 import data.DBUser as dbu
 
+def newMedal(name):
+    return dbu.newMedal(name)
+
 class User:
 
     def __init__(self, id, name, email, enPass, addr, bann, priv, acMedId, isAdmin):
@@ -48,3 +51,25 @@ class User:
 
     def setUsername(self, newUsername):
         return dbu.setUsername(self._id, newUsername)
+
+    def setHome(self, newHome):
+        return dbu.setHome(self._id, newHome)
+
+    def validatePassword(self, pwd):
+        if pwd == self.getEncryptedPassword():
+            return True
+        else:
+            return False
+
+    def setPassword(self, newPwd):
+        print('new password')
+        print(newPwd)
+        return dbu.setPassword(self._id, newPwd)
+
+    def setVisibility(self):
+        return dbu.setVisibility(self._id, self.getIsPrivate())
+
+    def setActiveMedal(self, medalId):
+        return dbu.setActiveMedal(self._id, medalId)
+
+
