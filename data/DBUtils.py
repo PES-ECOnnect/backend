@@ -52,6 +52,24 @@ def insert(query, args=()):
 
         return True
 
+    except psycopg2.Error:
+        return False
+
+    finally:
+        cur.close()
+        conn.close()
+
+
+def insertAndReturnLastRowId(query, args=()):
+    conn = getConnection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute(query, args)
+        conn.commit()
+        print("Successfully inserted.")
+
+        return True
 
     except psycopg2.Error:
         return False

@@ -1,4 +1,4 @@
-import sqlite3
+import traceback
 
 import psycopg2
 from flask import Flask, request
@@ -8,11 +8,15 @@ import domain.Authenticator as auth
 
 from domain.Reviewable import *
 from domain.Question import *
+
+from domain.User import *
+
 from domain.Forum import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
 import data.DBReviewable as dbp
+import data.DBUser as dbu
 
 import json
 import hashlib
@@ -110,6 +114,159 @@ def logout():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+@app.route("/users/<id>", methods=['GET'])
+def getUserInfo(id):
+    if request.method != 'GET':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    try:
+
+
+        user = auth.getUserForId(id)
+        if (user.getIsPrivate()==True):
+            return {'error': 'ERROR_PRIVATE_USER'}
+        result = {
+            'username': user.getName(),
+            'medals': user.getUnlockedMedals()
+        }
+        return result
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/account/email", methods=['PUT'])
+def updateEmail():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD '}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        newEmail = request.args.get('newEmail')
+        user = auth.getUserForToken(token)
+        user.setEmail(newEmail)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbu.EmailExistsException:
+        return {'error': 'ERROR_EMAIL_EXISTS'}
+    except dbu.InvalidEmailException:
+        return {'error': 'ERROR_INVALID_EMAIL'}
+
+@app.route("/account/username", methods=['PUT'])
+def updateUsername():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        newUsername = request.args.get('newUsername')
+        user = auth.getUserForToken(token)
+        user.setUsername(newUsername)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbu.UsernameExistsException:
+        return {'error': 'ERROR_USERNAME_EXISTS'}
+
+@app.route("/account/home", methods=['PUT'])
+def setHome():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        newHome = request.args.get('newHome')
+        user = auth.getUserForToken(token)
+        user.setHome(newHome)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/account/password", methods=['PUT'])
+def updatePassword():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        oldPassword = request.args.get('oldPassword')
+        oldEncryptedPwd = hashlib.sha256(oldPassword.encode('UTF-8')).hexdigest()
+        user = auth.getUserForToken(token)
+
+        if user.validatePassword(oldEncryptedPwd):
+            newPassword = request.args.get('newPassword')
+            enNewPass = hashlib.sha256(newPassword.encode('UTF-8')).hexdigest()
+            user.setPassword(enNewPass)
+            return {'status': 'success'}
+        else:
+            return {'error': 'ERROR_INCORRECT_PASSWORD'}
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/account/visibility", methods=['PUT'])
+def updateVisibility():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        user = auth.getUserForToken(token)
+        user.setVisibility()
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/account/medal", methods=['PUT'])
+def updateActiveMedal():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        medalId = request.args.get('medalId')
+        user = auth.getUserForToken(token)
+        if user.hasUnlockedMedal(medalId) == True:
+            user.setActiveMedal(medalId)
+            return {'status': 'success'}
+        else:
+            return {'error': 'ERROR_USER_INVALID_MEDAL'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@app.route("/medals", methods=['POST'])
+def createMedal():
+    if request.method != 'POST':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        medalName = request.args.get('medalName')
+        newMedal(medalName)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbu.MedalExistsException:
+        return {'error': 'ERROR_MEDAL_EXISTS'}
+'''
+products
+- invalid token
+- if no type -> all except company
+- if type -> all of type, empty if none
+    - error: ERROR_TYPE_NOT_EXISTS
+
+
+create
+- product exists -> ERROR_PRODUCT_EXISTS / ERROR_COMPANY_EXISTS
+- si type no existeix -> ERROR_TYPE_NOT_EXISTS
+'''
 
 @app.route("/companies", methods=['POST', 'GET'])
 @app.route("/products", methods=['POST', 'GET'])
@@ -300,13 +457,22 @@ def NewPost():
     try:
         auth.checkValidToken(token)
         text = request.args.get('text')
+
+        tags = obtainTags(text)
+        saveTags(tags)
+
         image = request.args.get('image')
-        newPost(token, text, image)
+        createPost(token, text, image, tags)
+
         return {'status': 'success'}
+
+
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
     except dbf.InsertionErrorException:
         return {'error': 'ERROR_INCORRECT_INSERTION'}
+    except Exception:
+        return {'error': 'ERROR_SOMETHING_WENT_WRONG', 'traceback': traceback.format_exc()}
 
 
 @app.route("/posts/<id>", methods=['DELETE'])
@@ -354,15 +520,24 @@ def getAllTags():
 
 @app.route("/posts", methods=['GET'])
 def getPosts():
+    # Get and check request MANDATORY arguments are valid (TODO -> for all endpoints)
     token = request.args.get('token')
+    num = request.args.get('n')
+    if any(x is None for x in [num, token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        num = request.args.get('n')
-        return getNPosts(token, num)
+        tag = request.args.get('tag') if 'tag' in request.args.keys() else None
+
+        return {
+            'result': getNPosts(token, num, tag)
+        }
+
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
-      
+
 @app.route("/test")
 def test():
     import data.DBUtils as db
