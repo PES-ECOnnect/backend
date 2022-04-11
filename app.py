@@ -466,7 +466,6 @@ def NewPost():
 
         return {'status': 'success'}
 
-
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
     except dbf.InsertionErrorException:
@@ -474,7 +473,7 @@ def NewPost():
     except Exception:
         return {'error': 'ERROR_SOMETHING_WENT_WRONG', 'traceback': traceback.format_exc()}
 
-
+      
 @app.route("/posts/<id>", methods=['DELETE'])
 def DeletePost(id):
     token = request.args.get('token')
