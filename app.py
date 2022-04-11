@@ -8,6 +8,7 @@ import domain.Authenticator as auth
 
 from domain.Reviewable import *
 from domain.Question import *
+from domain.Forum import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -116,8 +117,6 @@ products
 - if no type -> all except company
 - if type -> all of type, empty if none
     - error: ERROR_TYPE_NOT_EXISTS
-
-
 create
 - product exists -> ERROR_PRODUCT_EXISTS / ERROR_COMPANY_EXISTS
 - si type no existeix -> ERROR_TYPE_NOT_EXISTS
@@ -303,6 +302,50 @@ def getCompanyQuestions():
         auth.checkValidToken(token)
         questions = getQuestionsCompany()
         return {'result': questions}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/posts", methods=['POST'])
+def NewPost():
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        text = request.args.get('text')
+        image = request.args.get('image')
+        newPost(token,text,image)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbf.InsertionErrorException:
+        return {'error': 'ERROR_INCORRECT_INSERTION'}
+
+@app.route("/posts/<id>",methods=['DELETE'])
+def DeletePost(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        deletePost(token,id)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbf.UserNotPostOwnerException:
+        return {'error': 'ERROR_USER_NOT_POST_OWNER'}
+    except dbf.DeletingLikesDislikesException:
+        return {'error': 'ERROR_DELETING_LIKES_DISLIKES'}
+    except dbf.DeletingPostHashtagsException:
+        return {'error': 'ERROR_DELETING_LIKES_DISLIKES'}
+    except dbf.DeletingPostException:
+        return {'error': 'ERROR_DELETING_POST'}
+
+@app.route("/posts/<id>/like", methods=['POST'])
+def likePost(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        isLike = request.args.get('isLike') == "True"
+        remove = request.args.get('remove') == "True"
+        like(token, id, isLike, remove)
+        return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
