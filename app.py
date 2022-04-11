@@ -354,15 +354,24 @@ def getAllTags():
 
 @app.route("/posts", methods=['GET'])
 def getPosts():
+    # Get and check request MANDATORY arguments are valid (TODO -> for all endpoints)
     token = request.args.get('token')
+    num = request.args.get('n')
+    if any(x is None for x in [num, token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        num = request.args.get('n')
-        return getNPosts(token, num)
+        tag = request.args.get('tag') if 'tag' in request.args.keys() else None
+
+        return {
+            'result' : getNPosts(token, num, tag)
+        }
+
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
-      
+
 @app.route("/test")
 def test():
     import data.DBUtils as db
