@@ -9,6 +9,8 @@ def newPost(token, text, image):
     if result == False:
         raise InsertionErrorException()
 
+    return result
+
 
 # Deletes all likes and dislikes of the post with id postid
 def deletelikesDislikes(postid):

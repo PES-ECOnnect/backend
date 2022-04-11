@@ -5,8 +5,15 @@ import data.DBUser as dbu
 from data.DBSession import getUserIdForToken
 
 
-def newPost(token, text, image):
-    return dbf.newPost(token, text, image)
+def newPost(token, text, image, tags):
+    postId = dbf.newPost(token, text, image)
+
+    for tag in tags:
+        tagId = dbf.getTagId(tag)
+
+
+
+
 
 
 def deletePost(token, postid):

@@ -300,8 +300,11 @@ def NewPost():
     try:
         auth.checkValidToken(token)
         text = request.args.get('text')
+
+        tags = processTags(text)
+
         image = request.args.get('image')
-        newPost(token, text, image)
+        newPost(token, text, image, tags)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
