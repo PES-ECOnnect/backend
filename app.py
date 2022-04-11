@@ -8,7 +8,9 @@ import domain.Authenticator as auth
 
 from domain.Reviewable import *
 from domain.Question import *
+
 from domain.User import *
+
 from domain.Forum import *
 
 # Data Layer (TODO - Remove)
@@ -237,6 +239,7 @@ def updateActiveMedal():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+
 @app.route("/medals", methods=['POST'])
 def createMedal():
     if request.method != 'POST':
@@ -264,7 +267,6 @@ create
 - product exists -> ERROR_PRODUCT_EXISTS / ERROR_COMPANY_EXISTS
 - si type no existeix -> ERROR_TYPE_NOT_EXISTS
 '''
-
 
 @app.route("/companies", methods=['POST', 'GET'])
 @app.route("/products", methods=['POST', 'GET'])

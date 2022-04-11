@@ -234,7 +234,6 @@ def getLatestNPostsWithTag(n: int, tag: str) -> list:
 class InsertionErrorException(Exception):
     pass
 
-
 class DeletingLikesDislikesException(Exception):
     pass
 
