@@ -39,4 +39,3 @@ def getNPosts(token, number):
     userId = getUserIdForToken(token)
     posts = dbf.getPosts(userId, number)
     return {'result': posts}
-
