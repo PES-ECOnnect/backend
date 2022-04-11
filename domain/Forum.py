@@ -1,14 +1,33 @@
 import data.DBForum as dbf
 import data.DBUtils as db
+import data.DBUser as dbu
+import re
 from data.DBSession import getUserIdForToken
 
 
-def newPost(token, text, image):
-    return dbf.newPost(token, text, image)
+def obtainTags(text: str) -> list:
+    return re.findall(r"#(\w+)", text)
+
+
+def saveTags(tags: list) -> None:
+    for tag in tags:
+        dbf.insertTag(tag)
+
+    return tags
+
+def createPost(token, text, image, tags):
+    postId = dbf.insertPost(token, text, image)
+
+    for tag in tags:
+        tagId = dbf.getTagId(tag)
+        dbf.assignTagToPost(postId, tagId)
+
+    return postId
 
 
 def deletePost(token, postid):
-    userid = getUserIdForToken(token)
+    userid = dbu.getUserIdForToken(token)
+
     # check userid owns this post
     if dbf.ownsPost(userid, postid) == False:
         raise dbf.UserNotPostOwnerException()
@@ -43,10 +62,43 @@ def getUsedTags():
 
     return result
 
-  
-def getNPosts(token, number):
-    #comprovar que user token no està banejat
-    userId = getUserIdForToken(token)
-    posts = dbf.getPosts(userId, number)
-    return {'result': posts}
+
+def getNPosts(token, number, tag):
+    currentUserId = getUserIdForToken(token)
+
+    if tag is None:
+        posts = dbf.getLatestNPosts(number)
+    else:
+        posts = dbf.getLatestNPostsWithTag(number, tag)
+
+    result = []
+    for postInfo in posts:
+        postId = postInfo["idpost"]
+        authorId = postInfo["authorid"]
+
+        likes = dbf.getPostLikes(postId)
+        dislikes = dbf.getPostDislikes(postId)
+        authorInfo = dbu.getPostDisplayInfo(authorId)
+
+        if dbf.userLikesPost(currentUserId, postId):
+            userOption = 2
+        elif dbf.userDislikesPost(currentUserId, postId):
+            userOption = 1
+        else:
+            userOption = 0
+
+        result.append({
+            "postid": postInfo["idpost"],
+            "text": postInfo["text"],
+            "likes": likes,
+            "dislikes": dislikes,
+            "imageurl": postInfo["imageurl"],
+            "timestamp": postInfo["timestamp"],
+            "userid": authorInfo["iduser"],
+            "username": authorInfo["name"],
+            "useroption": userOption,
+            "medal": authorInfo["idactivemedal"],
+        })
+
+    return result
 

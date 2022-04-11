@@ -1,4 +1,4 @@
-import sqlite3
+import traceback
 
 import psycopg2
 from flask import Flask, request
@@ -118,6 +118,7 @@ def getUserInfo(id):
         return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
 
     try:
+
 
         user = auth.getUserForId(id)
         if (user.getIsPrivate()==True):
@@ -454,15 +455,23 @@ def NewPost():
     try:
         auth.checkValidToken(token)
         text = request.args.get('text')
+
+        tags = obtainTags(text)
+        saveTags(tags)
+
         image = request.args.get('image')
-        newPost(token, text, image)
+        createPost(token, text, image, tags)
+
         return {'status': 'success'}
+
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
     except dbf.InsertionErrorException:
         return {'error': 'ERROR_INCORRECT_INSERTION'}
+    except Exception:
+        return {'error': 'ERROR_SOMETHING_WENT_WRONG', 'traceback': traceback.format_exc()}
 
-
+      
 @app.route("/posts/<id>", methods=['DELETE'])
 def DeletePost(id):
     token = request.args.get('token')
@@ -508,11 +517,20 @@ def getAllTags():
 
 @app.route("/posts", methods=['GET'])
 def getPosts():
+    # Get and check request MANDATORY arguments are valid (TODO -> for all endpoints)
     token = request.args.get('token')
+    num = request.args.get('n')
+    if any(x is None for x in [num, token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        num = request.args.get('n')
-        return getNPosts(token, num)
+        tag = request.args.get('tag') if 'tag' in request.args.keys() else None
+
+        return {
+            'result': getNPosts(token, num, tag)
+        }
+
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 

@@ -112,13 +112,21 @@ def hasUnlockedMedal(userId, medalId):
     else:
         return False
 
+def getPostDisplayInfo(userId: int) -> dict:
+    q = "SELECT * FROM users " \
+        "WHERE iduser = %s " \
+
+    res = db.select(q, (userId,), True)
+    return None if res is None else dict(res)
+
+
 def insert(email, username, enPass):
     q = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
     return db.insert(query=q, args=(username, email, enPass))
 
 def delete(user):
     pass
-
+  
 def update(user):
     pass
 
