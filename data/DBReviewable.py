@@ -83,15 +83,15 @@ def selectByType(revType):
 
 
 def getTypeName(idReviewable):
-    q = "SELECT t.name FROM ReviewableType t, Reviewable r WHERE r.idReviewable = (?) AND t.TypeId = r.TypeId "
+    q = "SELECT t.name FROM ReviewableType t, Reviewable r WHERE r.idReviewable = %s AND t.TypeId = r.TypeId "
     return db.select(q, (idReviewable,), True)
 
 
 # Returns an integer with the number of times the id of the Reviewable has been valorated with stars Stars.s
 def getRatings(idReviewable, stars):
-    q = "SELECT count() FROM valoration WHERE idreviewable = %s AND stars = %s"
+    q = "SELECT count(*) FROM valoration WHERE idreviewable = %s AND stars = %s"
     result = db.select(q, (idReviewable, stars,), True)
-    return result['count()']
+    return result['count']
 
 
 def getLocalization(idReviewable):
@@ -121,23 +121,23 @@ def getReviewableAttributes(idReviewable):
         return result
 
 
-def answer(idReviewable, token, chosenOption, questionIndex):
+def answer(idReviewable, token, chosenOption, questionid):
     idUser = getUserIdForToken(token)
 
     q = "SELECT * FROM reviewable WHERE idreviewable = %s"
     TipusRow = db.select(query=q, args=(idReviewable,), one=True)
     idTipus = TipusRow['typeid']
 
-    q = "SELECT * FROM answer WHERE idreviewable = %s AND iduser = %s AND typeid = %s AND questionindex = %s"
-    answerRow = db.select(query=q, args=(idReviewable, idUser, idTipus, questionIndex,), one=True)
+    q = "SELECT * FROM answer WHERE idreviewable = %s AND iduser = %s AND typeid = %s AND questionid = %s"
+    answerRow = db.select(query=q, args=(idReviewable, idUser, idTipus, questionid,), one=True)
     if answerRow is None:
-        q = "INSERT INTO answer (idreviewable, iduser, chosenoption, typeid, questionindex) VALUES (%s, %s, %s, %s, " \
+        q = "INSERT INTO answer (idreviewable, iduser, chosenoption, typeid, questionid) VALUES (%s, %s, %s, %s, " \
             "%s) "
-        return db.insert(query=q, args=(idReviewable, idUser, chosenOption, idTipus, questionIndex,))
+        return db.insert(query=q, args=(idReviewable, idUser, chosenOption, idTipus, questionid,))
     else:
         q = "UPDATE answer SET chosenoption = %s WHERE idreviewable = %s AND iduser = %s AND typeid = %s AND " \
-            "questionindex = %s "
-        return db.update(query=q, args=(chosenOption, idReviewable, idUser, idTipus, questionIndex,))
+            "questionid = %s "
+        return db.update(query=q, args=(chosenOption, idReviewable, idUser, idTipus, questionid,))
 
 
 def review(idReviewable, token, review):

@@ -8,7 +8,7 @@ from data.DBSession import getUserIdForToken
 
 
 def insertQuestion(typeId, statement, index):
-    iQuery = "INSERT INTO question (typeid, statement, questionindex) VALUES (%s, %s, %s)"
+    iQuery = "INSERT INTO question (typeid, statement, questionid) VALUES (%s, %s, %s)"
     res = insert(query=iQuery, args=(str(typeId), statement, index))
     if type(res) == bool and not res:
         raise FailedToAddQuestionException()
@@ -28,19 +28,19 @@ def getQuestionsFromType(typeId):
 def getQuestions(idReviewable, TypeId, token):
     Result = []
     idUser = getUserIdForToken(token)
-    q = "SELECT questionindex, statement FROM question WHERE typeid = %s"
+    q = "SELECT questionid, statement FROM question WHERE typeid = %s"
     quest = select(q, (TypeId,), one=False)
     for i in quest:
-        questionIndex = i['questionindex']
-        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionindex = %s AND typeid = %s AND " \
+        questionid = i['questionid']
+        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionid = %s AND typeid = %s AND " \
             "chosenoption = 1 "
-        yes = select(q, (idReviewable, questionIndex, TypeId), one=True)
-        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionindex = %s AND typeid = %s AND " \
+        yes = select(q, (idReviewable, questionid, TypeId), one=True)
+        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionid = %s AND typeid = %s AND " \
             "chosenoption = 0 "
-        no = select(q, (idReviewable, questionIndex, TypeId), one=True)
+        no = select(q, (idReviewable, questionid, TypeId), one=True)
         
-        q = "SELECT chosenoption FROM answer WHERE idreviewable = %s AND iduser = %s AND questionindex = %s AND typeid = %s"
-        userAns = select(q, (idReviewable, idUser, questionIndex, TypeId), one=True)
+        q = "SELECT chosenoption FROM answer WHERE idreviewable = %s AND iduser = %s AND questionid = %s AND typeid = %s"
+        userAns = select(q, (idReviewable, idUser, questionid, TypeId), one=True)
         
         if userAns is None:
             userAns_str = "none"
