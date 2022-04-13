@@ -5,3 +5,4 @@ __pycache__/
 venv/bin/activate_with_windows_line_endings
 venv/bin/activate
 data/database.ini
+venv/lib/python3.8/site-packages/werkzeug/wrappers/__pycache__/
