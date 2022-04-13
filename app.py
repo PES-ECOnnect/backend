@@ -8,7 +8,6 @@ import domain.Authenticator as auth
 
 from domain.Reviewable import *
 from domain.Question import *
-from domain.Forum import *
 
 from domain.User import *
 
@@ -451,37 +450,6 @@ def getCompanyQuestions():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
-@app.route("/posts", methods=['POST'])
-def NewPost():
-    token = request.args.get('token')
-    try:
-        auth.checkValidToken(token)
-        text = request.args.get('text')
-        image = request.args.get('image')
-        newPost(token,text,image)
-        return {'status': 'success'}
-    except dbs.InvalidTokenException:
-        return {'error': 'ERROR_INVALID_TOKEN'}
-    except dbf.InsertionErrorException:
-        return {'error': 'ERROR_INCORRECT_INSERTION'}
-
-@app.route("/posts/<id>",methods=['DELETE'])
-def DeletePost(id):
-    token = request.args.get('token')
-    try:
-        auth.checkValidToken(token)
-        deletePost(token,id)
-        return {'status': 'success'}
-    except dbs.InvalidTokenException:
-        return {'error': 'ERROR_INVALID_TOKEN'}
-    except dbf.UserNotPostOwnerException:
-        return {'error': 'ERROR_USER_NOT_POST_OWNER'}
-    except dbf.DeletingLikesDislikesException:
-        return {'error': 'ERROR_DELETING_LIKES_DISLIKES'}
-    except dbf.DeletingPostHashtagsException:
-        return {'error': 'ERROR_DELETING_LIKES_DISLIKES'}
-    except dbf.DeletingPostException:
-        return {'error': 'ERROR_DELETING_POST'}
 
 @app.route("/posts", methods=['POST'])
 def NewPost():
