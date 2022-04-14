@@ -56,9 +56,12 @@ def like(token, postId, isLike, remove):
 # Obtains all tags that have been used at least once
 def getUsedTags():
     tags = dbf.getUsedTags()
-    result = {}
+    result = []
     for tag in tags:
-        result[tag] = dbf.tagUsages(tag)
+        result.append({
+            'tag' : tag,
+            'count' : dbf.tagUsages(tag)
+        })
 
     return result
 
