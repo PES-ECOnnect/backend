@@ -101,6 +101,7 @@ def getNPosts(token, number, tag):
             "username": authorInfo["name"],
             "useroption": userOption,
             "medal": authorInfo["idactivemedal"],
+            "ownpost": authorId == currentUserId
         })
 
     return result
