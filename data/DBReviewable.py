@@ -84,7 +84,8 @@ def selectByType(revType):
 
 def getTypeName(idReviewable):
     q = "SELECT t.name FROM ReviewableType t, Reviewable r WHERE r.idReviewable = %s AND t.TypeId = r.TypeId "
-    return db.select(q, (idReviewable,), True)
+    result = db.select(q, (idReviewable,), True)
+    return result['name']
 
 
 # Returns an integer with the number of times the id of the Reviewable has been valorated with stars Stars.s
