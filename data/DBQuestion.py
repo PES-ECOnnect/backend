@@ -32,15 +32,15 @@ def getQuestions(idReviewable, TypeId, token):
     quest = select(q, (TypeId,), one=False)
     for i in quest:
         questionid = i['questionid']
-        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionid = %s AND typeid = %s AND " \
+        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionid = %s AND " \
             "chosenoption = 1 "
-        yes = select(q, (idReviewable, questionid, TypeId), one=True)
-        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionid = %s AND typeid = %s AND " \
+        yes = select(q, (idReviewable, questionid), one=True)
+        q = "SELECT COUNT(*) from answer where idreviewable = %s AND questionid = %s  AND " \
             "chosenoption = 0 "
-        no = select(q, (idReviewable, questionid, TypeId), one=True)
+        no = select(q, (idReviewable, questionid), one=True)
         
-        q = "SELECT chosenoption FROM answer WHERE idreviewable = %s AND iduser = %s AND questionid = %s AND typeid = %s"
-        userAns = select(q, (idReviewable, idUser, questionid, TypeId), one=True)
+        q = "SELECT chosenoption FROM answer WHERE idreviewable = %s AND iduser = %s AND questionid = %s"
+        userAns = select(q, (idReviewable, idUser, questionid), one=True)
         
         if userAns is None:
             userAns_str = "none"

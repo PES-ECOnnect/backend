@@ -34,7 +34,7 @@ def getAllReviewableTypes():
 
 def getProduct(id, token):
     attribs = dbr.getReviewableAttributes(id)
-    # ratings MIRAR QUERY
+    # ratings
     Ratings = []
     for i in range(6):
         Ratings.append(dbr.getRatings(id, i))
@@ -43,13 +43,13 @@ def getProduct(id, token):
     # QUESTIONS
     Questions = dbq.getQuestions(id, attribs["typeid"], token)
 
-    if TypeName["name"] == "Company":
+    if TypeName == "Company":
         localization = dbr.getLocalization(id)
         return {'name': attribs["name"],
                 'imageURL': attribs["imageurl"],
                 'latitude': localization["lat"],
                 'longitude': localization["lon"],
-                'type': TypeName["name"],
+                'type': TypeName,
                 'ratings': Ratings,
                 'questions': Questions}
 
@@ -58,7 +58,7 @@ def getProduct(id, token):
         return {'name': attribs["name"],
                 'imageURL': attribs["imageurl"],
                 'manufacturer': manufacturer["manufacturer"],
-                'type': TypeName["name"],
+                'type': TypeName,
                 'ratings': Ratings,
                 'questions': Questions}
 
