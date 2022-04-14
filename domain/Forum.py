@@ -63,7 +63,7 @@ def getUsedTags():
             'count' : dbf.tagUsages(tag)
         })
 
-    return result
+    return sorted(result, key=lambda d: -d['count'])
 
 
 def getNPosts(token, number, tag):
