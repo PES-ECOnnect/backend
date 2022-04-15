@@ -218,7 +218,7 @@ def getLatestNPosts(n: int) -> list:
 
 # Get latest N posts that contain a given tag ordered chronologically
 def getLatestNPostsWithTag(n: int, tag: str) -> list:
-    q = "SELECT p.idpost, p.temps as timestamp, p.text, p.imageurl, iduser as authorid " \
+    q = "SELECT p.idpost, EXTRACT(EPOCH FROM temps) as timestamp, p.text, p.imageurl, iduser as authorid " \
         "FROM post p " \
         "JOIN posthashtag ph on ph.idpost = p.idpost " \
         "JOIN hashtag h on h.idtag = ph.idtag " \
