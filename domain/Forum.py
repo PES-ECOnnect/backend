@@ -3,7 +3,7 @@ import data.DBUtils as db
 import data.DBUser as dbu
 import re
 from data.DBSession import getUserIdForToken
-
+import datetime
 
 def obtainTags(text: str) -> list:
     return re.findall(r"#(\w+)", text)
@@ -104,7 +104,7 @@ def getNPosts(token, number, tag):
             "likes": likes,
             "dislikes": dislikes,
             "imageurl": postInfo["imageurl"],
-            "timestamp": postInfo["timestamp"],
+            "timestamp": datetime.datetime.timestamp(postInfo["timestamp"]),
             "userid": authorInfo["iduser"],
             "username": authorInfo["name"],
             "useroption": userOption,
