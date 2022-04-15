@@ -125,7 +125,7 @@ def insert(email, username, enPass):
     return db.insert(query=q, args=(username, email, enPass))
 
 def delete(userId):
-    db.delete("DELETE FROM users WHERE iduser = (%s)", (userId))
+    db.delete("DELETE FROM users WHERE iduser = %s", (userId,))
   
 def update(user):
     pass

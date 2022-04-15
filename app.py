@@ -266,13 +266,14 @@ def deleteAccount():
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
         user.deleteUser(token)
+        return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
 @app.route("/account/posts", methods=['DELETE'])
 def deletePostsUser():
-    token = request.args.get(token)
+    token = request.args.get('token')
     user = auth.getUserForToken(token)
     deleteUserPosts(user.getId())
     return {'status': 'success'}

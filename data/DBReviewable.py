@@ -155,10 +155,10 @@ def review(idReviewable, token, review):
 
 
 def deleteUserAnswers(userId):
-    db.delete("DELETE FROM answer WHERE iduser = (%s)", (userId,))
+    db.delete("DELETE FROM answer WHERE iduser = %s", (userId,))
 
 def deleteUserReviews(userId):
-    db.delete("DELETE FROM valoration WHERE iduser = (%s)", (userId))
+    db.delete("DELETE FROM valoration WHERE iduser = %s", (userId,))
 
 class FailedToInsertReviewableException(Exception):
     pass

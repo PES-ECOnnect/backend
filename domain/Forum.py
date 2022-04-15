@@ -42,7 +42,9 @@ def deletePost(userid, postid):
 def deleteUserPosts(userId):
     posts = dbf.getUserPosts(userId)
     for pid in posts:
-        deletePost(userId, pid)
+        idpost = str(pid['idpost'])
+        deletePost(userId, idpost)
+        print(pid['idpost'])
 
 
 def like(token, postId, isLike, remove):
