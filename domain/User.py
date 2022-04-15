@@ -3,8 +3,10 @@ import domain.Reviewable as rev
 import domain.Forum as forum
 import domain.Authenticator as auth
 
+
 def newMedal(name):
     return dbu.newMedal(name)
+
 
 class User:
 
