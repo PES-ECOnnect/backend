@@ -208,7 +208,7 @@ def userDislikesPost(userId: int, postId: int) -> int:
 
 # Get latest N posts ordered chronologically
 def getLatestNPosts(n: int) -> list:
-    q = "SELECT idpost, temps as timestamp, text, imageurl, iduser as authorid " \
+    q = "SELECT idpost, EXTRACT(EPOCH FROM temps) as timestamp, text, imageurl, iduser as authorid " \
         "FROM post p " \
         "ORDER BY temps DESC LIMIT %s"
 

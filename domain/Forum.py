@@ -104,7 +104,7 @@ def getNPosts(token, number, tag):
             "likes": likes,
             "dislikes": dislikes,
             "imageurl": postInfo["imageurl"],
-            "timestamp": datetime.datetime.timestamp(postInfo["timestamp"]),
+            "timestamp": postInfo["timestamp"],
             "userid": authorInfo["iduser"],
             "username": authorInfo["name"],
             "useroption": userOption,
