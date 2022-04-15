@@ -64,7 +64,8 @@ def getProduct(id, token):
                 'manufacturer': manufacturer["manufacturer"],
                 'type': TypeName,
                 'ratings': Ratings,
-                'questions': Questions}
+                'questions': Questions,
+                'userRate': userRate}
 
 
 def getRatings(idReviewable):
