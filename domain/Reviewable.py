@@ -71,6 +71,11 @@ def getQuestionsCompany():
     typeId = dbrt.getReviewableTypeId("Company")
     return dbq.getQuestionsFromType(typeId)
 
+def deleteUserAnswers(userId):
+    return dbr.deleteUserAnswers(userId)
+
+def deleteUserReviews(userId):
+    return dbr.deleteUserReviews(userId)
 
 class Reviewable:
     def __init__(self, id, name, type, imageURL, manufacturer, lat, lon):

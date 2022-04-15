@@ -1,4 +1,7 @@
 import data.DBUser as dbu
+import domain.Reviewable as rev
+import domain.Forum as forum
+import domain.Authenticator as auth
 
 def newMedal(name):
     return dbu.newMedal(name)
@@ -74,3 +77,15 @@ class User:
 
     def hasUnlockedMedal(self, medalId):
         return dbu.hasUnlockedMedal(self._id, medalId)
+
+    def deleteUser(self, token):
+        # delete ratings
+        rev.deleteUserReviews(self._id)
+        # delete answers
+        rev.deleteUserAnswers(self._id)
+        # delete posts
+        forum.deleteUserPosts(self._id)
+        # logout
+        auth.logOut(token)
+        # delete user
+        dbu.delete(self._id)

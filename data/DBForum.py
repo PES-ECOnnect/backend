@@ -229,6 +229,9 @@ def getLatestNPostsWithTag(n: int, tag: str) -> list:
     return [] if rows is None else rows
 
 
+def getUserPosts(userId):
+    return db.select("SELECT idpost FROM post WHERE iduser = (%s)", (userId,))
+
 # Exceptions
 class InsertionErrorException(Exception):
     pass
