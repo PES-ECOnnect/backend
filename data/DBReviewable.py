@@ -84,7 +84,8 @@ def selectByType(revType):
 
 def getTypeName(idReviewable):
     q = "SELECT t.name FROM ReviewableType t, Reviewable r WHERE r.idReviewable = %s AND t.TypeId = r.TypeId "
-    return db.select(q, (idReviewable,), True)
+    result = db.select(q, (idReviewable,), True)
+    return result['name']
 
 
 # Returns an integer with the number of times the id of the Reviewable has been valorated with stars Stars.s
@@ -152,6 +153,12 @@ def review(idReviewable, token, review):
         q = "UPDATE valoration SET stars = %s WHERE iduser = %s AND idreviewable = %s"
         return db.update(query=q, args=(review, idUser, idReviewable,))
 
+
+def deleteUserAnswers(userId):
+    db.delete("DELETE FROM answer WHERE iduser = %s", (userId,))
+
+def deleteUserReviews(userId):
+    db.delete("DELETE FROM valoration WHERE iduser = %s", (userId,))
 
 class FailedToInsertReviewableException(Exception):
     pass

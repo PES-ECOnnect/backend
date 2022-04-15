@@ -25,8 +25,8 @@ def createPost(token, text, image, tags):
     return postId
 
 
-def deletePost(token, postid):
-    userid = dbu.getUserIdForToken(token)
+def deletePost(userid, postid):
+    #userid = dbu.getUserIdForToken(token)
 
     # check userid owns this post
     if dbf.ownsPost(userid, postid) == False:
@@ -38,6 +38,13 @@ def deletePost(token, postid):
         dbf.deletePosthashtag(postid)
         # delete the post
         dbf.deletePost(postid)
+
+def deleteUserPosts(userId):
+    posts = dbf.getUserPosts(userId)
+    for pid in posts:
+        idpost = str(pid['idpost'])
+        deletePost(userId, idpost)
+        print(pid['idpost'])
 
 
 def like(token, postId, isLike, remove):

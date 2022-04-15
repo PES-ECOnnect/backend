@@ -255,6 +255,21 @@ def createMedal():
         return {'error': 'ERROR_INVALID_TOKEN'}
     except dbu.MedalExistsException:
         return {'error': 'ERROR_MEDAL_EXISTS'}
+
+@app.route("/account", methods=['DELETE'])
+def deleteAccount():
+    if request.method != 'DELETE':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        user = auth.getUserForToken(token)
+        user.deleteUser(token)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
 '''
 products
 - invalid token
@@ -479,7 +494,9 @@ def DeletePost(id):
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
-        deletePost(token, id)
+        user = auth.getUserForToken(token)
+        userId = user.getId()
+        deletePost(userId, id)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
