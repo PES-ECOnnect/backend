@@ -129,16 +129,16 @@ def answer(idReviewable, token, chosenOption, questionid):
     TipusRow = db.select(query=q, args=(idReviewable,), one=True)
     idTipus = TipusRow['typeid']
 
-    q = "SELECT * FROM answer WHERE idreviewable = %s AND iduser = %s AND typeid = %s AND questionid = %s"
-    answerRow = db.select(query=q, args=(idReviewable, idUser, idTipus, questionid,), one=True)
+    q = "SELECT * FROM answer WHERE idreviewable = %s AND iduser = %s AND questionid = %s"
+    answerRow = db.select(query=q, args=(idReviewable, idUser, questionid,), one=True)
     if answerRow is None:
-        q = "INSERT INTO answer (idreviewable, iduser, chosenoption, typeid, questionid) VALUES (%s, %s, %s, %s, " \
+        q = "INSERT INTO answer (idreviewable, iduser, chosenoption, questionid) VALUES (%s, %s, %s, " \
             "%s) "
-        return db.insert(query=q, args=(idReviewable, idUser, chosenOption, idTipus, questionid,))
+        return db.insert(query=q, args=(idReviewable, idUser, chosenOption, questionid,))
     else:
-        q = "UPDATE answer SET chosenoption = %s WHERE idreviewable = %s AND iduser = %s AND typeid = %s AND " \
+        q = "UPDATE answer SET chosenoption = %s WHERE idreviewable = %s AND iduser = %s AND " \
             "questionid = %s "
-        return db.update(query=q, args=(chosenOption, idReviewable, idUser, idTipus, questionid,))
+        return db.update(query=q, args=(chosenOption, idReviewable, idUser, questionid,))
 
 
 def review(idReviewable, token, review):
@@ -159,6 +159,17 @@ def deleteUserAnswers(userId):
 
 def deleteUserReviews(userId):
     db.delete("DELETE FROM valoration WHERE iduser = %s", (userId,))
+
+def getUserRate(revId, userId):
+    rate = db.select("SELECT stars FROM valoration WHERE iduser = %s AND idreviewable = %s", (userId, revId))
+    if rate:
+        aux = rate[0]
+        stars = aux['stars']
+        return stars
+    else:
+        return None
+
+# EXCEPTIONS
 
 class FailedToInsertReviewableException(Exception):
     pass

@@ -1,7 +1,7 @@
 import data.DBReviewable as dbr
 import data.DBReviewableType as dbrt
 import data.DBQuestion as dbq
-
+import domain.Authenticator as auth
 
 def getReviewablesByType(type):
     return dbr.selectByType(type)
@@ -43,6 +43,9 @@ def getProduct(id, token):
     # QUESTIONS
     Questions = dbq.getQuestions(id, attribs["typeid"], token)
 
+    user = auth.getUserForToken(token)
+    userRate = dbr.getUserRate(id, user.getId())
+
     if TypeName == "Company":
         localization = dbr.getLocalization(id)
         return {'name': attribs["name"],
@@ -51,7 +54,8 @@ def getProduct(id, token):
                 'longitude': localization["lon"],
                 'type': TypeName,
                 'ratings': Ratings,
-                'questions': Questions}
+                'questions': Questions,
+                'userRate': userRate}
 
     else:
         manufacturer = dbr.getManufacturer(id)
