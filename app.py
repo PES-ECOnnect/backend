@@ -29,36 +29,53 @@ def helloWorld():
     return "PES Econnect Root!"
 
 
-@app.route("/account", methods=['POST'])
+@app.route("/account", methods=['POST', 'GET'])
 def signUp():
-    if request.method != 'POST':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+    if request.method == "POST":
+        email = request.args.get('email')
+        username = request.args.get('username')
+        password = request.args.get('password')
+        if email is None or username is None or password is None:
+            return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
-    email = request.args.get('email')
-    username = request.args.get('username')
-    password = request.args.get('password')
-    if email is None or username is None or password is None:
-        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+        enPass = hashlib.sha256(password.encode('UTF-8')).hexdigest()
 
-    enPass = hashlib.sha256(password.encode('UTF-8')).hexdigest()
+        if auth.getUserForEmail(email) is not None:
+            return {'error': 'ERROR_USER_EMAIL_EXISTS'}
 
-    if auth.getUserForEmail(email) is not None:
-        return {'error': 'ERROR_USER_EMAIL_EXISTS'}
+        if auth.getUserForUsername(username) is not None:
+            return {'error': 'ERROR_USER_USERNAME_EXISTS'}
 
-    if auth.getUserForUsername(username) is not None:
-        return {'error': 'ERROR_USER_USERNAME_EXISTS'}
+        try:
+            auth.signUp(email, username, enPass)
+            token = auth.logIn(email, password)
+            return {'status': 'success',
+                    'token': str(token)}
 
-    try:
-        auth.signUp(email, username, enPass)
-        token = auth.logIn(email, password)
-        return {'status': 'success',
-                'token': str(token)}
+        except sqlite3.Error:
+            return {'error': 'ERROR_FAILED_SIGN_UP'}
 
-    except sqlite3.Error:
-        return {'error': 'ERROR_FAILED_SIGN_UP'}
+        except dbs.FailedToOpenSessionException:
+            return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
+    elif request.method == "GET":
+        token = request.args.get("token")
+        if token is None:
+            return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
-    except dbs.FailedToOpenSessionException:
-        return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
+        try:
+            auth.checkValidToken(token)
+            u = auth.getUserForToken(token)
+            return {
+                "username": u.getName(),
+                "email": u.getEmail(),
+                "activeMedal": u.getActiveMedalId(),
+                "medals": u.getUnlockedMedals()
+            }
+
+        except dbs.InvalidTokenException:
+            return {"error": "ERROR_INVALID_TOKEN"}
+
+
 
 
 @app.route("/account/login", methods=['GET'])
