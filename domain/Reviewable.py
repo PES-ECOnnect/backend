@@ -1,7 +1,7 @@
 import data.DBReviewable as dbr
 import data.DBReviewableType as dbrt
 import data.DBQuestion as dbq
-
+import domain.Authenticator as auth
 
 def getReviewablesByType(type):
     return dbr.selectByType(type)
@@ -34,7 +34,7 @@ def getAllReviewableTypes():
 
 def getProduct(id, token):
     attribs = dbr.getReviewableAttributes(id)
-    # ratings MIRAR QUERY
+    # ratings
     Ratings = []
     for i in range(6):
         Ratings.append(dbr.getRatings(id, i))
@@ -43,24 +43,29 @@ def getProduct(id, token):
     # QUESTIONS
     Questions = dbq.getQuestions(id, attribs["typeid"], token)
 
-    if TypeName["name"] == "Company":
+    user = auth.getUserForToken(token)
+    userRate = dbr.getUserRate(id, user.getId())
+
+    if TypeName == "Company":
         localization = dbr.getLocalization(id)
         return {'name': attribs["name"],
                 'imageURL': attribs["imageurl"],
                 'latitude': localization["lat"],
                 'longitude': localization["lon"],
-                'type': TypeName["name"],
+                'type': TypeName,
                 'ratings': Ratings,
-                'questions': Questions}
+                'questions': Questions,
+                'userRate': userRate}
 
     else:
         manufacturer = dbr.getManufacturer(id)
         return {'name': attribs["name"],
                 'imageURL': attribs["imageurl"],
                 'manufacturer': manufacturer["manufacturer"],
-                'type': TypeName["name"],
+                'type': TypeName,
                 'ratings': Ratings,
-                'questions': Questions}
+                'questions': Questions,
+                'userRate': userRate}
 
 
 def getRatings(idReviewable):
@@ -71,6 +76,11 @@ def getQuestionsCompany():
     typeId = dbrt.getReviewableTypeId("Company")
     return dbq.getQuestionsFromType(typeId)
 
+def deleteUserAnswers(userId):
+    return dbr.deleteUserAnswers(userId)
+
+def deleteUserReviews(userId):
+    return dbr.deleteUserReviews(userId)
 
 class Reviewable:
     def __init__(self, id, name, type, imageURL, manufacturer, lat, lon):

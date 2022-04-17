@@ -12,7 +12,7 @@ def insertType(name):
     c = con.cursor()
     c.execute("begin")
     try:
-        c.execute("INSERT INTO reviewableType (name) VALUES (?)", (name, ))
+        c.execute("INSERT INTO reviewabletype (name) VALUES %s", (name,))
         c.execute('commit')
     except con.Error:
         c.execute('rollback')
@@ -31,8 +31,7 @@ def getAllReviewableTypes():
 class TypeAlreadyExistsException(Exception):
     pass
 
-class IndavlidTypeNameException(Exception):
+  
+class InvalidTypeNameException(Exception):
     pass
-
-
 

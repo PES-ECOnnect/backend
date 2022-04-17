@@ -1,4 +1,4 @@
-import sqlite3
+import traceback
 
 import psycopg2
 from flask import Flask, request
@@ -8,11 +8,15 @@ import domain.Authenticator as auth
 
 from domain.Reviewable import *
 from domain.Question import *
+
+from domain.User import *
+
 from domain.Forum import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
 import data.DBReviewable as dbp
+import data.DBUser as dbu
 
 import json
 import hashlib
@@ -25,36 +29,53 @@ def helloWorld():
     return "PES Econnect Root!"
 
 
-@app.route("/account", methods=['POST'])
+@app.route("/account", methods=['POST', 'GET'])
 def signUp():
-    if request.method != 'POST':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+    if request.method == "POST":
+        email = request.args.get('email')
+        username = request.args.get('username')
+        password = request.args.get('password')
+        if email is None or username is None or password is None:
+            return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
-    email = request.args.get('email')
-    username = request.args.get('username')
-    password = request.args.get('password')
-    if email is None or username is None or password is None:
-        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+        enPass = hashlib.sha256(password.encode('UTF-8')).hexdigest()
 
-    enPass = hashlib.sha256(password.encode('UTF-8')).hexdigest()
+        if auth.getUserForEmail(email) is not None:
+            return {'error': 'ERROR_USER_EMAIL_EXISTS'}
 
-    if auth.getUserForEmail(email) is not None:
-        return {'error': 'ERROR_USER_EMAIL_EXISTS'}
+        if auth.getUserForUsername(username) is not None:
+            return {'error': 'ERROR_USER_USERNAME_EXISTS'}
 
-    if auth.getUserForUsername(username) is not None:
-        return {'error': 'ERROR_USER_USERNAME_EXISTS'}
+        try:
+            auth.signUp(email, username, enPass)
+            token = auth.logIn(email, password)
+            return {'status': 'success',
+                    'token': str(token)}
 
-    try:
-        auth.signUp(email, username, enPass)
-        token = auth.logIn(email, password)
-        return {'status': 'success',
-                'token': str(token)}
+        except sqlite3.Error:
+            return {'error': 'ERROR_FAILED_SIGN_UP'}
 
-    except sqlite3.Error:
-        return {'error': 'ERROR_FAILED_SIGN_UP'}
+        except dbs.FailedToOpenSessionException:
+            return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
+    elif request.method == "GET":
+        token = request.args.get("token")
+        if token is None:
+            return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
-    except dbs.FailedToOpenSessionException:
-        return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
+        try:
+            auth.checkValidToken(token)
+            u = auth.getUserForToken(token)
+            return {
+                "username": u.getName(),
+                "email": u.getEmail(),
+                "activeMedal": u.getActiveMedalId(),
+                "medals": u.getUnlockedMedals()
+            }
+
+        except dbs.InvalidTokenException:
+            return {"error": "ERROR_INVALID_TOKEN"}
+
+
 
 
 @app.route("/account/login", methods=['GET'])
@@ -110,6 +131,161 @@ def logout():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+@app.route("/users/<id>", methods=['GET'])
+def getUserInfo(id):
+    if request.method != 'GET':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    try:
+
+
+        user = auth.getUserForId(id)
+        if (user.getIsPrivate()==True):
+            return {'error': 'ERROR_PRIVATE_USER'}
+        result = {
+            'username': user.getName(),
+            'medals': user.getUnlockedMedals()
+        }
+        return result
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/account/email", methods=['PUT'])
+def updateEmail():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD '}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        newEmail = request.args.get('newEmail')
+        user = auth.getUserForToken(token)
+        user.setEmail(newEmail)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbu.EmailExistsException:
+        return {'error': 'ERROR_EMAIL_EXISTS'}
+    except dbu.InvalidEmailException:
+        return {'error': 'ERROR_INVALID_EMAIL'}
+
+@app.route("/account/username", methods=['PUT'])
+def updateUsername():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        newUsername = request.args.get('newUsername')
+        user = auth.getUserForToken(token)
+        user.setUsername(newUsername)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbu.UsernameExistsException:
+        return {'error': 'ERROR_USERNAME_EXISTS'}
+
+@app.route("/account/home", methods=['PUT'])
+def setHome():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        newHome = request.args.get('newHome')
+        user = auth.getUserForToken(token)
+        user.setHome(newHome)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/account/password", methods=['PUT'])
+def updatePassword():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        oldPassword = request.args.get('oldPassword')
+        oldEncryptedPwd = hashlib.sha256(oldPassword.encode('UTF-8')).hexdigest()
+        user = auth.getUserForToken(token)
+
+        if user.validatePassword(oldEncryptedPwd):
+            newPassword = request.args.get('newPassword')
+            enNewPass = hashlib.sha256(newPassword.encode('UTF-8')).hexdigest()
+            user.setPassword(enNewPass)
+            return {'status': 'success'}
+        else:
+            return {'error': 'ERROR_INCORRECT_PASSWORD'}
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/account/visibility", methods=['PUT'])
+def updateVisibility():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        user = auth.getUserForToken(token)
+        user.setVisibility()
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@app.route("/account/medal", methods=['PUT'])
+def updateActiveMedal():
+    if request.method != 'PUT':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        medalId = request.args.get('medalId')
+        user = auth.getUserForToken(token)
+        if user.hasUnlockedMedal(medalId) == True:
+            user.setActiveMedal(medalId)
+            return {'status': 'success'}
+        else:
+            return {'error': 'ERROR_USER_INVALID_MEDAL'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@app.route("/medals", methods=['POST'])
+def createMedal():
+    if request.method != 'POST':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        medalName = request.args.get('medalName')
+        newMedal(medalName)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbu.MedalExistsException:
+        return {'error': 'ERROR_MEDAL_EXISTS'}
+
+@app.route("/account", methods=['DELETE'])
+def deleteAccount():
+    if request.method != 'DELETE':
+        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
+
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        user = auth.getUserForToken(token)
+        user.deleteUser(token)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
 
 '''
 products
@@ -123,7 +299,6 @@ create
 - product exists -> ERROR_PRODUCT_EXISTS / ERROR_COMPANY_EXISTS
 - si type no existeix -> ERROR_TYPE_NOT_EXISTS
 '''
-
 
 @app.route("/companies", methods=['POST', 'GET'])
 @app.route("/products", methods=['POST', 'GET'])
@@ -307,26 +482,38 @@ def getCompanyQuestions():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+
 @app.route("/posts", methods=['POST'])
 def NewPost():
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
         text = request.args.get('text')
+
+        tags = obtainTags(text)
+        saveTags(tags)
+
         image = request.args.get('image')
-        newPost(token,text,image)
+        createPost(token, text, image, tags)
+
         return {'status': 'success'}
+
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
     except dbf.InsertionErrorException:
         return {'error': 'ERROR_INCORRECT_INSERTION'}
+    except Exception:
+        return {'error': 'ERROR_SOMETHING_WENT_WRONG', 'traceback': traceback.format_exc()}
 
-@app.route("/posts/<id>",methods=['DELETE'])
+      
+@app.route("/posts/<id>", methods=['DELETE'])
 def DeletePost(id):
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
-        deletePost(token,id)
+        user = auth.getUserForToken(token)
+        userId = user.getId()
+        deletePost(userId, id)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
@@ -338,6 +525,7 @@ def DeletePost(id):
         return {'error': 'ERROR_DELETING_LIKES_DISLIKES'}
     except dbf.DeletingPostException:
         return {'error': 'ERROR_DELETING_POST'}
+
 
 @app.route("/posts/<id>/like", methods=['POST'])
 def likePost(id):
@@ -352,13 +540,33 @@ def likePost(id):
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/posts", methods=['GET'])
-def getPosts():
+@app.route("/posts/tags", methods=['GET'])
+def getAllTags():
     token = request.args.get('token')
     try:
         auth.checkValidToken(token)
-        num = request.args.get('n')
-        return getNPosts(token, num)
+        x = getUsedTags()
+        return {'result': x}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@app.route("/posts", methods=['GET'])
+def getPosts():
+    # Get and check request MANDATORY arguments are valid (TODO -> for all endpoints)
+    token = request.args.get('token')
+    num = request.args.get('n')
+    if any(x is None for x in [num, token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    try:
+        auth.checkValidToken(token)
+        tag = request.args.get('tag') if 'tag' in request.args.keys() else None
+
+        return {
+            'result': getNPosts(token, num, tag)
+        }
+
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -394,7 +602,8 @@ def test():
     import time
     testPass = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"  # password 'test'
     q = "INSERT INTO users (name, email, password, address) VALUES (%s, %s, %s, %s)"
-    lastRowId = db.insert(q, ('test' + str(time.time())[0:15], 'test@gmail.com' + str(time.time())[0:15] , testPass, 'testAddress'))
+    lastRowId = db.insert(q, (
+    'test' + str(time.time())[0:15], 'test@gmail.com' + str(time.time())[0:15], testPass, 'testAddress'))
     testRes['3.- Insert 1: Success'] = str(lastRowId) + " (TEST PASSES)"
 
     # 4. Insert with Integrity error (Duplicate key)
@@ -415,7 +624,7 @@ def test():
     # 5. Delete success
 
     q = "DELETE FROM users WHERE name = %s"
-    deleted = db.delete(q, ('testDelete', ))
+    deleted = db.delete(q, ('testDelete',))
     testRes['5.- Delete 1: Success'] = "(TEST PASSES)" if deleted else "Error, something went wrong deleting."
 
     # If no row is deleted, no error is returned.
