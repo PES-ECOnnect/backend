@@ -45,7 +45,10 @@ def getUserForUsername(username):
     return dbu.selectByUsername(username)
 
 def getUserForId(id):
-    return dbu.selectById(id)
+    u = dbu.selectById(id)
+    if u is None:
+        raise InvalidUserIdException()
+    return u
 
 def signUp(email, username, enPass):
     b = dbu.insert(email, username, enPass)
@@ -60,6 +63,9 @@ class AuthenticationException(Exception):
         super().__init__(email)
         self.email = email
 
+
+class InvalidUserIdException(AuthenticationException):
+    pass
 
 class IncorrectUserPasswordException(AuthenticationException):
     pass
