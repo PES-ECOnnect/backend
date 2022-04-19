@@ -48,7 +48,9 @@ def getUserForId(id):
     return dbu.selectById(id)
 
 def signUp(email, username, enPass):
-    dbu.insert(email, username, enPass)
+    b = dbu.insert(email, username, enPass)
+    if not b:
+        raise FailedToInsertUserException()
 
 
 # --- Exceptions
@@ -68,4 +70,7 @@ class UserNotFoundException(AuthenticationException):
 
 
 class UserAlreadyExistsException(AuthenticationException):
+    pass
+
+class FailedToInsertUserException(AuthenticationException):
     pass
