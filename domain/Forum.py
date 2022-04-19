@@ -112,7 +112,7 @@ def getNPosts(token, number, tag):
             "useroption": userOption,
             "medal": authorInfo["idactivemedal"],
             "ownpost": authorId == currentUserId,
-            "bannedauthor": authorIsBanned
+            "authorbanned": authorIsBanned
         })
 
     return result
