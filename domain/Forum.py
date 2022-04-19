@@ -3,6 +3,7 @@ import data.DBUtils as db
 import data.DBUser as dbu
 import re
 from data.DBSession import getUserIdForToken
+import domain.Authenticator as auth
 import datetime
 
 def obtainTags(text: str) -> list:
@@ -86,6 +87,7 @@ def getNPosts(token, number, tag):
     for postInfo in posts:
         postId = postInfo["idpost"]
         authorId = postInfo["authorid"]
+        authorIsBanned = auth.getUserForId(authorId).isBanned()
 
         likes = dbf.getPostLikes(postId)
         dislikes = dbf.getPostDislikes(postId)
@@ -109,7 +111,8 @@ def getNPosts(token, number, tag):
             "username": authorInfo["name"],
             "useroption": userOption,
             "medal": authorInfo["idactivemedal"],
-            "ownpost": authorId == currentUserId
+            "ownpost": authorId == currentUserId,
+            "bannedauthor": authorIsBanned
         })
 
     return result
