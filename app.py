@@ -312,7 +312,7 @@ def deleteAccount():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
-@app.route("/account/<id>/ban", methods=['POST'])
+@app.route("/users/<id>/ban", methods=['POST'])
 def banAccount(id):
     token = request.args.get('token')
     try:
