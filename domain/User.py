@@ -2,6 +2,7 @@ import data.DBUser as dbu
 import domain.Reviewable as rev
 import domain.Forum as forum
 import domain.Authenticator as auth
+import data.DBSession as dbs
 
 
 def newMedal(name):
@@ -91,3 +92,10 @@ class User:
         auth.logOut(token)
         # delete user
         dbu.delete(self._id)
+
+    def banUser(self, id, isBanned):
+        if isBanned.lower() == "true":
+            dbu.banUser(id)
+            dbs.deleteUserTokens(id)
+        else:
+            dbu.unbanUser(id)
