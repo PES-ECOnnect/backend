@@ -291,6 +291,22 @@ def deleteAccount():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+@app.route("/account/<id>/ban", methods=['POST'])
+def banAccount(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        user = auth.getUserForToken(token)
+        if not user.isAdmin():
+            return {'error': 'ERROR_USER_NOT_ADMIN'}
+        if user.getId() == int(id):
+            return {'error': 'ERROR_CANNOT_BAN_YOURSELF'}
+        isBanned = request.args.get('isBanned')
+        user.banUser(id, isBanned)
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
 '''
 products
 - invalid token
