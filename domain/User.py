@@ -37,7 +37,7 @@ class User:
         return self._addr
 
     def isBanned(self):
-        return self._bann
+        return True if self._bann.lower() == "true" else False
 
     def getIsPrivate(self):
         return self._priv
