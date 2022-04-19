@@ -28,6 +28,12 @@ def getUserIdForToken(token):
     tokenRow = db.select(sQuery, (token,), True)
     return tokenRow['iduser'] if tokenRow is not None else None
 
+def deleteUserTokens(userId):
+    dQuery = "DELETE FROM sessiontoken where iduser = %s"
+    res = db.delete(dQuery, (userId))
+    if type(res) == bool and not res:
+        raise FailedToRemoveSessionTokenException()
+
 
 # ---  Exceptions
 
