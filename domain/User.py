@@ -71,8 +71,8 @@ class User:
         print(newPwd)
         return dbu.setPassword(self._id, newPwd)
 
-    def setVisibility(self):
-        return dbu.setVisibility(self._id, self.getIsPrivate())
+    def setVisibility(self, isPrivate):
+        return dbu.setVisibility(self._id, isPrivate)
 
     def setActiveMedal(self, medalId):
         return dbu.setActiveMedal(self._id, medalId)

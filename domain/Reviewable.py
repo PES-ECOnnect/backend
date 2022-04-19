@@ -45,6 +45,8 @@ def getProduct(id, token):
 
     user = auth.getUserForToken(token)
     userRate = dbr.getUserRate(id, user.getId())
+    if userRate is None:
+        userRate = 0
 
     if TypeName == "Company":
         localization = dbr.getLocalization(id)

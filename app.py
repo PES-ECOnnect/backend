@@ -237,7 +237,8 @@ def updateVisibility():
     try:
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
-        user.setVisibility()
+        isPrivate = request.args.get('isPrivate')
+        user.setVisibility(isPrivate)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
