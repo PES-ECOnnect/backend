@@ -3,7 +3,9 @@ import data.DBUtils as db
 import data.DBUser as dbu
 import re
 from data.DBSession import getUserIdForToken
+
 import domain.Authenticator as auth
+
 import datetime
 
 def obtainTags(text: str) -> list:
