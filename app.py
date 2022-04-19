@@ -52,11 +52,15 @@ def signUp():
             return {'status': 'success',
                     'token': str(token)}
 
-        except sqlite3.Error:
+        except auth.FailedToInsertUserException:
             return {'error': 'ERROR_FAILED_SIGN_UP'}
 
         except dbs.FailedToOpenSessionException:
             return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
+
+        except Exception:
+            return json.dumps({'error': 'ERROR_SOMETHING_WENT_WRONG'})
+
     elif request.method == "GET":
         token = request.args.get("token")
         if token is None:
