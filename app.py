@@ -80,8 +80,6 @@ def signUp():
             return {"error": "ERROR_INVALID_TOKEN"}
 
 
-
-
 @app.route("/account/login", methods=['GET'])
 def accountLogin():
     if request.method != 'GET':
@@ -153,6 +151,29 @@ def getUserInfo(id):
         return result
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@app.route("/users/<uid>/ban", methods=['GET'])
+def userIsBanned(uid):
+    token = request.args.get('token')
+    if any(x is None for x in [token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    try:
+        auth.checkValidToken(token)
+        u = auth.getUserForId(uid)
+        return {
+            'result': u.isBanned()
+        }
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+    except auth.InvalidUserIdException:
+        return {'error': 'ERROR_USER_NOT_EXISTS'}
+
+    except Exception:
+        return {'error': 'ERROR_SOMETHING_WENT_WRONG'}
 
 @app.route("/account/email", methods=['PUT'])
 def updateEmail():
