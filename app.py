@@ -261,23 +261,6 @@ def updateActiveMedal():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
-
-@app.route("/medals", methods=['POST'])
-def createMedal():
-    if request.method != 'POST':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
-    token = request.args.get('token')
-    try:
-        auth.checkValidToken(token)
-        medalName = request.args.get('medalName')
-        newMedal(medalName)
-        return {'status': 'success'}
-    except dbs.InvalidTokenException:
-        return {'error': 'ERROR_INVALID_TOKEN'}
-    except dbu.MedalExistsException:
-        return {'error': 'ERROR_MEDAL_EXISTS'}
-
 @app.route("/account", methods=['DELETE'])
 def deleteAccount():
     if request.method != 'DELETE':
@@ -439,11 +422,10 @@ def newProductType():
             reqData = request.get_json()
             questions = reqData['questions']
 
-            index = 0
             for q in questions:
-                newQuestion = Question(revTypeId, q, index)
+                print(questions)
+                newQuestion = Question(revTypeId, q)
                 newQuestion.insert()
-                index += 1
 
             return {'status': 'success'}
 

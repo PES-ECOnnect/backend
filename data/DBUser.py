@@ -86,10 +86,7 @@ def setPassword(userId, newPwd):
     db.update("UPDATE users SET password = %s WHERE iduser = %s", (newPwd, userId))
 
 def setVisibility(userId, isPrivate):
-    if isPrivate == True:
-        db.update("UPDATE users SET privateprofile = FALSE WHERE iduser = %s", (userId,))
-    else:
-        db.update("UPDATE users SET privateprofile = TRUE WHERE iduser = %s", (userId,))
+    db.update("UPDATE users SET privateprofile = %s WHERE iduser = %s", (isPrivate,userId,))
 
 def setActiveMedal(userId, medalId):
     db.update("UPDATE users SET idactivemedal = %s WHERE iduser = %s", (medalId, userId))
