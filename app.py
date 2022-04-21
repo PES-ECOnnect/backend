@@ -31,53 +31,54 @@ def helloWorld():
 
 @app.route("/account", methods=['POST', 'GET'])
 def signUp():
-    if request.method == "POST":
-        email = request.args.get('email')
-        username = request.args.get('username')
-        password = request.args.get('password')
-        if email is None or username is None or password is None:
-            return {'error': 'ERROR_INVALID_ARGUMENTS'}
+    email = request.args.get('email')
+    username = request.args.get('username')
+    password = request.args.get('password')
+    if any(x is None for x in [email, username, password]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
-        enPass = hashlib.sha256(password.encode('UTF-8')).hexdigest()
+    enPass = hashlib.sha256(password.encode('UTF-8')).hexdigest()
 
-        if auth.getUserForEmail(email) is not None:
-            return {'error': 'ERROR_USER_EMAIL_EXISTS'}
+    if auth.getUserForEmail(email) is not None:
+        return {'error': 'ERROR_USER_EMAIL_EXISTS'}
 
-        if auth.getUserForUsername(username) is not None:
-            return {'error': 'ERROR_USER_USERNAME_EXISTS'}
+    if auth.getUserForUsername(username) is not None:
+        return {'error': 'ERROR_USER_USERNAME_EXISTS'}
 
-        try:
-            auth.signUp(email, username, enPass)
-            token = auth.logIn(email, password)
-            return {'status': 'success',
-                    'token': str(token)}
+    try:
+        auth.signUp(email, username, enPass)
+        token = auth.logIn(email, password)
+        return {'status': 'success',
+                'token': str(token)}
 
-        except auth.FailedToInsertUserException:
-            return {'error': 'ERROR_FAILED_SIGN_UP'}
+    except auth.FailedToInsertUserException:
+        return {'error': 'ERROR_FAILED_SIGN_UP'}
 
-        except dbs.FailedToOpenSessionException:
-            return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
+    except dbs.FailedToOpenSessionException:
+        return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
 
-        except Exception:
-            return json.dumps({'error': 'ERROR_SOMETHING_WENT_WRONG'})
+    except Exception:
+        return json.dumps({'error': 'ERROR_SOMETHING_WENT_WRONG'})
 
-    elif request.method == "GET":
-        token = request.args.get("token")
-        if token is None:
-            return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
-        try:
-            auth.checkValidToken(token)
-            u = auth.getUserForToken(token)
-            return {
-                "username": u.getName(),
-                "email": u.getEmail(),
-                "activeMedal": u.getActiveMedalId(),
-                "medals": u.getUnlockedMedals()
-            }
+@app.route("/account", methods=['GET'])
+def getCurrentUserInfo():
+    token = request.args.get("token")
+    if token is None:
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
-        except dbs.InvalidTokenException:
-            return {"error": "ERROR_INVALID_TOKEN"}
+    try:
+        auth.checkValidToken(token)
+        u = auth.getUserForToken(token)
+        return {
+            "username": u.getName(),
+            "email": u.getEmail(),
+            "activeMedal": u.getActiveMedalId(),
+            "medals": u.getUnlockedMedals()
+        }
+
+    except dbs.InvalidTokenException:
+        return {"error": "ERROR_INVALID_TOKEN"}
 
 
 @app.route("/account/login", methods=['GET'])
@@ -143,10 +144,8 @@ def getUserInfo(id):
         return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
 
     try:
-
-
         user = auth.getUserForId(id)
-        if (user.getIsPrivate()==True):
+        if user.getIsPrivate():
             return {'error': 'ERROR_PRIVATE_USER'}
         result = {
             'username': user.getName(),

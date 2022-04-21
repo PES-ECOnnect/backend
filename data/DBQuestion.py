@@ -55,6 +55,7 @@ def getQuestions(idReviewable, TypeId, token):
             'text': i["statement"].strip(),
             'num_yes': yes["count"],
             'num_no': no["count"],
+            'questionid': questionid,
             'user_answer': userAns_str
         })
     return Result
