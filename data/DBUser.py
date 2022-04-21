@@ -91,17 +91,6 @@ def setVisibility(userId, isPrivate):
 def setActiveMedal(userId, medalId):
     db.update("UPDATE users SET idactivemedal = %s WHERE iduser = %s", (medalId, userId))
 
-def newMedal(name):
-    con = db.getConnection()
-    c = con.cursor()
-    c.execute("begin")
-    try:
-        c.execute("INSERT INTO medal(medalname) VALUES (%s)", (name,))
-        c.execute('commit')
-    except con.Error:
-        c.execute('rollback')
-        raise MedalExistsException()
-
 def hasUnlockedMedal(userId, medalId):
     result = db.select("SELECT * FROM unlockedmedals WHERE iduser=(%s) AND idmedal=(%s)", (userId, medalId))
     if result:

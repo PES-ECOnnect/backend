@@ -8,18 +8,9 @@ def getReviewableTypeId(typeName: str) -> int:
 
 
 def insertType(name):
-    '''
-    con = getConnection()
-    c = con.cursor()
-    c.execute("begin")
-    try:
-        c.execute("INSERT INTO reviewabletype (name) VALUES %s", (name,))
-        c.execute('commit')
-    except con.Error:
-        c.execute('rollback')
+    res = insert("INSERT INTO reviewabletype (name) VALUES (%s)", (name, ))
+    if type(res) == bool and not res:
         raise TypeAlreadyExistsException()
-    '''
-    insert("INSERT INTO reviewabletype (name) VALUES (%s)", (name, ))
 
 
 def getAllReviewableTypes():

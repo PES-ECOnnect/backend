@@ -14,7 +14,9 @@ def insertQuestion(typeId, statement):
     if type(res) == bool and not res:
         raise FailedToAddQuestionException()
     '''
-    insert("INSERT INTO question (typeid, statement) VALUES (%s, %s)", (str(typeId), statement))
+    res = insert("INSERT INTO question (typeid, statement) VALUES (%s, %s)", (typeId, statement))
+    if type(res) == bool and not res:
+        raise FailedToAddQuestionException()
 
 def getQuestionsFromType(typeId):
     sQuery = "SELECT questionid, statement FROM question WHERE typeid = %s"
