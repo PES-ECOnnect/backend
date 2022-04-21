@@ -10,7 +10,7 @@ from domain.Reviewable import *
 from domain.Question import *
 
 from domain.User import *
-
+from domain.Question import *
 from domain.Forum import *
 
 # Data Layer (TODO - Remove)
@@ -523,6 +523,31 @@ def getCompanyQuestions():
         auth.checkValidToken(token)
         questions = getQuestionsCompany()
         return {'result': questions}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@app.route("/question/<id>", methods=['PUT'])
+def updateQuestion(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        newQuestion = request.args.get('newQuestion')
+        result = updateQuestionName(id, newQuestion)
+        return {'result': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@app.route("/question/<id>", methods=['DELETE'])
+def deleteQuestion(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        result = deleteProductTypeQuestion(id)
+        if not result:
+            return {'error': 'ERROR_INCORRECT_QUESTION'}
+        return {'result': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
