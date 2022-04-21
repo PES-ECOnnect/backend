@@ -528,6 +528,18 @@ def getCompanyQuestions():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
+@app.route("/question/<id>", methods=['PUT'])
+def updateQuestion(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        newQuestion = request.args.get('newQuestion')
+        updateQuestionName(id, newQuestion)
+        return {'result': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
 @app.route("/posts", methods=['POST'])
 def NewPost():
     token = request.args.get('token')

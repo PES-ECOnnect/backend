@@ -169,6 +169,10 @@ def getUserRate(revId, userId):
     else:
         return None
 
+def updateQuestion(id, newQuestion):
+    q = "UPDATE question SET statement = %s WHERE questionid = %s"
+    db.update(query=q, args=(newQuestion, id))
+
 # EXCEPTIONS
 
 class FailedToInsertReviewableException(Exception):
