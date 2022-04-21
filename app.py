@@ -89,6 +89,10 @@ def accountLogin():
     passwordString = request.args.get('password')
 
     try:
+        u = auth.getUserForEmail(email)
+        if u.isBanned():
+            return {'error': 'ERROR_BANNED'}
+
         token = auth.logIn(email, passwordString)
         return json.dumps({
             'token': str(token)
