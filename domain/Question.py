@@ -1,6 +1,14 @@
 import data.DBQuestion as dbq
 
 
+def updateQuestionName(id, newQuestion):
+    return dbq.updateQuestion(id, newQuestion)
+
+
+def deleteProductTypeQuestion(id):
+    return dbq.deleteQuestion(id)
+
+
 class Question:
     """
     @def modifyQuestion()

@@ -82,8 +82,6 @@ def deleteUserAnswers(userId):
 def deleteUserReviews(userId):
     return dbr.deleteUserReviews(userId)
 
-def updateQuestionName(id, newQuestion):
-    return dbr.updateQuestion(id, newQuestion)
 
 class Reviewable:
     def __init__(self, id, name, type, imageURL, manufacturer, lat, lon):

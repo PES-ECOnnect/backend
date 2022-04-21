@@ -60,6 +60,21 @@ def getQuestions(idReviewable, TypeId, token):
     return Result
 
 
+def updateQuestion(id, newQuestion):
+    q = "UPDATE question SET statement = %s WHERE questionid = %s"
+    return update(query=q, args=(newQuestion, id))
+
+
+def deleteQuestion(id):
+    q = "DELETE FROM question WHERE questionid = %s"
+    deleted = delete(query=q, args=id)
+    if deleted:
+        q = "DELETE FROM answer WHERE questionid = %s"
+        delete(query=q, args=id)
+        return True
+    else:
+        return False
+
 # EXCEPTIONS
 
 class FailedToAddQuestionException(Exception):
