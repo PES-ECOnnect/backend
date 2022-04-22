@@ -7,20 +7,24 @@ from data.DBSession import getUserIdForToken
 # @def getInfo()
 
 
-def insertQuestion(typeId, statement, index):
+def insertQuestion(typeId, statement):
+    '''
     iQuery = "INSERT INTO question (typeid, statement, questionid) VALUES (%s, %s, %s)"
     res = insert(query=iQuery, args=(str(typeId), statement, index))
     if type(res) == bool and not res:
         raise FailedToAddQuestionException()
-
+    '''
+    res = insert("INSERT INTO question (typeid, statement) VALUES (%s, %s)", (typeId, statement))
+    if type(res) == bool and not res:
+        raise FailedToAddQuestionException()
 
 def getQuestionsFromType(typeId):
-    sQuery = "SELECT statement FROM question WHERE typeid = %s"
+    sQuery = "SELECT questionid, statement FROM question WHERE typeid = %s"
     qResult = select(sQuery, (typeId,), False)
     result = []
     if qResult is not None:
         for qr in qResult:
-            result.append(qr['statement'])
+            result.append(qr)
     return result
 
 

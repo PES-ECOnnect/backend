@@ -261,7 +261,8 @@ def updateVisibility():
     try:
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
-        user.setVisibility()
+        isPrivate = request.args.get('isPrivate')
+        user.setVisibility(isPrivate)
         return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
@@ -283,23 +284,6 @@ def updateActiveMedal():
             return {'error': 'ERROR_USER_INVALID_MEDAL'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
-
-
-@app.route("/medals", methods=['POST'])
-def createMedal():
-    if request.method != 'POST':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
-    token = request.args.get('token')
-    try:
-        auth.checkValidToken(token)
-        medalName = request.args.get('medalName')
-        newMedal(medalName)
-        return {'status': 'success'}
-    except dbs.InvalidTokenException:
-        return {'error': 'ERROR_INVALID_TOKEN'}
-    except dbu.MedalExistsException:
-        return {'error': 'ERROR_MEDAL_EXISTS'}
 
 @app.route("/account", methods=['DELETE'])
 def deleteAccount():
@@ -478,11 +462,10 @@ def newProductType():
             reqData = request.get_json()
             questions = reqData['questions']
 
-            index = 0
             for q in questions:
-                newQuestion = Question(revTypeId, q, index)
+                print(questions)
+                newQuestion = Question(revTypeId, q)
                 newQuestion.insert()
-                index += 1
 
             return {'status': 'success'}
 
@@ -500,8 +483,8 @@ def newProductType():
             return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/companies/<id>")
-@app.route("/products/<id>")
+@app.route("/companies/<id>", methods=['GET'])
+@app.route("/products/<id>", methods=['GET'])
 def getReviewable(id):
     token = request.args.get('token')
     try:
@@ -514,6 +497,48 @@ def getReviewable(id):
         return {'error': 'ID_WRONG_TYPE'}
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_INCORRECT_ID_REVIEWABLE'}
+
+
+@app.route("/companies/<id>", methods=['POST'])
+def updateCompany(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        name = request.args.get('name')
+        image = request.args.get('imageURL')
+        lat = float(request.args.get('lat'))
+        lon = float(request.args.get('lon'))
+        company = Reviewable(id, name, 'company', image, None,lat, lon)
+        company.updateCompany()
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbr.FailedToUpdateCompanyException:
+        return {'error': 'ERROR_COMPANY_UPDATE'}
+    except dbr.FailedToUpdateReviewableException:
+        return {'error': 'ERROR_REVIEWABLE_NAME_EXISTS'}
+
+
+@app.route("/products/<id>", methods=['POST'])
+def updateProduct(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        name = request.args.get('name')
+        manufacturer = request.args.get('manufacturer')
+        image = request.args.get('imageURL')
+        type = request.args.get('type')
+        product = Reviewable(id, name, type, image, manufacturer, None, None)
+        product.updateProduct()
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbr.FailedToUpdateReviewableException:
+        return {'error': 'ERROR_REVIEWABLE_NAME_EXISTS'}
+    except dbr.FailedToUpdateProductException:
+        return {'error': 'ERROR_PRODUCT_UPDATE'}
+    except dbr.IncorrectReviewableTypeException:
+        return {'error': 'ERROR_TYPE_NOT_EXISTS'}
 
 
 @app.route("/companies/questions", methods=['GET'])

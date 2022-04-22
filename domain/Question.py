@@ -16,10 +16,9 @@ class Question:
     @def getInfo()
     """
 
-    def __init__(self, typeId, statement, index):
+    def __init__(self, typeId, statement):
         self._typeId = typeId
         self._statement = statement
-        self._index = index
 
     def insert(self):
-        return dbq.insertQuestion(typeId=self._typeId, statement=self._statement, index=self._index)
+        return dbq.insertQuestion(typeId=self._typeId, statement=self._statement)
