@@ -118,3 +118,16 @@ class Reviewable:
 
     def getImageURL(self):
         return self._imageURL
+
+    def getLat(self):
+        return self._lat
+
+    def getLon(self):
+        return self._lon
+
+    def updateCompany(self):
+        return dbr.updateCompany(self._name, self._imageURL, self._lat, self._lon,self._id)
+
+    def updateProduct(self):
+        typeid = getReviewableTypeIdByName(self._type)
+        return dbr.updateProduct(self._name, typeid, self._imageURL, self._manufacturer, self._id)

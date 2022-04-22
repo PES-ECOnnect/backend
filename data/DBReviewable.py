@@ -169,6 +169,22 @@ def getUserRate(revId, userId):
     else:
         return None
 
+def updateCompany(name, image, lat, lon, id):
+    res = db.update("UPDATE reviewable SET name=%s, imageurl=%s WHERE idreviewable=%s", (name, image, id))
+    if type(res) == bool and not res:
+        raise FailedToUpdateReviewableException()
+    res = db.update("UPDATE installercompany SET lat=%s, lon=%s WHERE idreviewable = %s", (lat, lon, id))
+    if type(res) == bool and not res:
+        raise FailedToUpdateCompanyException()
+
+def updateProduct(name, type, image, manufacturer, id):
+    res = db.update("UPDATE reviewable SET name=%s, typeid=%s, imageurl=%s WHERE idreviewable = %s", (name, type, image, id))
+    print(res)
+    if not res:
+        raise FailedToUpdateReviewableException()
+    db.update("UPDATE equipmentproduct SET  manufacturer=%s WHERE idreviewable=%s", (manufacturer, id))
+
+
 # EXCEPTIONS
 
 class FailedToInsertReviewableException(Exception):
@@ -188,4 +204,13 @@ class IncorrectIdReviewableException(Exception):
 
 
 class ReviewableAlreadyExistsException(Exception):
+    pass
+
+class FailedToUpdateCompanyException(Exception):
+    pass
+
+class FailedToUpdateReviewableException(Exception):
+    pass
+
+class FailedToUpdateProductException(Exception):
     pass
