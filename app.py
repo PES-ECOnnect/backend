@@ -421,6 +421,26 @@ def answerQuestion(id):
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+@app.route("/companies/<id>", methods=['DELETE'])
+@app.route("/products/<id>", methods=['DELETE'])
+def removeReviewable(id):
+    token = request.args.get('token')
+    try:
+        auth.checkValidToken(token)
+        user = auth.getUserForToken(token)
+        if not user.isAdmin():
+            return {'error': 'ERROR_USER_NOT_ADMIN'}
+        # check Reviewable exists
+        dbr.getReviewableAttributes(id)
+
+        # delete reviewable cascade
+        deleteReviewable(id)
+        return {'status': 'success'}
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbr.IncorrectReviewableTypeException:
+        return {'error': 'ERROR_PRODUCT_NOT_EXISTS'}
 
 @app.route("/companies/<id>/review", methods=['POST'])
 @app.route("/products/<id>/review", methods=['POST'])

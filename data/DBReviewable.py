@@ -160,6 +160,9 @@ def deleteUserAnswers(userId):
 def deleteUserReviews(userId):
     db.delete("DELETE FROM valoration WHERE iduser = %s", (userId,))
 
+def deleteReviewable(idreviewable):
+    db.delete("DELETE FROM reviewable WHERE idreviewable = %s",(idreviewable,))
+
 def getUserRate(revId, userId):
     rate = db.select("SELECT stars FROM valoration WHERE iduser = %s AND idreviewable = %s", (userId, revId))
     if rate:

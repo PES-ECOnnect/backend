@@ -1,5 +1,7 @@
 from app import app
 import json
+from domain.Reviewable import *
+import data.DBUtils as dbu
 
 
 # GET ALL
@@ -43,7 +45,36 @@ def test_getinfoProduct():
         response["ratings"] == correct["ratings"] and
         response["type"]==correct["type"]
     )
-    
+
+def test_deleteReviewable():
+    # Insert reviewables
+    rev = Reviewable(id = 99,name='ProvaEliminat',type='Solar panel',imageURL='https://xd',manufacturer='jo',lat="null",lon="null")
+    rev.insert()
+    #getproductid
+    q = "SELECT idreviewable FROM reviewable where name = 'ProvaEliminat'"
+    id = dbu.select(q,(),True)
+    print(id["idreviewable"])
+    # Insert Valorations
+    rev.review(id['idreviewable'],"44cab830-b668-11ec-91af-1a0e95636881,3",2)
+    # Insert Answers
+    rev.answerQuestion(productId=id['idreviewable'],token="44cab830-b668-11ec-91af-1a0e95636881",chosenOption=0,questionIndex=4)
+    # Execute DeleteReviewable
+    resp = app.test_client().delete("/products/" + str(id['idreviewable']) + "?token=44cab830-b668-11ec-91af-1a0e95636881")
+    print(resp)
+    # Check valorations, answers, equip/installers and reviewable are not in the database
+    q = "SELECT * FROM reviewable WHERE idreviewable = %s"
+    select = dbu.select(q,(id['idreviewable'],),True)
+    print(select)
+    assert select is None
+    q = "SELECT * FROM valoration WHERE idreviewable = %s"
+    select = dbu.select(q, (id['idreviewable'],), True)
+    assert select is None
+    q = "SELECT * FROM equipmentproduct WHERE idreviewable = %s"
+    select = dbu.select(q, (id['idreviewable'],), True)
+    assert select is None
+    q = "SELECT * FROM answer WHERE idreviewable = %s"
+    select = dbu.select(q, (id['idreviewable'],), True)
+    assert select is None
 
     '''
 # CREATE
