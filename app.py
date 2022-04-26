@@ -522,6 +522,7 @@ def newProductType():
         return {'result': getAllReviewableTypes()}
 
 
+
 @app.route("/companies/<id>", methods=['GET'])
 @app.route("/products/<id>", methods=['GET'])
 def getReviewable(id):
