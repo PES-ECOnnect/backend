@@ -379,8 +379,6 @@ def products():
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_TYPE_NOT_EXISTS'}
 
-    
-
     if request.method == 'POST':
         # Create product
 
@@ -521,8 +519,7 @@ def newProductType():
             return {'error': 'TYPE_EXISTS'}
 
     elif request.method == 'GET':
-        return getAllReviewableTypes()
-
+        return {'result': getAllReviewableTypes()}
 
 
 @app.route("/companies/<id>", methods=['GET'])
