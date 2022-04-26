@@ -74,10 +74,14 @@ def getCurrentUserInfo():
         auth.checkValidToken(token)
         u = auth.getUserForToken(token)
         return {
-            "username": u.getName(),
-            "email": u.getEmail(),
-            "activeMedal": u.getActiveMedalId(),
-            "medals": u.getUnlockedMedals()
+            "result": {
+                "username": u.getName(),
+                "email": u.getEmail(),
+                "activeMedal": u.getActiveMedalId(),
+                "medals": u.getUnlockedMedals(),
+                "isPrivate": u.getIsPrivate(),
+                "home": u.getAddress()
+            }
         }
 
     except dbs.InvalidTokenException:
