@@ -23,6 +23,9 @@ import hashlib
 
 app = Flask(__name__)
 
+def anyNoneIn(l: list) -> bool:
+    return any(x is None for x in l)
+
 
 @app.route("/")
 def helloWorld():
@@ -34,7 +37,7 @@ def signUp():
     email = request.args.get('email')
     username = request.args.get('username')
     password = request.args.get('password')
-    if any(x is None for x in [email, username, password]):
+    if anyNoneIn([email, username, password]):
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
     enPass = hashlib.sha256(password.encode('UTF-8')).hexdigest()
@@ -64,7 +67,7 @@ def signUp():
 @app.route("/account", methods=['GET'])
 def getCurrentUserInfo():
     token = request.args.get("token")
-    if token is None:
+    if anyNoneIn([token]):
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
     try:
@@ -83,11 +86,10 @@ def getCurrentUserInfo():
 
 @app.route("/account/login", methods=['GET'])
 def accountLogin():
-    if request.method != 'GET':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
     email = request.args.get('email')
     passwordString = request.args.get('password')
+    if any(x is None for x in [email, passwordString]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
     try:
         u = auth.getUserForEmail(email)
@@ -111,14 +113,13 @@ def accountLogin():
 
 @app.route("/account/isadmin", methods=['GET'])
 def isAdmin():
-    if request.method != 'GET':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
     token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}     
+
     try:
         auth.checkValidToken(token)
         u = auth.getUserForToken(token)
-
         return {'result': 'true'} if u.isAdmin() else {'result': 'false'}
 
     except dbs.InvalidTokenException:
@@ -127,31 +128,31 @@ def isAdmin():
 
 @app.route("/account/logout", methods=['GET'])
 def logout():
-    if request.method != 'GET':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
     token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
         auth.logOut(token)
         return {'status': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+
 @app.route("/users/<id>", methods=['GET'])
 def getUserInfo(id):
-    if request.method != 'GET':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
     try:
         user = auth.getUserForId(id)
         if user.getIsPrivate():
             return {'error': 'ERROR_PRIVATE_USER'}
-        result = {
+        
+        return {
             'username': user.getName(),
             'medals': user.getUnlockedMedals()
         }
-        return result
+
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -159,15 +160,13 @@ def getUserInfo(id):
 @app.route("/users/<uid>/ban", methods=['GET'])
 def userIsBanned(uid):
     token = request.args.get('token')
-    if any(x is None for x in [token]):
+    if anyNoneIn([token]):
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
     try:
         auth.checkValidToken(token)
         u = auth.getUserForId(uid)
-        return {
-            'result': u.isBanned()
-        }
+        return {'result': u.isBanned()}
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
@@ -178,166 +177,183 @@ def userIsBanned(uid):
     except Exception:
         return {'error': 'ERROR_SOMETHING_WENT_WRONG'}
 
+
 @app.route("/account/email", methods=['PUT'])
 def updateEmail():
-    if request.method != 'PUT':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD '}
-
     token = request.args.get('token')
+    newEmail = request.args.get('newEmail')
+
+    if anyNoneIn([token, newEmail]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        newEmail = request.args.get('newEmail')
         user = auth.getUserForToken(token)
         user.setEmail(newEmail)
         return {'status': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+    
     except dbu.EmailExistsException:
         return {'error': 'ERROR_EMAIL_EXISTS'}
+    
     except dbu.InvalidEmailException:
         return {'error': 'ERROR_INVALID_EMAIL'}
 
+
 @app.route("/account/username", methods=['PUT'])
 def updateUsername():
-    if request.method != 'PUT':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
     token = request.args.get('token')
+    newUsername = request.args.get('newUsername')
+
+    if anyNoneIn([token, newUsername]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        newUsername = request.args.get('newUsername')
         user = auth.getUserForToken(token)
         user.setUsername(newUsername)
         return {'status': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+    
     except dbu.UsernameExistsException:
         return {'error': 'ERROR_USERNAME_EXISTS'}
 
+
 @app.route("/account/home", methods=['PUT'])
 def setHome():
-    if request.method != 'PUT':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
     token = request.args.get('token')
+    newHome = request.args.get('newHome')
+
+    if anyNoneIn([token, newHome]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        newHome = request.args.get('newHome')
         user = auth.getUserForToken(token)
         user.setHome(newHome)
         return {'status': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+
 @app.route("/account/password", methods=['PUT'])
 def updatePassword():
-    if request.method != 'PUT':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
     token = request.args.get('token')
+    oldPassword = request.args.get('oldPassword')
+    newPassword = request.args.get('newPassword')
+
+    if anyNoneIn([token, oldPassword, newPassword]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        oldPassword = request.args.get('oldPassword')
         oldEncryptedPwd = hashlib.sha256(oldPassword.encode('UTF-8')).hexdigest()
         user = auth.getUserForToken(token)
 
         if user.validatePassword(oldEncryptedPwd):
-            newPassword = request.args.get('newPassword')
             enNewPass = hashlib.sha256(newPassword.encode('UTF-8')).hexdigest()
             user.setPassword(enNewPass)
             return {'status': 'success'}
+        
         else:
             return {'error': 'ERROR_INCORRECT_PASSWORD'}
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+
 @app.route("/account/visibility", methods=['PUT'])
 def updateVisibility():
-    if request.method != 'PUT':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
     token = request.args.get('token')
+    isPrivate = request.args.get('isPrivate')
+
+    if anyNoneIn([token, isPrivate]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
-        isPrivate = request.args.get('isPrivate')
         user.setVisibility(isPrivate)
         return {'status': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 @app.route("/account/medal", methods=['PUT'])
 def updateActiveMedal():
-    if request.method != 'PUT':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
     token = request.args.get('token')
+    medalId = request.args.get('medalId')
+    if anyNoneIn([token, medalId]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        medalId = request.args.get('medalId')
         user = auth.getUserForToken(token)
-        if user.hasUnlockedMedal(medalId) == True:
+        
+        if user.hasUnlockedMedal(medalId):
             user.setActiveMedal(medalId)
             return {'status': 'success'}
-        else:
-            return {'error': 'ERROR_USER_INVALID_MEDAL'}
+        
+        return {'error': 'ERROR_USER_INVALID_MEDAL'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 @app.route("/account", methods=['DELETE'])
 def deleteAccount():
-    if request.method != 'DELETE':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
     token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
         user.deleteUser(token)
         return {'status': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 @app.route("/users/<id>/ban", methods=['POST'])
 def banAccount(id):
     token = request.args.get('token')
+    isBanned = request.args.get('isBanned')
+    if anyNoneIn([token, isBanned]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
+        
         if not user.isAdmin():
             return {'error': 'ERROR_USER_NOT_ADMIN'}
+        
         if user.getId() == int(id):
             return {'error': 'ERROR_CANNOT_BAN_YOURSELF'}
-        isBanned = request.args.get('isBanned')
+        
         user.banUser(id, isBanned)
         return {'status': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
-'''
-products
-- invalid token
-- if no type -> all except company
-- if type -> all of type, empty if none
-    - error: ERROR_TYPE_NOT_EXISTS
-
-
-create
-- product exists -> ERROR_PRODUCT_EXISTS / ERROR_COMPANY_EXISTS
-- si type no existeix -> ERROR_TYPE_NOT_EXISTS
-'''
 
 @app.route("/companies", methods=['POST', 'GET'])
 @app.route("/products", methods=['POST', 'GET'])
 def products():
-    if request.method != 'POST' and request.method != 'GET':
-        return {'error': 'ERROR_INVALID_REQUEST_METHOD'}
-
     # check if token is valid
     token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -363,15 +379,16 @@ def products():
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_TYPE_NOT_EXISTS'}
 
-    reviewableName = request.args.get('name')
+    
 
     if request.method == 'POST':
         # Create product
 
+        reviewableName = request.args.get('name')
         manufacturer = request.args.get('manufacturer')
-        # TODO: Obtain bytes from request body, upload to storage service, obtain URL, save it and return it.
-        # imageURL = request.args.get('image')
-        imageURL = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-product-6_large.png'
+        imageURL = request.args.get('image')
+        if anyNoneIn([reviewableName, manufacturer, imageURL]):
+            return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
         if revType == "Company":
             lat = request.args.get('lat')
@@ -386,8 +403,10 @@ def products():
         try:
             newReviewable.insert()
             return {'status': 'success'}
+        
         except dbp.FailedToInsertReviewableException:
             return {'error': 'ERROR_FAILED_TO_CREATE_REVIEWABLE'}
+        
         except dbp.ReviewableAlreadyExistsException:
             return {'error': 'ERROR_COMPANY_EXISTS' if revType == 'Company' else 'ERROR_PRODUCT_EXISTS'}
 
@@ -408,23 +427,28 @@ def products():
 @app.route("/products/<id>/answer", methods=['POST'])
 def answerQuestion(id):
     token = request.args.get('token')
+    questionIndex = request.args.get('questionIndex')
+    chosenOption = request.args.get('chosenOption')
+    if anyNoneIn([token, questionIndex, chosenOption]):
+            return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        questionIndex = request.args.get('questionIndex')
-        chosenOption = request.args.get('chosenOption')
-
         reviewable = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
         reviewable.answerQuestion(id, token, chosenOption, questionIndex)
-
         return {'status': 'success'}
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+
 @app.route("/companies/<id>", methods=['DELETE'])
 @app.route("/products/<id>", methods=['DELETE'])
 def removeReviewable(id):
     token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
@@ -439,6 +463,7 @@ def removeReviewable(id):
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+    
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_PRODUCT_NOT_EXISTS'}
 
@@ -446,6 +471,9 @@ def removeReviewable(id):
 @app.route("/products/<id>/review", methods=['POST'])
 def reviewReviewable(id):
     token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}    
+
     try:
         auth.checkValidToken(token)
         review = request.args.get('review')
@@ -461,29 +489,29 @@ def reviewReviewable(id):
 
 @app.route("/products/types", methods=['POST', 'GET'])
 def newProductType():
-    if request.method != 'POST' and request.method != 'GET':
-        return {'error': 'INVALID_REQUEST_METHOD'}
+    token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}    
+
+    try:
+        auth.checkValidToken(token)
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
 
     if request.method == 'POST':
-
-        token = request.args.get('token')
-        try:
-            auth.checkValidToken(token)
-
-        except dbs.InvalidTokenException:
-            return {'error': 'ERROR_INVALID_TOKEN'}
-
+        
         name = request.args.get('name')
+        reqData = request.get_json()
+
+        if anyNoneIn([name, reqData]):
+            return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
         try:
             createType(name)
             revTypeId = getReviewableTypeIdByName(name)
-
-            reqData = request.get_json()
             questions = reqData['questions']
 
             for q in questions:
-                print(questions)
                 newQuestion = Question(revTypeId, q)
                 newQuestion.insert()
 
@@ -493,28 +521,28 @@ def newProductType():
             return {'error': 'TYPE_EXISTS'}
 
     elif request.method == 'GET':
-        token = request.args.get('token')
-        try:
-            auth.checkValidToken(token)
-            result = getAllReviewableTypes()
-            # {'name': 'NOM', 'preguntes': [{'idx': 'b', 'text': 'TEXT'}, {'idx': 'b', 'text': 'TEXT'}]}
-            return {'result': result}
-        except dbs.InvalidTokenException:
-            return {'error': 'ERROR_INVALID_TOKEN'}
+        return getAllReviewableTypes()
+
 
 
 @app.route("/companies/<id>", methods=['GET'])
 @app.route("/products/<id>", methods=['GET'])
 def getReviewable(id):
     token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'} 
+
     try:
         auth.checkValidToken(token)
         # return name, image, manufacturer, type, ratings[5], vector, questions{text,num_yes, num_no, user_answer}
         return getProduct(id, token)
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+    
     except dbr.IdWrongTypeException:
         return {'error': 'ID_WRONG_TYPE'}
+    
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_INCORRECT_ID_REVIEWABLE'}
 
@@ -522,19 +550,26 @@ def getReviewable(id):
 @app.route("/companies/<id>", methods=['POST'])
 def updateCompany(id):
     token = request.args.get('token')
+    name = request.args.get('name')
+    image = request.args.get('imageURL')
+    lat = None if request.args.get('lat') is None else float(request.args.get('lat'))
+    lon = None if request.args.get('lon') is None else float(request.args.get('lon'))
+    
+    if anyNoneIn([token, name, image, lat, lon]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'} 
+
     try:
         auth.checkValidToken(token)
-        name = request.args.get('name')
-        image = request.args.get('imageURL')
-        lat = float(request.args.get('lat'))
-        lon = float(request.args.get('lon'))
         company = Reviewable(id, name, 'company', image, None,lat, lon)
         company.updateCompany()
         return {'status': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+    
     except dbr.FailedToUpdateCompanyException:
         return {'error': 'ERROR_COMPANY_UPDATE'}
+    
     except dbr.FailedToUpdateReviewableException:
         return {'error': 'ERROR_REVIEWABLE_NAME_EXISTS'}
 
@@ -542,21 +577,29 @@ def updateCompany(id):
 @app.route("/products/<id>", methods=['POST'])
 def updateProduct(id):
     token = request.args.get('token')
+    name = request.args.get('name')
+    manufacturer = request.args.get('manufacturer')
+    image = request.args.get('imageURL')
+    type = request.args.get('type')
+
+    if anyNoneIn([token, name, manufacturer, image]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'} 
+
     try:
         auth.checkValidToken(token)
-        name = request.args.get('name')
-        manufacturer = request.args.get('manufacturer')
-        image = request.args.get('imageURL')
-        type = request.args.get('type')
         product = Reviewable(id, name, type, image, manufacturer, None, None)
         product.updateProduct()
         return {'status': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+    
     except dbr.FailedToUpdateReviewableException:
         return {'error': 'ERROR_REVIEWABLE_NAME_EXISTS'}
+    
     except dbr.FailedToUpdateProductException:
         return {'error': 'ERROR_PRODUCT_UPDATE'}
+    
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_TYPE_NOT_EXISTS'}
 
@@ -564,10 +607,14 @@ def updateProduct(id):
 @app.route("/companies/questions", methods=['GET'])
 def getCompanyQuestions():
     token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'} 
+
     try:
         auth.checkValidToken(token)
         questions = getQuestionsCompany()
         return {'result': questions}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -575,11 +622,16 @@ def getCompanyQuestions():
 @app.route("/question/<id>", methods=['PUT'])
 def updateQuestion(id):
     token = request.args.get('token')
+    newQuestion = request.args.get('newQuestion')
+
+    if anyNoneIn([token, newQuestion]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'} 
+
     try:
         auth.checkValidToken(token)
-        newQuestion = request.args.get('newQuestion')
         result = updateQuestionName(id, newQuestion)
         return {'result': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -587,12 +639,17 @@ def updateQuestion(id):
 @app.route("/question/<id>", methods=['DELETE'])
 def deleteQuestion(id):
     token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
         result = deleteProductTypeQuestion(id)
         if not result:
             return {'error': 'ERROR_INCORRECT_QUESTION'}
+        
         return {'result': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -600,22 +657,30 @@ def deleteQuestion(id):
 @app.route("/posts", methods=['POST'])
 def NewPost():
     token = request.args.get('token')
+    text = request.args.get('text')
+    image = request.args.get('image')
+
+    if anyNoneIn([token, text, image]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        text = request.args.get('text')
-
+        
+        # Extract and save the post's hashtags 
         tags = obtainTags(text)
         saveTags(tags)
 
-        image = request.args.get('image')
+        # Creation of the post
         createPost(token, text, image, tags)
 
         return {'status': 'success'}
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+    
     except dbf.InsertionErrorException:
         return {'error': 'ERROR_INCORRECT_INSERTION'}
+    
     except Exception:
         return {'error': 'ERROR_SOMETHING_WENT_WRONG', 'traceback': traceback.format_exc()}
 
@@ -623,20 +688,28 @@ def NewPost():
 @app.route("/posts/<id>", methods=['DELETE'])
 def DeletePost(id):
     token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
         userId = user.getId()
         deletePost(userId, id)
         return {'status': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+    
     except dbf.UserNotPostOwnerException:
         return {'error': 'ERROR_USER_NOT_POST_OWNER'}
+    
     except dbf.DeletingLikesDislikesException:
         return {'error': 'ERROR_DELETING_LIKES_DISLIKES'}
+    
     except dbf.DeletingPostHashtagsException:
         return {'error': 'ERROR_DELETING_LIKES_DISLIKES'}
+    
     except dbf.DeletingPostException:
         return {'error': 'ERROR_DELETING_POST'}
 
@@ -644,12 +717,17 @@ def DeletePost(id):
 @app.route("/posts/<id>/like", methods=['POST'])
 def likePost(id):
     token = request.args.get('token')
+    isLike = (request.args.get('isLike').lower() == "true") if request.args.get('isLike') is not None else None 
+    remove = (request.args.get('remove').lower() == "true") if request.args.get('remove') is not None else None
+
+    if anyNoneIn([token, isLike, remove]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        isLike = request.args.get('isLike').lower() == "true"
-        remove = request.args.get('remove').lower() == "true"
         like(token, id, isLike, remove)
         return {'status': 'success'}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -657,20 +735,23 @@ def likePost(id):
 @app.route("/posts/tags", methods=['GET'])
 def getAllTags():
     token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
     try:
         auth.checkValidToken(token)
-        x = getUsedTags()
-        return {'result': x}
+        return {'result': getUsedTags()}
+    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
 @app.route("/posts", methods=['GET'])
 def getPosts():
-    # Get and check request MANDATORY arguments are valid (TODO -> for all endpoints)
     token = request.args.get('token')
     num = request.args.get('n')
-    if any(x is None for x in [num, token]):
+    
+    if anyNoneIn([token, num]):
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
     try:
