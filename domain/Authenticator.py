@@ -38,7 +38,10 @@ def getUserForToken(token):
 
 
 def getUserForEmail(email):
-    return dbu.selectByEmail(email)
+    u = dbu.selectByEmail(email)
+    if u is None:
+        raise UserNotFoundException()
+    return u
 
 
 def getUserForUsername(username):
