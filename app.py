@@ -32,7 +32,7 @@ def helloWorld():
     return "PES Econnect Root!"
 
 
-@app.route("/account", methods=['POST', 'GET'])
+@app.route("/account", methods=['POST'])
 def signUp():
     email = request.args.get('email')
     username = request.args.get('username')
@@ -88,7 +88,7 @@ def getCurrentUserInfo():
 def accountLogin():
     email = request.args.get('email')
     passwordString = request.args.get('password')
-    if any(x is None for x in [email, passwordString]):
+    if anyNoneIn([email, passwordString]):
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
     try:
@@ -520,7 +520,6 @@ def newProductType():
 
     elif request.method == 'GET':
         return {'result': getAllReviewableTypes()}
-
 
 
 @app.route("/companies/<id>", methods=['GET'])

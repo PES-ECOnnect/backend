@@ -50,11 +50,11 @@ def getTagId(tag: str) -> int:
 # Deletes all likes and dislikes of the post with id postid
 def deletelikesDislikes(postid):
     q = "DELETE FROM likes WHERE idPost = %s"
-    result = delete(q, args=(postid))
+    result = delete(q, args=(postid,))
     if result == False:
         raise DeletingLikesDislikesException()
     q = "DELETE FROM dislikes WHERE idPost = %s"
-    result = delete(q, args=(postid))
+    result = delete(q, args=(postid,))
     if result == False:
         raise DeletingLikesDislikesException()
 
@@ -62,7 +62,7 @@ def deletelikesDislikes(postid):
 # Deletes all postshashtags of the post with id postid
 def deletePosthashtag(postid):
     q = "DELETE FROM posthashtag WHERE idPost = %s"
-    result = delete(q, args=(postid))
+    result = delete(q, args=(postid,))
     if result == False:
         raise DeletingPostHashtagsException()
 
@@ -70,7 +70,7 @@ def deletePosthashtag(postid):
 # Deletes all likes and dislikes of the post with id postid
 def deletePost(postid):
     q = "DELETE FROM post WHERE idPost = %s"
-    result = delete(q, args=(postid))
+    result = delete(q, args=(postid,))
     if result == False:
         raise DeletingPostException()
 

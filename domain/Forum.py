@@ -29,11 +29,12 @@ def createPost(token, text, image, tags):
 
 
 def deletePost(userid, postid):
-    #userid = dbu.getUserIdForToken(token)
+    currentUser = auth.getUserForId(userid)
 
     # check userid owns this post
-    if dbf.ownsPost(userid, postid) == False:
+    if not currentUser.isAdmin() and not dbf.ownsPost(userid, postid):
         raise dbf.UserNotPostOwnerException()
+
     else:
         # delete likes and dislikes
         dbf.deletelikesDislikes(postid)
