@@ -383,9 +383,8 @@ def products():
         # Create product
 
         reviewableName = request.args.get('name')
-        manufacturer = request.args.get('manufacturer')
         imageURL = request.args.get('imageURL')
-        if anyNoneIn([reviewableName, manufacturer, imageURL]):
+        if anyNoneIn([reviewableName, imageURL]):
             return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
         if revType == "Company":
@@ -395,6 +394,10 @@ def products():
                                        lat=lat,
                                        lon=lon)
         else:
+            manufacturer = request.args.get('manufacturer')
+            if anyNoneIn([manufacturer]):
+                return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
             newReviewable = Reviewable(id=None, name=reviewableName, type=revType, imageURL=imageURL,
                                        manufacturer=manufacturer,
                                        lat=None, lon=None)
