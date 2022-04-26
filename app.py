@@ -97,6 +97,9 @@ def accountLogin():
 
     try:
         u = auth.getUserForEmail(email)
+        if u is None:
+            return json.dumps({'error': 'ERROR_USER_NOT_FOUND'})
+
         if u.isBanned():
             return {'error': 'ERROR_BANNED'}
 
@@ -104,9 +107,6 @@ def accountLogin():
         return json.dumps({
             'token': str(token)
         })
-
-    except auth.UserNotFoundException:
-        return json.dumps({'error': 'ERROR_USER_NOT_FOUND'})
 
     except auth.IncorrectUserPasswordException:
         return json.dumps({'error': 'ERROR_USER_INCORRECT_PASSWORD'})
