@@ -52,7 +52,7 @@ def userFromRow(userRow) -> User:
 
 def getUnlockedMedals(userId):
     medals = db.select("SELECT idmedal FROM unlockedmedals WHERE iduser = %s", (userId,))
-    return medals
+    return [x['idmedal'] for x in medals]
 
 def setEmail(userId, newEmail):
     if (isEmailValid(newEmail)):
