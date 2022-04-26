@@ -384,7 +384,7 @@ def products():
 
         reviewableName = request.args.get('name')
         manufacturer = request.args.get('manufacturer')
-        imageURL = request.args.get('image')
+        imageURL = request.args.get('imageURL')
         if anyNoneIn([reviewableName, manufacturer, imageURL]):
             return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
