@@ -44,6 +44,7 @@ def getUserForEmail(email):
 def getUserForUsername(username):
     return dbu.selectByUsername(username)
 
+
 def getUserForId(id):
     u = dbu.selectById(id)
     if u is None:

@@ -32,7 +32,7 @@ def helloWorld():
     return "PES Econnect Root!"
 
 
-@app.route("/account", methods=['POST', 'GET'])
+@app.route("/account", methods=['POST'])
 def signUp():
     email = request.args.get('email')
     username = request.args.get('username')
@@ -74,10 +74,14 @@ def getCurrentUserInfo():
         auth.checkValidToken(token)
         u = auth.getUserForToken(token)
         return {
-            "username": u.getName(),
-            "email": u.getEmail(),
-            "activeMedal": u.getActiveMedalId(),
-            "medals": u.getUnlockedMedals()
+            "result": {
+                "username": u.getName(),
+                "email": u.getEmail(),
+                "activeMedal": u.getActiveMedalId(),
+                "medals": u.getUnlockedMedals(),
+                "isPrivate": u.getIsPrivate(),
+                "home": u.getAddress()
+            }
         }
 
     except dbs.InvalidTokenException:
@@ -88,11 +92,15 @@ def getCurrentUserInfo():
 def accountLogin():
     email = request.args.get('email')
     passwordString = request.args.get('password')
-    if any(x is None for x in [email, passwordString]):
+
+    if anyNoneIn([email, passwordString]):
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
     try:
         u = auth.getUserForEmail(email)
+        if u is None:
+            return json.dumps({'error': 'ERROR_USER_NOT_FOUND'})
+
         if u.isBanned():
             return {'error': 'ERROR_BANNED'}
 
@@ -100,9 +108,6 @@ def accountLogin():
         return json.dumps({
             'token': str(token)
         })
-
-    except auth.UserNotFoundException:
-        return json.dumps({'error': 'ERROR_USER_NOT_FOUND'})
 
     except auth.IncorrectUserPasswordException:
         return json.dumps({'error': 'ERROR_USER_INCORRECT_PASSWORD'})
@@ -318,8 +323,6 @@ def deleteAccount():
             user.deleteUser(token)
             return {'status': 'success'}
         return {'error': 'ERROR_INCORRECT_PASSWORD'}
-
-    
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -383,15 +386,13 @@ def products():
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_TYPE_NOT_EXISTS'}
 
-    
 
     if request.method == 'POST':
         # Create product
 
         reviewableName = request.args.get('name')
-        manufacturer = request.args.get('manufacturer')
-        imageURL = request.args.get('image')
-        if anyNoneIn([reviewableName, manufacturer, imageURL]):
+        imageURL = request.args.get('imageURL')
+        if anyNoneIn([reviewableName, imageURL]):
             return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
         if revType == "Company":
@@ -401,6 +402,10 @@ def products():
                                        lat=lat,
                                        lon=lon)
         else:
+            manufacturer = request.args.get('manufacturer')
+            if anyNoneIn([manufacturer]):
+                return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
             newReviewable = Reviewable(id=None, name=reviewableName, type=revType, imageURL=imageURL,
                                        manufacturer=manufacturer,
                                        lat=None, lon=None)
@@ -525,8 +530,7 @@ def newProductType():
             return {'error': 'TYPE_EXISTS'}
 
     elif request.method == 'GET':
-        return getAllReviewableTypes()
-
+        return {'result': getAllReviewableTypes()}
 
 
 @app.route("/companies/<id>", methods=['GET'])
