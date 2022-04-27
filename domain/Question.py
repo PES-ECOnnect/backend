@@ -9,6 +9,7 @@ def deleteProductTypeQuestion(id):
     return dbq.deleteQuestion(id)
 
 
+
 class Question:
     """
     @def modifyQuestion()
