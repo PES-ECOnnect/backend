@@ -794,7 +794,7 @@ def createQuestion():
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_TYPE_NOT_EXISTS'}
 
-@app.route("/companies/quiestions", methods=['POST'])
+@app.route("/companies/questions", methods=['POST'])
 def createCompanyQuestion():
     token = request.args.get('token')
     statement = request.args.get('statement')
