@@ -25,6 +25,10 @@ def updateProductTypeName(typeId, newName):
     return dbrt.updateProductType(typeId, newName)
 
 
+def deleteProductTypeByName(typeName):
+    typeId = getReviewableTypeIdByName(typeName)
+    return dbrt.deleteProductType(typeId)
+
 def getAllReviewableTypes():
     types = dbrt.getAllReviewableTypes()
     result = []
