@@ -628,7 +628,7 @@ def getCompanyQuestions():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/question/<id>", methods=['PUT'])
+@app.route("/questions/<id>", methods=['PUT'])
 def updateQuestion(id):
     token = request.args.get('token')
     newQuestion = request.args.get('newQuestion')
@@ -638,14 +638,14 @@ def updateQuestion(id):
 
     try:
         auth.checkValidToken(token)
-        result = updateQuestionName(id, newQuestion)
-        return {'result': 'success'}
+        updateQuestionName(id, newQuestion)
+        return {'status': 'success'}
     
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/question/<id>", methods=['DELETE'])
+@app.route("/questions/<id>", methods=['DELETE'])
 def deleteQuestion(id):
     token = request.args.get('token')
     if anyNoneIn([token]):
@@ -657,7 +657,7 @@ def deleteQuestion(id):
         if not result:
             return {'error': 'ERROR_INCORRECT_QUESTION'}
         
-        return {'result': 'success'}
+        return {'status': 'success'}
     
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
@@ -795,7 +795,8 @@ def createQuestion():
     except dbr.IncorrectReviewableTypeException:
         return {'error': 'ERROR_TYPE_NOT_EXISTS'}
 
-@app.route("/companies/quiestions", methods=['POST'])
+
+@app.route("/companies/questions", methods=['POST'])
 def createCompanyQuestion():
     token = request.args.get('token')
     statement = request.args.get('statement')
