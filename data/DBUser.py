@@ -118,11 +118,11 @@ def update(user):
 
 def banUser(userId):
     q = "UPDATE users SET banned = TRUE WHERE iduser = %s"
-    return db.update(query=q, args=(userId))
+    return db.update(query=q, args=(userId,))
 
 def unbanUser(userId):
     q = "UPDATE users SET banned = FALSE WHERE iduser = %s"
-    return db.update(query=q, args=(userId))
+    return db.update(query=q, args=(userId,))
 
 # OTHER FUNCTIONS
 def isEmailValid(email):

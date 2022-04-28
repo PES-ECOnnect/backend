@@ -30,7 +30,7 @@ def getUserIdForToken(token):
 
 def deleteUserTokens(userId):
     dQuery = "DELETE FROM sessiontoken where iduser = %s"
-    res = db.delete(dQuery, (userId))
+    res = db.delete(dQuery, (userId,))
     if type(res) == bool and not res:
         raise FailedToRemoveSessionTokenException()
 
