@@ -21,6 +21,9 @@ def getReviewableTypeIdByName(typeName) -> int:
         raise dbr.IncorrectReviewableTypeException()
     return revTypeId
 
+def updateProductTypeName(typeId, newName):
+    return dbrt.updateProductType(typeId, newName)
+
 
 def getAllReviewableTypes():
     types = dbrt.getAllReviewableTypes()
