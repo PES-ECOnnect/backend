@@ -20,6 +20,13 @@ def getAllReviewableTypes():
     return select(sQuery, (), False)
 
 
+def updateProductType(id, newName):
+    q = "UPDATE reviewabletype SET name = %s WHERE typeid = %s"
+    result = update(query=q, args=(newName, id))
+    if not result:
+        raise TypeAlreadyExistsException()
+
+
 # EXCEPTIONS
 
 class TypeAlreadyExistsException(Exception):
