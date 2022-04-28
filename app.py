@@ -627,7 +627,7 @@ def getCompanyQuestions():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/question/<id>", methods=['PUT'])
+@app.route("/questions/<id>", methods=['PUT'])
 def updateQuestion(id):
     token = request.args.get('token')
     newQuestion = request.args.get('newQuestion')
@@ -644,7 +644,7 @@ def updateQuestion(id):
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/question/<id>", methods=['DELETE'])
+@app.route("/questions/<id>", methods=['DELETE'])
 def deleteQuestion(id):
     token = request.args.get('token')
     if anyNoneIn([token]):
