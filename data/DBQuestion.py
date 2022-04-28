@@ -72,13 +72,7 @@ def updateQuestion(id, newQuestion):
 
 def deleteQuestion(id):
     q = "DELETE FROM question WHERE questionid = %s"
-    deleted = delete(query=q, args=id)
-    if deleted:
-        q = "DELETE FROM answer WHERE questionid = %s"
-        delete(query=q, args=id)
-        return True
-    else:
-        return False
+    return delete(query=q, args=(id,))
 
 # EXCEPTIONS
 

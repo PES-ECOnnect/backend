@@ -74,10 +74,14 @@ def getCurrentUserInfo():
         auth.checkValidToken(token)
         u = auth.getUserForToken(token)
         return {
-            "username": u.getName(),
-            "email": u.getEmail(),
-            "activeMedal": u.getActiveMedalId(),
-            "medals": u.getUnlockedMedals()
+            "result": {
+                "username": u.getName(),
+                "email": u.getEmail(),
+                "activeMedal": u.getActiveMedalId(),
+                "medals": u.getUnlockedMedals(),
+                "isPrivate": u.getIsPrivate(),
+                "home": u.getAddress()
+            }
         }
 
     except dbs.InvalidTokenException:
@@ -93,6 +97,9 @@ def accountLogin():
 
     try:
         u = auth.getUserForEmail(email)
+        if u is None:
+            return json.dumps({'error': 'ERROR_USER_NOT_FOUND'})
+
         if u.isBanned():
             return {'error': 'ERROR_BANNED'}
 
@@ -100,9 +107,6 @@ def accountLogin():
         return json.dumps({
             'token': str(token)
         })
-
-    except auth.UserNotFoundException:
-        return json.dumps({'error': 'ERROR_USER_NOT_FOUND'})
 
     except auth.IncorrectUserPasswordException:
         return json.dumps({'error': 'ERROR_USER_INCORRECT_PASSWORD'})
@@ -307,15 +311,18 @@ def updateActiveMedal():
 @app.route("/account", methods=['DELETE'])
 def deleteAccount():
     token = request.args.get('token')
-    if anyNoneIn([token]):
+    pwd = request.args.get('password')
+    if anyNoneIn([token, pwd]):
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
     try:
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
-        user.deleteUser(token)
-        return {'status': 'success'}
-    
+        encrPwd = hashlib.sha256(pwd.encode('UTF-8')).hexdigest()
+        if user.validatePassword(encrPwd):
+            user.deleteUser(token)
+            return {'status': 'success'}
+        return {'error': 'ERROR_INCORRECT_PASSWORD'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -383,9 +390,8 @@ def products():
         # Create product
 
         reviewableName = request.args.get('name')
-        manufacturer = request.args.get('manufacturer')
-        imageURL = request.args.get('image')
-        if anyNoneIn([reviewableName, manufacturer, imageURL]):
+        imageURL = request.args.get('imageURL')
+        if anyNoneIn([reviewableName, imageURL]):
             return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
         if revType == "Company":
@@ -395,6 +401,10 @@ def products():
                                        lat=lat,
                                        lon=lon)
         else:
+            manufacturer = request.args.get('manufacturer')
+            if anyNoneIn([manufacturer]):
+                return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
             newReviewable = Reviewable(id=None, name=reviewableName, type=revType, imageURL=imageURL,
                                        manufacturer=manufacturer,
                                        lat=None, lon=None)
@@ -521,6 +531,33 @@ def newProductType():
     elif request.method == 'GET':
         return {'result': getAllReviewableTypes()}
 
+@app.route("/products/types", methods=['PUT'])
+def updateProductType():
+    token = request.args.get('token')
+    oldName = request.args.get('oldName')
+    newName = request.args.get('newName')
+
+    if anyNoneIn([token, oldName, newName]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    if oldName == "Company":
+        return {'error': 'ERROR_CANNOT_UPDATE_COMPANY_TYPE_NAME'}
+
+    try:
+        auth.checkValidToken(token)
+        typeId = getReviewableTypeIdByName(oldName)
+        updateProductTypeName(typeId, newName)
+        return {'status': 'success'}
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+    except dbr.IncorrectReviewableTypeException:
+        return {'error': 'ERROR_INVALID_TYPE_NAME'}
+
+    except dbrt.TypeAlreadyExistsException:
+        return {'error': 'ERROR_TYPE_NAME_ALREADY_EXISTS'}
+
 
 @app.route("/companies/<id>", methods=['GET'])
 @app.route("/products/<id>", methods=['GET'])
@@ -616,7 +653,7 @@ def getCompanyQuestions():
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/question/<id>", methods=['PUT'])
+@app.route("/questions/<id>", methods=['PUT'])
 def updateQuestion(id):
     token = request.args.get('token')
     newQuestion = request.args.get('newQuestion')
@@ -626,14 +663,14 @@ def updateQuestion(id):
 
     try:
         auth.checkValidToken(token)
-        result = updateQuestionName(id, newQuestion)
-        return {'result': 'success'}
+        updateQuestionName(id, newQuestion)
+        return {'status': 'success'}
     
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
 
-@app.route("/question/<id>", methods=['DELETE'])
+@app.route("/questions/<id>", methods=['DELETE'])
 def deleteQuestion(id):
     token = request.args.get('token')
     if anyNoneIn([token]):
@@ -645,7 +682,7 @@ def deleteQuestion(id):
         if not result:
             return {'error': 'ERROR_INCORRECT_QUESTION'}
         
-        return {'result': 'success'}
+        return {'status': 'success'}
     
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
@@ -761,6 +798,46 @@ def getPosts():
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@app.route("/questions", methods=['POST'])
+def createQuestion():
+    token = request.args.get('token')
+    statement = request.args.get('statement')
+    type = request.args.get('type')
+
+    if anyNoneIn([token, statement, type]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    try:
+        auth.checkValidToken(token)
+        typeId = getReviewableTypeIdByName(type)
+        question = Question(typeId, statement)
+        question.insert()
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+    except dbr.IncorrectReviewableTypeException:
+        return {'error': 'ERROR_TYPE_NOT_EXISTS'}
+
+
+@app.route("/companies/questions", methods=['POST'])
+def createCompanyQuestion():
+    token = request.args.get('token')
+    statement = request.args.get('statement')
+
+    if anyNoneIn([token, statement]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    try:
+        auth.checkValidToken(token)
+        typeId = getReviewableTypeIdByName('Company')
+        question = Question(typeId, statement)
+        question.insert()
+        return {'status': 'success'}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
 
 
 @app.route("/test")
