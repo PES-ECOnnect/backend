@@ -319,7 +319,8 @@ def deleteAccount():
     try:
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
-        if user.validatePassword(pwd):
+        encrPwd = hashlib.sha256(pwd.encode('UTF-8')).hexdigest()
+        if user.validatePassword(encrPwd):
             user.deleteUser(token)
             return {'status': 'success'}
         return {'error': 'ERROR_INCORRECT_PASSWORD'}
