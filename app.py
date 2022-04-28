@@ -637,8 +637,8 @@ def updateQuestion(id):
 
     try:
         auth.checkValidToken(token)
-        result = updateQuestionName(id, newQuestion)
-        return {'result': 'success'}
+        updateQuestionName(id, newQuestion)
+        return {'status': 'success'}
     
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
@@ -656,7 +656,7 @@ def deleteQuestion(id):
         if not result:
             return {'error': 'ERROR_INCORRECT_QUESTION'}
         
-        return {'result': 'success'}
+        return {'status': 'success'}
     
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
