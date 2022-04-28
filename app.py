@@ -534,6 +534,34 @@ def newProductType():
         return {'result': getAllReviewableTypes()}
 
 
+@app.route("/products/types", methods=['PUT'])
+def updateProductType():
+    token = request.args.get('token')
+    oldName = request.args.get('oldName')
+    newName = request.args.get('newName')
+
+    if anyNoneIn([token, oldName, newName]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    if oldName == "Company":
+        return {'error': 'ERROR_CANNOT_UPDATE_COMPANY_TYPE_NAME'}
+
+    try:
+        auth.checkValidToken(token)
+        typeId = getReviewableTypeIdByName(oldName)
+        updateProductTypeName(typeId, newName)
+        return {'status': 'success'}
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+    except dbr.IncorrectReviewableTypeException:
+        return {'error': 'ERROR_INVALID_TYPE_NAME'}
+
+    except dbrt.TypeAlreadyExistsException:
+        return {'error': 'ERROR_TYPE_NAME_ALREADY_EXISTS'}
+
+
 @app.route("/companies/<id>", methods=['GET'])
 @app.route("/products/<id>", methods=['GET'])
 def getReviewable(id):
@@ -805,7 +833,7 @@ def createCompanyQuestion():
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
     try:
-        auth.checkValidToken()
+        auth.checkValidToken(token)
         typeId = getReviewableTypeIdByName('Company')
         question = Question(typeId, statement)
         question.insert()
