@@ -562,6 +562,31 @@ def updateProductType():
         return {'error': 'ERROR_TYPE_NAME_ALREADY_EXISTS'}
 
 
+@app.route("/products/types", methods=['DELETE'])
+def deleteProductType():
+    token = request.args.get('token')
+    name = request.args.get('name')
+
+    if anyNoneIn([token, name]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    if name == "Company":
+        return {'error': 'ERROR_CANNOT_DELETE_COMPANY_TYPE'}
+
+    try:
+        auth.checkValidToken(token)
+        result = deleteProductTypeByName(name)
+        if not result:
+            return {'error': 'ERROR_SOMETHING_WENT_WRONG'}
+        return {'status': 'success'}
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+    except dbr.IncorrectReviewableTypeException:
+        return {'error': 'ERROR_INVALID_TYPE_NAME'}
+
+
 @app.route("/companies/<id>", methods=['GET'])
 @app.route("/products/<id>", methods=['GET'])
 def getReviewable(id):

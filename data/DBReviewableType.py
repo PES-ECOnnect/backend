@@ -26,6 +26,10 @@ def updateProductType(id, newName):
     if not result:
         raise TypeAlreadyExistsException()
 
+def deleteProductType(id):
+    q = "DELETE FROM reviewabletype WHERE typeid = %s"
+    return delete(query=q, args=(id,))
+
 
 # EXCEPTIONS
 
