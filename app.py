@@ -328,11 +328,11 @@ def banAccount(id):
 
     try:
         auth.checkValidToken(token)
+
         user = auth.getUserForToken(token)
-        
+
         if not user.isAdmin():
             return {'error': 'ERROR_USER_NOT_ADMIN'}
-        
         if user.getId() == int(id):
             return {'error': 'ERROR_CANNOT_BAN_YOURSELF'}
         
