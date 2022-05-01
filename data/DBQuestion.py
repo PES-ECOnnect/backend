@@ -32,7 +32,7 @@ def getQuestionsFromType(typeId):
 def getQuestions(idReviewable, TypeId, token):
     Result = []
     idUser = getUserIdForToken(token)
-    q = "SELECT questionid, statement FROM question WHERE typeid = %s"
+    q = "SELECT questionid, statement FROM question WHERE typeid = %s ORDER BY (questionid)"
     quest = select(q, (TypeId,), one=False)
     for i in quest:
         questionid = i['questionid']
