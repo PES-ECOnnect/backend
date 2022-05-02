@@ -320,7 +320,7 @@ def deleteAccount():
         user = auth.getUserForToken(token)
         encrPwd = hashlib.sha256(pwd.encode('UTF-8')).hexdigest()
         if user.validatePassword(encrPwd):
-            user.deleteUser(token)
+            user.deleteUser()
             return {'status': 'success'}
         return {'error': 'ERROR_INCORRECT_PASSWORD'}
     except dbs.InvalidTokenException:

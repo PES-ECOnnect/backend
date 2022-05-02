@@ -111,6 +111,7 @@ def insert(email, username, enPass):
     return db.insert(query=q, args=(username, email, enPass))
 
 def delete(userId):
+    print(userId)
     db.delete("DELETE FROM users WHERE iduser = %s", (userId,))
   
 def update(user):
@@ -123,6 +124,9 @@ def banUser(userId):
 def unbanUser(userId):
     q = "UPDATE users SET banned = FALSE WHERE iduser = %s"
     return db.update(query=q, args=(userId,))
+
+def deleteUser(userId):
+    db.delete("DELETE FROM users WHERE iduser = %s", (userId,))
 
 # OTHER FUNCTIONS
 def isEmailValid(email):

@@ -78,17 +78,9 @@ class User:
     def hasUnlockedMedal(self, medalId):
         return dbu.hasUnlockedMedal(self._id, medalId)
 
-    def deleteUser(self, token):
-        # delete ratings
-        rev.deleteUserReviews(self._id)
-        # delete answers
-        rev.deleteUserAnswers(self._id)
-        # delete posts
-        forum.deleteUserPosts(self._id)
-        # logout
-        auth.logOut(token)
+    def deleteUser(self):
         # delete user
-        dbu.delete(self._id)
+        dbu.deleteUser(self._id)
 
     def banUser(self, id, isBanned):
         if isBanned.lower() == "true":
