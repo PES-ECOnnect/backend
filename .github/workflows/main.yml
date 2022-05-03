@@ -4,10 +4,22 @@ on:
   push:
     branches:
       - master
+      - dev
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    steps:
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Test with pytest
+        run: python -m pytest -v
   build:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -17,9 +29,3 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "pes-econnect" #Must be unique in Heroku
           heroku_email: "pol.burkardt@estudiantat.upc.edu"
-      - name: Install test dependencies
-        run: |
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-      - name: Test with pytest
-        run: python -m pytest -v
