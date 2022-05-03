@@ -19,7 +19,7 @@ def insertQuestion(typeId, statement):
         raise FailedToAddQuestionException()
 
 def getQuestionsFromType(typeId):
-    sQuery = "SELECT questionid, statement FROM question WHERE typeid = %s"
+    sQuery = "SELECT questionid, statement FROM question WHERE typeid = %s ORDER BY (questionid)"
     qResult = select(sQuery, (typeId,), False)
     result = []
     if qResult is not None:
