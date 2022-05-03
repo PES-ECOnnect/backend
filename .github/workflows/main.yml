@@ -18,5 +18,4 @@ jobs:
           heroku_app_name: "pes-econnect" #Must be unique in Heroku
           heroku_email: "pol.burkardt@estudiantat.upc.edu"
       - name: Test with pytest
-          run: |
-          python -m pytest -v
+        run: python -m pytest -v
