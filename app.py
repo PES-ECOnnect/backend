@@ -60,6 +60,9 @@ def signUp():
     except dbs.FailedToOpenSessionException:
         return json.dumps({'error': 'ERROR_STARTING_USER_SESSION'})
 
+    except dbu.InvalidEmailException:
+        return {'error': 'ERROR_INVALID_EMAIL'}
+
     except Exception:
         return json.dumps({'error': 'ERROR_SOMETHING_WENT_WRONG'})
 

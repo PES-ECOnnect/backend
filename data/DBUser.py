@@ -107,8 +107,12 @@ def getPostDisplayInfo(userId: int) -> dict:
 
 
 def insert(email, username, enPass):
-    q = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
-    return db.insert(query=q, args=(username, email, enPass))
+    if (isEmailValid(email)):
+        q = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
+        return db.insert(query=q, args=(username, email, enPass))
+    else:
+        raise InvalidEmailException()
+
 
 def delete(userId):
     print(userId)
