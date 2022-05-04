@@ -54,11 +54,11 @@ def test_getNLastPosts():
     resp = app.test_client().get("posts?token=93003eec-b589-11ec-a4e2-00155d3ce0fb&n=1")
     assert resp.status_code == 200
     correct = ({
-            "authorbanned": false,
+            "authorbanned": "false",
             "dislikes": "0",
             "imageurl": "a",
             "likes": "0",
-            "ownpost": true,
+            "ownpost": "true",
             "text": "testdopost",
             "userid": "1",
             "useroption": "0"
