@@ -76,18 +76,12 @@ def test_invalidMedal():
     assert response.data == b'{"error":"ERROR_USER_INVALID_MEDAL"}\n'
 
 def test_banAccount():
-    token = '93003eec-b589-11ec-a4e2-00155d3ce0fa'
-    user = auth.getUserForToken(token)
-    id = user.getId()
-    response = app.test_client().post("users/"+str(id)+"/ban?token=83003eec-b589-11ec-a4e2-00155d3ce0fa&isBanned=False")
+    response = app.test_client().post("users/2/ban?token=83003eec-b589-11ec-a4e2-00155d3ce0fa&isBanned=False")
     assert response.status_code == 200
     assert response.data == b'{"status":"success"}\n'
 
 def test_unbanAccount():
-    token = '93003eec-b589-11ec-a4e2-00155d3ce0fa'
-    user = auth.getUserForToken(token)
-    id = user.getId()
-    response = app.test_client().post("users/"+str(id)+"/ban?token=83003eec-b589-11ec-a4e2-00155d3ce0fa&isBanned=True")
+    response = app.test_client().post("users/2/ban?token=83003eec-b589-11ec-a4e2-00155d3ce0fa&isBanned=True")
     assert response.status_code == 200
     assert response.data == b'{"status":"success"}\n'
 
