@@ -3,22 +3,21 @@ import json
 
 import data.DBUtils as db
 
+def test_initDB():
+    db.insert("INSERT INTO sessiontoken VALUES ('93003eec-b589-11ec-a4e2-00155d3ce0fb',1)")
+
 def test_homePage():
     response = app.test_client().get("/")
     assert response.status_code == 200
     assert response.data == b"PES Econnect Root!"
 
 def test_isAdmin():
-    response = app.test_client().get("/account/isadmin?token=0cdde536-b597-11ec-8ddb-7aa110a1837a")
+    response = app.test_client().get("/account/isadmin?token=93003eec-b589-11ec-a4e2-00155d3ce0fb")
     assert response.status_code == 200
     assert response.data == b'{"result":"true"}\n'
 
 def test_isAdminNotFound():
-    response = app.test_client().get("/account/isadmin?email=admin@email.com&password=adminn")
-    assert response.data == b'{"error":"ERROR_INVALID_TOKEN"}\n'
-
-def test_isAdminIncorrectPassword():
-    response = app.test_client().get("/account/isadmin?email=admin@econnectcom&password=adminnn")
+    response = app.test_client().get("/account/isadmin?email=admin@email.com&password=adminn&token=xdddd")
     assert response.data == b'{"error":"ERROR_INVALID_TOKEN"}\n'
 
 def test_signUp():
@@ -54,5 +53,7 @@ def test_accountLogInIncorrectPassword():
 def test_cleanDB():
     # clean database
     db.delete("DELETE FROM users where email in ('sign@up.test')")
+    db.delete("DELETE FROM sessiontoken where token = '93003eec-b589-11ec-a4e2-00155d3ce0fb'")
+
 
 
