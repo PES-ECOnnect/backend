@@ -7,7 +7,8 @@ import domain.Authenticator as auth
 import hashlib
 
 def test_initDB():
-    #db.insert("INSERT INTO sessiontoken VALUES ('93003eec-b589-11ec-a4e2-00155d3ce0fc',1)")
+    db.insert("INSERT INTO sessiontoken VALUES ('83003eec-b589-11ec-a4e2-00155d3ce0fc',1)")  # admin token
+
     email = 'testuseremail@gmail.com'
     name = 'testname'
     pwd = 'testPwd'
@@ -74,6 +75,16 @@ def test_invalidMedal():
     response = app.test_client().put("account/medal?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&medalId=1")
     assert response.data == b'{"error":"ERROR_USER_INVALID_MEDAL"}\n'
 
+def test_banAccount():
+    response = app.test_client().post("users/2/ban?token=83003eec-b589-11ec-a4e2-00155d3ce0fc&isBanned=False")
+    assert response.status_code == 200
+    assert response.data == b'{"status":"success"}\n'
+
+def test_unbanAccount():
+    response = app.test_client().post("users/2/ban?token=83003eec-b589-11ec-a4e2-00155d3ce0fc&isBanned=True")
+    assert response.status_code == 200
+    assert response.data == b'{"status":"success"}\n'
+
 def test_deleteAccount():
     user = auth.getUserForToken('93003eec-b589-11ec-a4e2-00155d3ce0fa')
     id = user.getId()
@@ -84,6 +95,7 @@ def test_deleteAccount():
 
 
 def test_cleanDB():
+    db.delete("DELETE FROM sessiontoken where token = '83003eec-b589-11ec-a4e2-00155d3ce0fc'")  # admin token
     db.delete("DELETE FROM sessiontoken where token = '93003eec-b589-11ec-a4e2-00155d3ce0fa'")
     db.delete("DELETE FROM users where name in ('testname', 'testname2', 'newTestName')")
 
