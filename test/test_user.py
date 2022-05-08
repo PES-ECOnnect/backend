@@ -8,7 +8,6 @@ import hashlib
 
 def test_initDB():
     db.insert("INSERT INTO sessiontoken VALUES ('83003eec-b589-11ec-a4e2-00155d3ce0fc',1)")  # admin token
-
     email = 'testuseremail@gmail.com'
     name = 'testname'
     pwd = 'testPwd'

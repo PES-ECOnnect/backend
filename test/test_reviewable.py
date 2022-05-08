@@ -87,6 +87,56 @@ def test_deleteReviewable():
     select = dbu.select(q, (id['idreviewable'],), True)
     assert select is None
 
+
+def test_editProduct():
+    #insert token
+    token = '93003eec-b589-11ec-a4e2-00155d3ce0fa'
+    dbu.insert("INSERT INTO sessiontoken VALUES (%s, 4)", (token, ))
+    type = 'test'
+    dbu.insert("INSERT INTO reviewableType (name) VALUES (%s)", (type,))
+    # insert product
+    prod = Reviewable(id= 7777, name = 'testEdit', type = 'Generadors', imageURL = 'image', manufacturer='testMan', lat = 'null', lon = 'null')
+    prod.insert()
+    name = 'testEdit'
+    query = dbu.select("SELECT idreviewable FROM reviewable WHERE name = %s", (name, ), True)
+    prodId = query['idreviewable']
+    req = "/products/"+str(prodId)+"?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&name=newNameEdit&manufacturer=newMan&imageURL=newImage&type=test"
+    print(req)
+    response = app.test_client().post(req)
+    assert response.status_code == 200
+
+    product = dbu.select("SELECT name FROM reviewable WHERE idreviewable = %s", (prodId, ), True)
+    info = dbu.select("SELECT * FROM equipmentproduct WHERE idreviewable = %s", (prodId, ), True)
+    assert product['name'] == 'newNameEdit'
+    assert info['manufacturer'] == 'newMan'
+
+    dbu.delete("DELETE FROM reviewableType WHERE name = 'test'")
+    dbu.delete("DELETE FROM reviewable WHERE idreviewable = %s", (prodId,))
+
+def test_editCompany():
+    # insert product
+    comp = Reviewable(id=7777, name='testEdit', type='Company', imageURL='image', manufacturer=None, lat=0.0,
+                      lon=0.0)
+    comp.insert()
+    name = 'testEdit'
+    query = dbu.select("SELECT idreviewable FROM reviewable WHERE name = %s", (name,), True)
+    compId = query['idreviewable']
+    req = "/companies/" + str(
+        compId) + "?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&name=newNameEdit&lat=1.1&lon=1.1&imageURL=newImage"
+    print(req)
+    response = app.test_client().post(req)
+    assert response.status_code == 200
+
+    company = dbu.select("SELECT name FROM reviewable WHERE idreviewable = %s", (compId,), True)
+    info = dbu.select("SELECT * FROM installercompany WHERE idreviewable = %s", (compId,), True)
+    assert company['name'] == 'newNameEdit'
+    assert str(info['lat']) == '1.10'
+    assert str(info['lon']) == '1.10'
+
+    dbu.delete("DELETE FROM sessiontoken WHERE token = '93003eec-b589-11ec-a4e2-00155d3ce0fa'")
+    dbu.delete("DELETE FROM reviewable WHERE idreviewable = %s", (compId,))
+
+
     '''
 # CREATE
 
