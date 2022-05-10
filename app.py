@@ -314,18 +314,14 @@ def updateActiveMedal():
 @app.route("/account", methods=['DELETE'])
 def deleteAccount():
     token = request.args.get('token')
-    pwd = request.args.get('password')
-    if anyNoneIn([token, pwd]):
+    if anyNoneIn([token,]):
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
 
     try:
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
-        encrPwd = hashlib.sha256(pwd.encode('UTF-8')).hexdigest()
-        if user.validatePassword(encrPwd):
-            user.deleteUser()
-            return {'status': 'success'}
-        return {'error': 'ERROR_INCORRECT_PASSWORD'}
+        user.deleteUser()
+        return {'status': 'success'}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
