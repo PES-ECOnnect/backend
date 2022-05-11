@@ -21,11 +21,18 @@ import data.DBUser as dbu
 import json
 import hashlib
 
+import pandas as pd
+from sodapy import Socrata
+
+client = Socrata(analisi.transparenciacatalunya.cat,
+                  MyAppToken,
+                  userame="user@example.com",
+                  password="AFakePassword")
+
 app = Flask(__name__)
 
 def anyNoneIn(l: list) -> bool:
     return any(x is None for x in l)
-
 
 @app.route("/")
 def helloWorld():
@@ -863,6 +870,17 @@ def createCompanyQuestion():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+@app.route("/homes/cities/<zipcode>")
+def getStreetNames(zipcode):
+    token = request.args.get('token')
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+    try:
+        auth.checkValidToken(token)
+        # Get json cities with zipcode
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
 
 
 @app.route("/test")
