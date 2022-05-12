@@ -9,58 +9,130 @@ import data.DBUtils as dbu
 #def test_getProductsFromType():
 
 def test_getinfoCompanies():
-    resp = app.test_client().get("companies/1?token=93003eec-b589-11ec-a4e2-00155d3ce0fb")
-    correct = ({ "imageURL": "https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-product-6_large.png",
-                 "latitude": "10.04",
-                 "longitude": "5.05",
-                 "name": "TestName",
-                 "questions": [],
-                 "ratings": [ 0, 0, 1, 0, 0, 1 ],
+    insert = app.test_client().post("companies?token=TEST_POL&name=testpytestcompany&imageURL=xd&lat=0&lon=0")
+    q = "SELECT idreviewable from reviewable WHERE name = 'testpytestcompany'"
+    result = dbu.select(q, args=(), one=True)
+    uri = "companies/"+ str(result["idreviewable"]) + "?token=TEST_POL"
+    resp = app.test_client().get(uri)
+    correct = ({ "imageurl": "xd",
+                 "latitude": "0.00",
+                 "longitude": "0.00",
+                 "name": "testpytestcompany",
+                 #"questions": [],
+                 "ratings": [0,0,0,0,0,0],
                  "type": "Company" })
     response = json.loads(resp.get_data(as_text=True))
+    q = "DELETE FROM reviewable WHERE name = 'testpytestcompany'"
+    result = dbu.delete(q, args=())
     assert (
-            response["imageURL"] == correct["imageURL"] and
+            response["imageURL"] == correct["imageurl"] and
             response["latitude"] == correct["latitude"] and
             response["longitude"] == correct["longitude"] and
             response["name"] == correct["name"] and
-            response["questions"] == correct["questions"] and
+            #response["questions"] == correct["questions"] and
             response["ratings"] == correct["ratings"] and
             response["type"] == correct["type"]
     )
 
 def test_getinfoProduct():
-    resp = app.test_client().get("products/2?token=93003eec-b589-11ec-a4e2-00155d3ce0fb")
-    correct = ({ "imageURL": "https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-product-6_large.png",
-                 "manufacturer": "Test",
-                 "name": "ProductTest",
-                 "questions": [],
-                 "ratings": [ 0, 0, 0, 1, 0, 0 ],
-                 "type": "TestType" })
+    insert = app.test_client().post("products?token=TEST_POL&name=testpytestproduct&imageURL=xd&manufacturer=jo&type=Generadors")
+    q = "SELECT idreviewable from reviewable WHERE name = 'testpytestproduct'"
+    result = dbu.select(q, args=(), one=True)
+    uri = "products/" + str(result["idreviewable"]) + "?token=TEST_POL"
+    resp = app.test_client().get(uri)
+    correct = ({ "imageURL": "xd",
+                 "manufacturer": "jo",
+                 "name": "testpytestproduct",
+                 #"questions": [],
+                 "ratings": [ 0, 0, 0, 0, 0, 0 ],
+                 "type": "Generadors" })
     response = json.loads(resp.get_data(as_text=True))
+    q = "DELETE FROM reviewable WHERE name = 'testpytestproduct'"
+    result = dbu.delete(q, args=())
     assert (
         response["imageURL"]==correct["imageURL"] and
         response["manufacturer"]==correct["manufacturer"] and
         response["name"] == correct["name"] and
-        response["questions"] == correct["questions"] and
+        #response["questions"] == correct["questions"] and
+        response["ratings"] == correct["ratings"] and
+        response["type"]==correct["type"]
+    )
+
+
+from app import app
+import json
+from domain.Reviewable import *
+import data.DBUtils as dbu
+
+
+# GET ALL
+
+#def test_getProductsFromType():
+
+def test_getinfoCompanies():
+    insert = app.test_client().post("companies?token=TEST_POL&name=testpytestcompany&imageURL=xd&lat=0&lon=0")
+    q = "SELECT idreviewable from reviewable WHERE name = 'testpytestcompany'"
+    result = dbu.select(q, args=(), one=True)
+    uri = "companies/"+ str(result["idreviewable"]) + "?token=TEST_POL"
+    resp = app.test_client().get(uri)
+    correct = ({ "imageurl": "xd",
+                 "latitude": "0.00",
+                 "longitude": "0.00",
+                 "name": "testpytestcompany",
+                 #"questions": [],
+                 "ratings": [0,0,0,0,0,0],
+                 "type": "Company" })
+    response = json.loads(resp.get_data(as_text=True))
+    q = "DELETE FROM reviewable WHERE name = 'testpytestcompany'"
+    result = dbu.delete(q, args=())
+    assert (
+            response["imageURL"] == correct["imageurl"] and
+            response["latitude"] == correct["latitude"] and
+            response["longitude"] == correct["longitude"] and
+            response["name"] == correct["name"] and
+            #response["questions"] == correct["questions"] and
+            response["ratings"] == correct["ratings"] and
+            response["type"] == correct["type"]
+    )
+
+def test_getinfoProduct():
+    insert = app.test_client().post("products?token=TEST_POL&name=testpytestproduct&imageURL=xd&manufacturer=jo&type=Generadors")
+    q = "SELECT idreviewable from reviewable WHERE name = 'testpytestproduct'"
+    result = dbu.select(q, args=(), one=True)
+    uri = "products/" + str(result["idreviewable"]) + "?token=TEST_POL"
+    resp = app.test_client().get(uri)
+    correct = ({ "imageURL": "xd",
+                 "manufacturer": "jo",
+                 "name": "testpytestproduct",
+                 #"questions": [],
+                 "ratings": [ 0, 0, 0, 0, 0, 0 ],
+                 "type": "Generadors" })
+    response = json.loads(resp.get_data(as_text=True))
+    q = "DELETE FROM reviewable WHERE name = 'testpytestproduct'"
+    result = dbu.delete(q, args=())
+    assert (
+        response["imageURL"]==correct["imageURL"] and
+        response["manufacturer"]==correct["manufacturer"] and
+        response["name"] == correct["name"] and
+        #response["questions"] == correct["questions"] and
         response["ratings"] == correct["ratings"] and
         response["type"]==correct["type"]
     )
 
 def test_deleteReviewable():
     # Insert reviewables
-    rev = Reviewable(id = 99,name='ProvaEliminat',type='Solar panel',imageURL='https://xd',manufacturer='jo',lat="null",lon="null")
+    rev = Reviewable(id = 91243123412341234123,name='ProvaEliminat',type='Solar panel',imageURL='https://xd',manufacturer='jo',lat="null",lon="null")
     rev.insert()
     #getproductid
     q = "SELECT idreviewable FROM reviewable where name = 'ProvaEliminat'"
     id = dbu.select(q,(),True)
     print(id["idreviewable"])
     # Insert Valorations
-    rev.review(id['idreviewable'],"44cab830-b668-11ec-91af-1a0e95636881,3",2)
+    rev.review(id['idreviewable'],"TEST_POL",2)
     # Insert Answers
-    rev.answerQuestion(productId=id['idreviewable'],token="44cab830-b668-11ec-91af-1a0e95636881",chosenOption=0,questionIndex=4)
+    rev.answerQuestion(productId=id['idreviewable'],token="TEST_POL",chosenOption=0,questionIndex=4)
     # Execute DeleteReviewable
-    resp = app.test_client().delete("/products/" + str(id['idreviewable']) + "?token=44cab830-b668-11ec-91af-1a0e95636881")
-    print(resp)
+    resp = app.test_client().delete("/products/" + str(id['idreviewable']) + "?token=test_token")
     # Check valorations, answers, equip/installers and reviewable are not in the database
     q = "SELECT * FROM reviewable WHERE idreviewable = %s"
     select = dbu.select(q,(id['idreviewable'],),True)
@@ -76,10 +148,60 @@ def test_deleteReviewable():
     select = dbu.select(q, (id['idreviewable'],), True)
     assert select is None
 
+
+def test_editProduct():
+    #insert token
+    token = '93003eec-b589-11ec-a4e2-00155d3ce0fa'
+    dbu.insert("INSERT INTO sessiontoken VALUES (%s, 4)", (token, ))
+    type = 'test'
+    dbu.insert("INSERT INTO reviewableType (name) VALUES (%s)", (type,))
+    # insert product
+    prod = Reviewable(id= 7777, name = 'testEdit', type = 'Generadors', imageURL = 'image', manufacturer='testMan', lat = 'null', lon = 'null')
+    prod.insert()
+    name = 'testEdit'
+    query = dbu.select("SELECT idreviewable FROM reviewable WHERE name = %s", (name, ), True)
+    prodId = query['idreviewable']
+    req = "/products/"+str(prodId)+"?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&name=newNameEdit&manufacturer=newMan&imageURL=newImage&type=test"
+    print(req)
+    response = app.test_client().post(req)
+    assert response.status_code == 200
+
+    product = dbu.select("SELECT name FROM reviewable WHERE idreviewable = %s", (prodId, ), True)
+    info = dbu.select("SELECT * FROM equipmentproduct WHERE idreviewable = %s", (prodId, ), True)
+    assert product['name'] == 'newNameEdit'
+    assert info['manufacturer'] == 'newMan'
+
+    dbu.delete("DELETE FROM reviewableType WHERE name = 'test'")
+    dbu.delete("DELETE FROM reviewable WHERE idreviewable = %s", (prodId,))
+
+def test_editCompany():
+    # insert product
+    comp = Reviewable(id=7777, name='testEdit', type='Company', imageURL='image', manufacturer=None, lat=0.0,
+                      lon=0.0)
+    comp.insert()
+    name = 'testEdit'
+    query = dbu.select("SELECT idreviewable FROM reviewable WHERE name = %s", (name,), True)
+    compId = query['idreviewable']
+    req = "/companies/" + str(
+        compId) + "?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&name=newNameEdit&lat=1.1&lon=1.1&imageURL=newImage"
+    print(req)
+    response = app.test_client().post(req)
+    assert response.status_code == 200
+
+    company = dbu.select("SELECT name FROM reviewable WHERE idreviewable = %s", (compId,), True)
+    info = dbu.select("SELECT * FROM installercompany WHERE idreviewable = %s", (compId,), True)
+    assert company['name'] == 'newNameEdit'
+    assert str(info['lat']) == '1.10'
+    assert str(info['lon']) == '1.10'
+
+    dbu.delete("DELETE FROM sessiontoken WHERE token = '93003eec-b589-11ec-a4e2-00155d3ce0fa'")
+    dbu.delete("DELETE FROM reviewable WHERE idreviewable = %s", (compId,))
+
+
     '''
 # CREATE
 
-def test_createProduct():
+def test_createProduct():   
 
 def test_createCompany():
 
