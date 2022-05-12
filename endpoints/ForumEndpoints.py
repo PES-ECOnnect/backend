@@ -135,3 +135,26 @@ def getPosts():
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+
+@forum_endpoint.route("/revp/posts", methods=['GET'])
+def getRevpPosts():
+    token = request.args.get('token')
+    lastDate = request.args.get('lastDate')
+    tag = request.args.get('tag')
+    n = request.args.get('n')
+
+    if anyNoneIn([token, lastDate, tag, n]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    try:
+        auth.checkValidToken(token)
+
+        return {
+            'result': getRevPollutionPosts(n, tag, lastDate)
+        }
+
+    except InvalidDateException:
+        return {'error': 'ERROR_INVALID_DATE'}
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
