@@ -295,6 +295,41 @@ def updateActiveMedal():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
+@user_endpoint.route("/account/about", methods=['PUT'])
+def updateAbout():
+    token = request.args.get('token')
+    newAbout = request.args.get('newAbout')
+
+    if anyNoneIn([token, newAbout]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    try:
+        auth.checkValidToken(token)
+        user = auth.getUserForToken(token)
+        user.setAbout(newAbout)
+        return {'status': 'success'}
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+
+@user_endpoint.route("/account/picture", methods=['PUT'])
+def updatePicture():
+    token = request.args.get('token')
+    newPictureURL = request.args.get('newPictureURL')
+
+    if anyNoneIn([token, newPictureURL]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    try:
+        auth.checkValidToken(token)
+        user = auth.getUserForToken(token)
+        user.setPicture(newPictureURL)
+        return {'status': 'success'}
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
 
 @user_endpoint.route("/account", methods=['DELETE'])
 def deleteAccount():

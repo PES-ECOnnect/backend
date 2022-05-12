@@ -12,6 +12,8 @@ def test_getUsedTags():
     #assert response.status_code == 200
     #assert response.data == b"PES Econnect Root!"
 '''
+
+
 def test_doLikePost():
     response = app.test_client().post(
         "posts/1/like?token=93003eec-b589-11ec-a4e2-00155d3ce0fb&isLike=True&remove=False")
@@ -38,6 +40,7 @@ def test_removeDislikePost():
         "posts/1/like?token=93003eec-b589-11ec-a4e2-00155d3ce0fb&isLike=False&remove=True")
     assert response.status_code == 200
     assert response.data == b'{"status":"success"}\n'
+
 
 def test_doPost():
     response = app.test_client().post("posts?token=93003eec-b589-11ec-a4e2-00155d3ce0fb&text=testdopost&image=a")

@@ -33,6 +33,9 @@ def test_cleanDB():
 import data.DBUtils as db
 
 
+import data.DBUtils as db
+
+
 '''
 
 # GET QUESTIONS
