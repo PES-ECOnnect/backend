@@ -48,6 +48,7 @@ def test_forum_getRevpollutionPosts_WithWrongLastDate():
     assert response.status_code == 200
     assert response.data == b'{"error":"ERROR_INVALID_DATE"}\n'
 
+
 def test_initDB():
     db.insert("INSERT INTO sessiontoken VALUES ('93003eec-b589-11ec-a4e2-00155d3ce0fb',1)")
 
