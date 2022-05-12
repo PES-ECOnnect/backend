@@ -21,13 +21,9 @@ import data.DBUser as dbu
 import json
 import hashlib
 
-import pandas as pd
 from sodapy import Socrata
 
-client = Socrata(analisi.transparenciacatalunya.cat,
-                  MyAppToken,
-                  userame="user@example.com",
-                  password="AFakePassword")
+client_gene = Socrata("analisi.transparenciacatalunya.cat", "kP8jxf5SrHh4g8Sd42esZ5uba")
 
 app = Flask(__name__)
 
@@ -878,7 +874,14 @@ def getStreetNames(zipcode):
     try:
         auth.checkValidToken(token)
         # Get json cities with zipcode
-
+        results = client_gene.get("j6ii-t3w2",codi_postal=str(zipcode))
+        # Recorrem tots els objectes del json
+        streets = {}
+        for house in results:
+            street = house["adre_a"]
+            if not street in streets:
+                streets.update({street:'1'})
+        return streets
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
