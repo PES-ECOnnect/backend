@@ -47,12 +47,16 @@ def userFromRow(userRow) -> User:
         (str(userRow['banned']) if userRow['banned'] is not None else None),
         (bool(userRow['privateprofile']) if userRow['privateprofile'] is not None else None),
         (int(userRow['idactivemedal']) if userRow['idactivemedal'] is not None else None),
-        (True if userRow['isadmin'] == 1 else False)
+        (True if userRow['isadmin'] == 1 else False),
+        (str(userRow['about']) if userRow['about'] is not None else None),
+        (str(userRow['pictureurl']) if userRow['pictureurl'] is not None else None),
     )
+
 
 def getUnlockedMedals(userId):
     medals = db.select("SELECT m.idmedal, m.medalname FROM unlockedmedals u, medal m WHERE iduser = %s AND u.idmedal = m.idmedal", (userId,))
     return medals
+
 
 def setEmail(userId, newEmail):
     if (isEmailValid(newEmail)):
@@ -68,6 +72,7 @@ def setEmail(userId, newEmail):
     else:
         raise InvalidEmailException()
 
+
 def setUsername(userId, newUsername):
     con = db.getConnection()
     c = con.cursor()
@@ -79,11 +84,22 @@ def setUsername(userId, newUsername):
         c.execute('rollback')
         raise UsernameExistsException()
 
+
 def setHome(userId, newHome):
     db.update("UPDATE users SET address = %s WHERE iduser = %s", (newHome, userId))
 
+
 def setPassword(userId, newPwd):
     db.update("UPDATE users SET password = %s WHERE iduser = %s", (newPwd, userId))
+
+
+def setAbout(userId, newAbout):
+    db.update("UPDATE users SET about = %s WHERE iduser = %s", (newAbout, userId))
+
+
+def setPicture(userId, newPictureURL):
+    db.update("UPDATE users SET pictureurl = %s WHERE iduser = %s", (newPictureURL, userId))
+
 
 def setVisibility(userId, isPrivate):
     db.update("UPDATE users SET privateprofile = %s WHERE iduser = %s", (isPrivate,userId,))
@@ -91,12 +107,14 @@ def setVisibility(userId, isPrivate):
 def setActiveMedal(userId, medalId):
     db.update("UPDATE users SET idactivemedal = %s WHERE iduser = %s", (medalId, userId))
 
+
 def hasUnlockedMedal(userId, medalId):
     result = db.select("SELECT * FROM unlockedmedals WHERE iduser=(%s) AND idmedal=(%s)", (userId, medalId))
     if result:
         return True
     else:
         return False
+
 
 def getPostDisplayInfo(userId: int) -> dict:
     q = "SELECT * FROM users " \
@@ -117,23 +135,25 @@ def insert(email, username, enPass):
 def delete(userId):
     print(userId)
     db.delete("DELETE FROM users WHERE iduser = %s", (userId,))
-  
+
+
 def update(user):
     pass
+
 
 def banUser(userId):
     q = "UPDATE users SET banned = TRUE WHERE iduser = %s"
     return db.update(query=q, args=(userId,))
 
+
 def unbanUser(userId):
     q = "UPDATE users SET banned = FALSE WHERE iduser = %s"
     return db.update(query=q, args=(userId,))
 
-def deleteUser(userId):
-    db.delete("DELETE FROM users WHERE iduser = %s", (userId,))
 
 def deleteUser(userId):
     db.delete("DELETE FROM users WHERE iduser = %s", (userId,))
+
 
 # OTHER FUNCTIONS
 def isEmailValid(email):
