@@ -22,6 +22,10 @@ def test_forum_getRevpollutionPosts_ErrorInvalidArgs():
     assert response.status_code == 200
     assert response.data == b'{"error":"ERROR_INVALID_ARGUMENTS"}\n'
 
+    response = app.test_client().get("/revp/posts?token=INVALID_TOKEN&lastDate=none&tag=TestTag")
+    assert response.status_code == 200
+    assert response.data == b'{"error":"ERROR_INVALID_ARGUMENTS"}\n'
+
 def test_forum_getRevpollutionPosts_WithoutLastDate():
     response = app.test_client().get("/revp/posts?n=10&token=TEST_POL&tag=TestTag&lastDate=none")
     assert response.status_code == 200
