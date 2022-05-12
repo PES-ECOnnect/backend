@@ -132,10 +132,14 @@ def getRevPollutionPosts(n: int, tag: str, lastDate):
         except Exception:
             raise InvalidDateException()
 
-    posts = dbf.getLatestNPostsWithTag(n, tag)
+    # There will never be more than 1000 posts in the system
+    posts = dbf.getLatestNPostsWithTag(1000, tag)
 
     result = []
     for post in posts:
+        if len(result) > int(n):
+            break
+
         if lastDate != 'none' and lastDate > float(post['timestamp']):
             # If requested, filter out posts older than lastDate
             continue
@@ -153,7 +157,6 @@ def getRevPollutionPosts(n: int, tag: str, lastDate):
         })
 
     return result
-
 
 
 class InvalidDateException(Exception):
