@@ -6,7 +6,8 @@ import data.DBUtils as dbu
 
 # GET ALL
 
-#def test_getProductsFromType():
+def test_iniDB():
+    dbu.insert("INSERT INTO sessiontoken VALUES ('test_token', 1)")
 
 def test_getinfoCompanies():
     insert = app.test_client().post("companies?token=TEST_POL&name=testpytestcompany&imageURL=xd&lat=0&lon=0")
@@ -83,8 +84,8 @@ def test_getinfoCompanies():
                  "ratings": [0,0,0,0,0,0],
                  "type": "Company" })
     response = json.loads(resp.get_data(as_text=True))
-    q = "DELETE FROM reviewable WHERE name = 'testpytestcompany'"
-    result = dbu.delete(q, args=())
+    #q = "DELETE FROM reviewable WHERE name = 'testpytestcompany'"
+    #result = dbu.delete(q, args=())
     assert (
             response["imageURL"] == correct["imageurl"] and
             response["latitude"] == correct["latitude"] and
@@ -108,8 +109,8 @@ def test_getinfoProduct():
                  "ratings": [ 0, 0, 0, 0, 0, 0 ],
                  "type": "Generadors" })
     response = json.loads(resp.get_data(as_text=True))
-    q = "DELETE FROM reviewable WHERE name = 'testpytestproduct'"
-    result = dbu.delete(q, args=())
+    #q = "DELETE FROM reviewable WHERE name = 'testpytestproduct'"
+    #result = dbu.delete(q, args=())
     assert (
         response["imageURL"]==correct["imageURL"] and
         response["manufacturer"]==correct["manufacturer"] and
@@ -151,7 +152,7 @@ def test_deleteReviewable():
 
 def test_editProduct():
     #insert token
-    token = '93003eec-b589-11ec-a4e2-00155d3ce0fa'
+    token = 'test_token'
     dbu.insert("INSERT INTO sessiontoken VALUES (%s, 4)", (token, ))
     type = 'test'
     dbu.insert("INSERT INTO reviewableType (name) VALUES (%s)", (type,))
@@ -161,7 +162,7 @@ def test_editProduct():
     name = 'testEdit'
     query = dbu.select("SELECT idreviewable FROM reviewable WHERE name = %s", (name, ), True)
     prodId = query['idreviewable']
-    req = "/products/"+str(prodId)+"?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&name=newNameEdit&manufacturer=newMan&imageURL=newImage&type=test"
+    req = "/products/"+str(prodId)+"?token=test_token&name=newNameEdit&manufacturer=newMan&imageURL=newImage&type=test"
     print(req)
     response = app.test_client().post(req)
     assert response.status_code == 200
@@ -171,8 +172,8 @@ def test_editProduct():
     assert product['name'] == 'newNameEdit'
     assert info['manufacturer'] == 'newMan'
 
-    dbu.delete("DELETE FROM reviewableType WHERE name = 'test'")
-    dbu.delete("DELETE FROM reviewable WHERE idreviewable = %s", (prodId,))
+    #dbu.delete("DELETE FROM reviewableType WHERE name = 'test'")
+    #dbu.delete("DELETE FROM reviewable WHERE idreviewable = %s", (prodId,))
 
 def test_editCompany():
     # insert product
@@ -183,20 +184,34 @@ def test_editCompany():
     query = dbu.select("SELECT idreviewable FROM reviewable WHERE name = %s", (name,), True)
     compId = query['idreviewable']
     req = "/companies/" + str(
-        compId) + "?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&name=newNameEdit&lat=1.1&lon=1.1&imageURL=newImage"
+        compId) + "?token=test_token&name=newNameEdit2&lat=1.1&lon=1.1&imageURL=newImage"
     print(req)
     response = app.test_client().post(req)
     assert response.status_code == 200
 
     company = dbu.select("SELECT name FROM reviewable WHERE idreviewable = %s", (compId,), True)
     info = dbu.select("SELECT * FROM installercompany WHERE idreviewable = %s", (compId,), True)
-    assert company['name'] == 'newNameEdit'
+    assert company['name'] == 'newNameEdit2'
     assert str(info['lat']) == '1.10'
     assert str(info['lon']) == '1.10'
 
-    dbu.delete("DELETE FROM sessiontoken WHERE token = '93003eec-b589-11ec-a4e2-00155d3ce0fa'")
-    dbu.delete("DELETE FROM reviewable WHERE idreviewable = %s", (compId,))
+    #dbu.delete("DELETE FROM sessiontoken WHERE token = 'test_token'")
+    #dbu.delete("DELETE FROM reviewable WHERE idreviewable = %s", (compId,))
 
+def test_cleanDB():
+    dbu.delete("DELETE FROM sessiontoken WHERE token = 'test_token'")
+    dbu.delete("DELETE FROM reviewableType WHERE name = 'test'")
+
+
+    dbu.delete("DELETE FROM reviewable WHERE name = 'newNameEdit2'")
+
+
+    dbu.delete("DELETE FROM reviewable WHERE name = 'newNameEdit'")
+
+    q = "DELETE FROM reviewable WHERE name = 'testpytestproduct'"
+    result = dbu.delete(q, args=())
+    q = "DELETE FROM reviewable WHERE name = 'testpytestcompany'"
+    result = dbu.delete(q, args=())
 
     '''
 # CREATE
