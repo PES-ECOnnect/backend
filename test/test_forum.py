@@ -1,7 +1,52 @@
 from app import app
 import json
-
+import re
 import data.DBUtils as db
+
+
+def test_forum_getRevpollutionPosts_ErrorInvalidToken():
+    response = app.test_client().get("/revp/posts?token=INVALID_TOKEN&n=10&lastDate=none&tag=TestTag")
+    assert response.status_code == 200
+    assert response.data == b'{"error":"ERROR_INVALID_TOKEN"}\n'
+
+def test_forum_getRevpollutionPosts_ErrorInvalidArgs():
+    response = app.test_client().get("/revp/posts?token=TEST_POL&n=10&lastDate=none")
+    assert response.status_code == 200
+    assert response.data == b'{"error":"ERROR_INVALID_ARGUMENTS"}\n'
+
+    response = app.test_client().get("/revp/posts?token=TEST_POL&n=10&tag=TestTag")
+    assert response.status_code == 200
+    assert response.data == b'{"error":"ERROR_INVALID_ARGUMENTS"}\n'
+
+    response = app.test_client().get("/revp/posts?n=10&lastDate=none&tag=TestTag")
+    assert response.status_code == 200
+    assert response.data == b'{"error":"ERROR_INVALID_ARGUMENTS"}\n'
+
+def test_forum_getRevpollutionPosts_WithoutLastDate():
+    response = app.test_client().get("/revp/posts?n=10&token=TEST_POL&tag=TestTag&lastDate=none")
+    assert response.status_code == 200
+    d = dict(response.get_json())
+    posts = d["result"]
+
+    for post in posts:
+        tags = re.findall(r"#(\w+)", post["text"])
+        assert "TestTag" in tags
+
+def test_forum_getRevpollutionPosts_WithLastDate():
+    response = app.test_client().get("/revp/posts?n=10&token=TEST_POL&tag=TestTag&lastDate=1649936459.640000")
+    assert response.status_code == 200
+    d = dict(response.get_json())
+    posts = d["result"]
+
+    for post in posts:
+        tags = re.findall(r"#(\w+)", post["text"])
+        assert "TestTag" in tags
+        assert float(post["timestamp"]) >= 1649936459.640000
+
+def test_forum_getRevpollutionPosts_WithWrongLastDate():
+    response = app.test_client().get("/revp/posts?n=10&token=TEST_POL&tag=TestTag&lastDate=ThisIsNotAUnixTimestamp")
+    assert response.status_code == 200
+    assert response.data == b'{"error":"ERROR_INVALID_DATE"}\n'
 
 
 def test_initDB():
