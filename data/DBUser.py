@@ -47,7 +47,9 @@ def userFromRow(userRow) -> User:
         (str(userRow['banned']) if userRow['banned'] is not None else None),
         (bool(userRow['privateprofile']) if userRow['privateprofile'] is not None else None),
         (int(userRow['idactivemedal']) if userRow['idactivemedal'] is not None else None),
-        (True if userRow['isadmin'] == 1 else False)
+        (True if userRow['isadmin'] == 1 else False),
+        (str(userRow['about']) if userRow['about'] is not None else None),
+        (str(userRow['pictureurl']) if userRow['pictureurl'] is not None else None),
     )
 
 

@@ -3,15 +3,38 @@ import json
 
 import data.DBUtils as db
 
+
 def test_initDB():
     db.insert("INSERT INTO sessiontoken VALUES ('93003eec-b589-11ec-a4e2-00155d3ce0fb',1)")
 
-'''
-def test_getUsedTags():
-    #response = app.test_client().get("/")
-    #assert response.status_code == 200
-    #assert response.data == b"PES Econnect Root!"
-'''
+
+def test_forum_getAvailablePostTags():
+    response = app.test_client().get("/posts/tags?token=TEST_POL")
+    assert response.status_code == 200
+    assert b"result" in response.data
+
+
+def test_forum_getAvailablePostTags_InvalidArguments():
+    response = app.test_client().get("/posts/tags")
+    assert response.status_code == 200
+    assert response.data == b'{"error":"ERROR_INVALID_ARGUMENTS"}\n'
+
+
+def test_forum_getAvailablePostTags_InvalidToken():
+    response = app.test_client().get("/posts/tags?token=")
+    assert response.status_code == 200
+    assert response.data == b'{"error":"ERROR_INVALID_TOKEN"}\n'
+
+
+def test_forum_getPostsForTag():
+    response = app.test_client().get("/posts?token=TEST_POL&tag=TEST_POL&n=10")
+    assert response.status_code == 200
+    d = dict(response.get_json())
+    posts = d["result"]
+
+    for post in posts:
+        tags = re.findall(r"#(\w+)", post["text"])
+        assert "TEST_POL" in tags
 
 
 def test_doLikePost():
