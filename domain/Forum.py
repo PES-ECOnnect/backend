@@ -159,6 +159,5 @@ def getRevPollutionPosts(n: int, tag: str, lastDate):
     return result
 
 
-
 class InvalidDateException(Exception):
     pass
