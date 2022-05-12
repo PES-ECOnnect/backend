@@ -157,4 +157,5 @@ def getRevpPosts():
         return {'error': 'ERROR_INVALID_DATE'}
 
     except dbs.InvalidTokenException:
+
         return {'error': 'ERROR_INVALID_TOKEN'}
