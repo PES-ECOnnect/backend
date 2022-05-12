@@ -15,5 +15,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r "requirements.txt"
+<<<<<<< HEAD
+=======
+          pip install sodapy
+>>>>>>> 6f217c2e61019b8a38895f7085c2a973ff696cb7
       - name: Test with pytest
         run: python -m pytest -v
