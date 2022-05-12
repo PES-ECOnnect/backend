@@ -26,3 +26,4 @@ python -m pytest -v
 
 execute tests from an especific file:
 python -m pytest test/file.py -v
+
