@@ -8,6 +8,7 @@ import domain.Authenticator as auth
 
 import datetime
 
+
 def obtainTags(text: str) -> list:
     return re.findall(r"#(\w+)", text)
 
@@ -17,6 +18,7 @@ def saveTags(tags: list) -> None:
         dbf.insertTag(tag)
 
     return tags
+
 
 def createPost(token, text, image, tags):
     postId = dbf.insertPost(token, text, image)
@@ -42,6 +44,7 @@ def deletePost(userid, postid):
         dbf.deletePosthashtag(postid)
         # delete the post
         dbf.deletePost(postid)
+
 
 def deleteUserPosts(userId):
     posts = dbf.getUserPosts(userId)
@@ -71,8 +74,8 @@ def getUsedTags():
     result = []
     for tag in tags:
         result.append({
-            'tag' : tag,
-            'count' : dbf.tagUsages(tag)
+            'tag': tag,
+            'count': dbf.tagUsages(tag)
         })
 
     return sorted(result, key=lambda d: -d['count'])
@@ -115,8 +118,46 @@ def getNPosts(token, number, tag):
             "useroption": userOption,
             "medal": authorInfo["idactivemedal"],
             "ownpost": authorId == currentUserId,
-            "authorbanned": authorIsBanned
+            "authorbanned": authorIsBanned,
+            "authorpictureurl": authorInfo["pictureurl"]
         })
 
     return result
 
+
+def getRevPollutionPosts(n: int, tag: str, lastDate):
+    if lastDate != 'none':
+        try:
+            lastDate = float(lastDate)
+        except Exception:
+            raise InvalidDateException()
+
+    # There will never be more than 1000 posts in the system
+    posts = dbf.getLatestNPostsWithTag(1000, tag)
+
+    result = []
+    for post in posts:
+        if len(result) > int(n):
+            break
+
+        if lastDate != 'none' and lastDate > float(post['timestamp']):
+            # If requested, filter out posts older than lastDate
+            continue
+
+        authorId = post["authorid"]
+        authorInfo = dbu.getPostDisplayInfo(authorId)
+
+        result.append({
+            'postid': post['idpost'],
+            'username': authorInfo['name'],
+            'text': post['text'],
+            'imageurl': post['imageurl'],
+            'profilepic': authorInfo['pictureurl'],
+            'timestamp': post['timestamp']
+        })
+
+    return result
+
+
+class InvalidDateException(Exception):
+    pass

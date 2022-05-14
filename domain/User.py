@@ -5,10 +5,9 @@ import domain.Authenticator as auth
 import data.DBSession as dbs
 
 
-
 class User:
 
-    def __init__(self, id, name, email, enPass, addr, bann, priv, acMedId, isAdmin):
+    def __init__(self, id, name, email, enPass, addr, bann, priv, acMedId, isAdmin, about, pictureURL):
         self._id = id
         self._name = name
         self._email = email
@@ -18,6 +17,11 @@ class User:
         self._priv = priv
         self._acMedId = acMedId
         self._isAdmin = isAdmin
+        self._about = about
+        self._pictureURL = pictureURL
+        self._lat = None
+        self._lon = None
+        self._energyEf = None
 
     def getId(self):
         return self._id
@@ -49,6 +53,12 @@ class User:
     def getUnlockedMedals(self):
         return dbu.getUnlockedMedals(self._id)
 
+    def getAbout(self):
+        return self._about
+
+    def getPictureURL(self):
+        return self._pictureURL
+
     def setEmail(self, newEmail):
         return dbu.setEmail(self._id, newEmail)
 
@@ -57,6 +67,14 @@ class User:
 
     def setHome(self, newHome):
         return dbu.setHome(self._id, newHome)
+
+    def setAbout(self, newAbout):
+        self._about = newAbout
+        return dbu.setAbout(self._id, newAbout)
+
+    def setPicture(self, newPictureURL):
+        self._pictureURL = newPictureURL
+        return dbu.setPicture(self._id, newPictureURL)
 
     def validatePassword(self, pwd):
         if pwd == self.getEncryptedPassword():
