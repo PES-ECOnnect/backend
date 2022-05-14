@@ -84,7 +84,9 @@ def getCurrentUserInfo():
                 "activeMedal": u.getActiveMedalId(),
                 "medals": u.getUnlockedMedals(),
                 "isPrivate": u.getIsPrivate(),
-                "home": u.getAddress()
+                "home": u.getAddress(),
+                "about":u.getAbout(),
+                "pictureURL":u.getPictureURL()
             }
         }
 
@@ -158,7 +160,10 @@ def getUserInfo(id):
 
         return {
             'username': user.getName(),
-            'medals': user.getUnlockedMedals()
+            'medals': user.getUnlockedMedals(),
+            'activeMedal': user.getActiveMedalId(),
+            'about':user.getAbout(),
+            'pictureURL':user.getPictureURL()
         }
 
     except dbs.InvalidTokenException:
