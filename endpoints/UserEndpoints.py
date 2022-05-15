@@ -383,6 +383,9 @@ def getStreetNames(zipcode):
         auth.checkValidToken(token)
         # Get json cities with zipcode
         results = client_gene.get("j6ii-t3w2",codi_postal=str(zipcode))
+        print(results)
+        if results == []:
+            return {'error': 'CITY_NOT_EXISTS'}
         # Recorrem tots els objectes del json
         streets = {}
         for house in results:
@@ -392,3 +395,40 @@ def getStreetNames(zipcode):
         return streets
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+
+@user_endpoint.route("/homes/building")
+def getDomiciles():
+    token = request.args.get('token')
+    street = request.args.get('street')
+    number = request.args.get('number')
+    zipcode = request.args.get('zipcode')
+    if anyNoneIn([token,street]): # The number may be null?
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+    try:
+        auth.checkValidToken(token)
+        if number is None:
+            results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street)
+        else:
+            results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street,numero=number)
+        houses = {}
+        #json.dumps(houses)
+        i = 0
+        for house in results:
+            if("pis" in house and "porta" in house):
+                complete = {
+                    # All the attributes we need in this thing
+                    "numero": house["numero"],
+                    "pis": house["pis"],
+                    "porta": house["porta"]
+                }
+            else:
+                complete = {
+                    # All the attributes we need in this thing
+                    "numero": house["numero"],
+                }
+            houses.update({i : complete})
+            i+=1
+
+        return houses
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
