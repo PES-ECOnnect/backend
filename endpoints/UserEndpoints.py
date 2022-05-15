@@ -410,25 +410,20 @@ def getDomiciles():
             results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street)
         else:
             results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street,numero=number)
-        houses = {}
-        #json.dumps(houses)
-        i = 0
+        houses = []
         for house in results:
             if("pis" in house and "porta" in house):
-                complete = {
+                houses.append({
                     # All the attributes we need in this thing
                     "numero": house["numero"],
                     "pis": house["pis"],
                     "porta": house["porta"]
-                }
+                })
             else:
-                complete = {
+                houses.append({
                     # All the attributes we need in this thing
                     "numero": house["numero"],
-                }
-            houses.update({i : complete})
-            i+=1
-
-        return houses
+                })
+        return {'result': houses}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
