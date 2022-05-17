@@ -6,10 +6,12 @@ import os
 
 def getConnection():
     params = {}
+
     params['host'] = os.environ.get('ECONNECT_DATABASE_HOST')
     params['database'] = os.environ.get('ECONNECT_DATABASE_NAME')
     params['password'] = os.environ.get('ECONNECT_DATABASE_PASSWORD')
     params['user'] = os.environ.get('ECONNECT_DATABASE_USER')
+
     conn = psycopg2.connect(**params)
     return conn
 
