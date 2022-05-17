@@ -77,8 +77,8 @@ def test_getinfoCompanies():
     uri = "companies/"+ str(result["idreviewable"]) + "?token=TEST_POL"
     resp = app.test_client().get(uri)
     correct = ({ "imageurl": "xd",
-                 "latitude": "0.00",
-                 "longitude": "0.00",
+                 "latitude": 0.0,
+                 "longitude": 0.0,
                  "name": "testpytestcompany",
                  #"questions": [],
                  "ratings": [0,0,0,0,0,0],
@@ -88,8 +88,8 @@ def test_getinfoCompanies():
     #result = dbu.delete(q, args=())
     assert (
             response["imageURL"] == correct["imageurl"] and
-            response["latitude"] == correct["latitude"] and
-            response["longitude"] == correct["longitude"] and
+            float(response["latitude"]) == float(correct["latitude"]) and
+            float(response["longitude"]) == float(correct["longitude"]) and
             response["name"] == correct["name"] and
             #response["questions"] == correct["questions"] and
             response["ratings"] == correct["ratings"] and
@@ -192,8 +192,8 @@ def test_editCompany():
     company = dbu.select("SELECT name FROM reviewable WHERE idreviewable = %s", (compId,), True)
     info = dbu.select("SELECT * FROM installercompany WHERE idreviewable = %s", (compId,), True)
     assert company['name'] == 'newNameEdit2'
-    assert str(info['lat']) == '1.10'
-    assert str(info['lon']) == '1.10'
+    assert float(info['lat']) == 1.1
+    assert float(info['lon']) == 1.10
 
     #dbu.delete("DELETE FROM sessiontoken WHERE token = 'test_token'")
     #dbu.delete("DELETE FROM reviewable WHERE idreviewable = %s", (compId,))
