@@ -22,9 +22,12 @@ import data.DBUser as dbu
 import json
 import hashlib
 
+import os
+
 # Generalitat Dataset
 from sodapy import Socrata
-client_gene = Socrata("analisi.transparenciacatalunya.cat", "kP8jxf5SrHh4g8Sd42esZ5uba")
+
+client_gene = Socrata("analisi.transparenciacatalunya.cat", os.environ['ECONNECT_GENE_TOKEN'])
 
 def anyNoneIn(l: list) -> bool:
     return any(x is None for x in l)
