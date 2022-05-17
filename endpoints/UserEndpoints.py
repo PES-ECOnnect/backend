@@ -27,7 +27,7 @@ import os
 # Generalitat Dataset
 from sodapy import Socrata
 
-client_gene = Socrata("analisi.transparenciacatalunya.cat", os.environ['ECONNECT_GENE_TOKEN'])
+client_gene = Socrata("analisi.transparenciacatalunya.cat", os.environ.get('ECONNECT_GENE_TOKEN'))
 
 def anyNoneIn(l: list) -> bool:
     return any(x is None for x in l)
