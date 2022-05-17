@@ -386,16 +386,18 @@ def getStreetNames(zipcode):
         auth.checkValidToken(token)
         # Get json cities with zipcode
         results = client_gene.get("j6ii-t3w2",codi_postal=str(zipcode))
-        print(results)
         if results == []:
             return {'error': 'CITY_NOT_EXISTS'}
         # Recorrem tots els objectes del json
-        streets = {}
+        streets_total = []
         for house in results:
             street = house["adre_a"]
-            if not street in streets:
-                streets.update({street:'1'})
-        return streets
+            trobat = False
+            for x in streets_total:
+                if(x == street): trobat = True
+            if trobat == False:
+                streets_total.append(street)
+        return {'result': streets_total}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
