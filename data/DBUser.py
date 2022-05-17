@@ -54,7 +54,7 @@ def userFromRow(userRow) -> User:
 
 
 def getUnlockedMedals(userId):
-    medals = db.select("SELECT m.idmedal, m.medalname FROM unlockedmedals u, medal m WHERE iduser = %s AND u.idmedal = m.idmedal", (userId,))
+    medals = db.select("SELECT m.idmedal FROM unlockedmedals u, medal m WHERE iduser = %s AND u.idmedal = m.idmedal", (userId,))
     return medals
 
 
