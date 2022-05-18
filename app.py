@@ -43,7 +43,6 @@ def anyNoneIn(l: list) -> bool:
 def helloWorld():
     return "PES Econnect Root!"
 
-
 @app.route("/account/home", methods=['PUT'])
 def setHome():
     token = request.args.get('token')

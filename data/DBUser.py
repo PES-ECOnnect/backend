@@ -54,7 +54,7 @@ def userFromRow(userRow) -> User:
 
 
 def getUnlockedMedals(userId):
-    medals = db.select("SELECT m.idmedal, m.medalname FROM unlockedmedals u, medal m WHERE iduser = %s AND u.idmedal = m.idmedal", (userId,))
+    medals = db.select("SELECT m.idmedal FROM unlockedmedals u, medal m WHERE iduser = %s AND u.idmedal = m.idmedal", (userId,))
     return medals
 
 
@@ -103,17 +103,6 @@ def setPicture(userId, newPictureURL):
 
 def setVisibility(userId, isPrivate):
     db.update("UPDATE users SET privateprofile = %s WHERE iduser = %s", (isPrivate,userId,))
-
-def setActiveMedal(userId, medalId):
-    db.update("UPDATE users SET idactivemedal = %s WHERE iduser = %s", (medalId, userId))
-
-
-def hasUnlockedMedal(userId, medalId):
-    result = db.select("SELECT * FROM unlockedmedals WHERE iduser=(%s) AND idmedal=(%s)", (userId, medalId))
-    if result:
-        return True
-    else:
-        return False
 
 
 def getPostDisplayInfo(userId: int) -> dict:

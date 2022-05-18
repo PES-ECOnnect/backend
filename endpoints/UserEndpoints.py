@@ -13,6 +13,7 @@ from domain.Question import *
 from domain.User import *
 from domain.Question import *
 from domain.Forum import *
+from domain.Medal import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -22,9 +23,12 @@ import data.DBUser as dbu
 import json
 import hashlib
 
+import os
+
 # Generalitat Dataset
 from sodapy import Socrata
-client_gene = Socrata("analisi.transparenciacatalunya.cat", "kP8jxf5SrHh4g8Sd42esZ5uba")
+
+client_gene = Socrata("analisi.transparenciacatalunya.cat", os.environ.get('ECONNECT_GENE_TOKEN'))
 
 def anyNoneIn(l: list) -> bool:
     return any(x is None for x in l)
@@ -292,8 +296,8 @@ def updateActiveMedal():
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
 
-        if user.hasUnlockedMedal(medalId):
-            user.setActiveMedal(medalId)
+        if dbm.hasUnlockedMedal(user.getId(), medalId):
+            dbm.setActiveMedal(user.getId(), medalId)
             return {'status': 'success'}
 
         return {'error': 'ERROR_USER_INVALID_MEDAL'}
@@ -384,12 +388,49 @@ def getStreetNames(zipcode):
         auth.checkValidToken(token)
         # Get json cities with zipcode
         results = client_gene.get("j6ii-t3w2",codi_postal=str(zipcode))
+        if results == []:
+            return {'error': 'CITY_NOT_EXISTS'}
         # Recorrem tots els objectes del json
-        streets = {}
+        streets_total = []
         for house in results:
             street = house["adre_a"]
-            if not street in streets:
-                streets.update({street:'1'})
-        return streets
+            trobat = False
+            for x in streets_total:
+                if(x == street): trobat = True
+            if trobat == False:
+                streets_total.append(street)
+        return {'result': streets_total}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+
+@user_endpoint.route("/homes/building")
+def getDomiciles():
+    token = request.args.get('token')
+    street = request.args.get('street')
+    number = request.args.get('number')
+    zipcode = request.args.get('zipcode')
+    if anyNoneIn([token,street]): # The number may be null?
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+    try:
+        auth.checkValidToken(token)
+        if number is None:
+            results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street)
+        else:
+            results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street,numero=number)
+        houses = []
+        for house in results:
+            if("pis" in house and "porta" in house):
+                houses.append({
+                    # All the attributes we need in this thing
+                    "numero": house["numero"],
+                    "pis": house["pis"],
+                    "porta": house["porta"]
+                })
+            else:
+                houses.append({
+                    # All the attributes we need in this thing
+                    "numero": house["numero"],
+                })
+        return {'result': houses}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}

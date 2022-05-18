@@ -3,6 +3,7 @@ import domain.Reviewable as rev
 import domain.Forum as forum
 import domain.Authenticator as auth
 import data.DBSession as dbs
+from enum import Enum
 
 
 class User:
@@ -89,12 +90,6 @@ class User:
 
     def setVisibility(self, isPrivate):
         return dbu.setVisibility(self._id, isPrivate)
-
-    def setActiveMedal(self, medalId):
-        return dbu.setActiveMedal(self._id, medalId)
-
-    def hasUnlockedMedal(self, medalId):
-        return dbu.hasUnlockedMedal(self._id, medalId)
 
     def deleteUser(self):
         # delete user
