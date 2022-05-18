@@ -13,6 +13,7 @@ from domain.Question import *
 from domain.User import *
 from domain.Question import *
 from domain.Forum import *
+from domain.Medal import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -294,8 +295,8 @@ def updateActiveMedal():
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
 
-        if user.hasUnlockedMedal(medalId):
-            user.setActiveMedal(medalId)
+        if dbm.hasUnlockedMedal(user.getId(), medalId):
+            dbm.setActiveMedal(user.getId(), medalId)
             return {'status': 'success'}
 
         return {'error': 'ERROR_USER_INVALID_MEDAL'}

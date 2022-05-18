@@ -26,6 +26,12 @@ class Medal(Enum):
     PreguntaPlata = 21
     PreguntaBronze = 22
 
+def setActiveMedal(idUser, idMedal):
+    return dbm.setActiveMedal(idUser, idMedal)
+
+def hasUnlockedMedal(idUser, idMedal):
+    return dbm.hasUnlockedMedal(idUser, idMedal)
+
 def unlockMedal(idUser, medalla):
     idMedal = medalla.value
     result = dbm.unlockMedal(idUser, idMedal)
@@ -67,4 +73,49 @@ def checkProductMedals(token):
         return unlockMedal(idUser, Medal.ProductePlata)
     elif num == 20:
         return unlockMedal(idUser, Medal.ProducteOr)
+    return None
+
+def checkPostMedals(token):
+    user = auth.getUserForToken(token)
+    idUser = user.getId()
+    num = dbm.getNumPosts(idUser)
+    if num == 1:
+        return unlockMedal(idUser, Medal.ForumBronze)
+    elif num == 10:
+        return unlockMedal(idUser, Medal.ForumPlata)
+    elif num == 25:
+        return unlockMedal(idUser, Medal.ForumOr)
+    return None
+
+def checkLikeMedals(token):
+    user = auth.getUserForToken(token)
+    idUser = user.getId()
+    num = dbm.getNumLikes(idUser)
+    if num == 1:
+        return unlockMedal(idUser, Medal.LikeBronze)
+    elif num == 20:
+        return unlockMedal(idUser, Medal.LikePlata)
+    elif num == 100:
+        return unlockMedal(idUser, Medal.LikeOr)
+    return None
+
+def checkEfficiencyMedals(token):
+    user = auth.getUserForToken(token)
+    idUser = user.getId()
+    dbm.deleteEfficiencyMedal(idUser)
+    efficiency = dbm.getEnergyEficiency(idUser)
+    if efficiency == 'A':
+        return unlockMedal(idUser, Medal.EficienciaA)
+    elif efficiency == 'B':
+        return unlockMedal(idUser, Medal.EficienciaB)
+    elif efficiency == 'C':
+        return unlockMedal(idUser, Medal.EficienciaC)
+    elif efficiency == 'D':
+        return unlockMedal(idUser, Medal.EficienciaD)
+    elif efficiency == 'E':
+        return unlockMedal(idUser, Medal.EficienciaE)
+    elif efficiency == 'F':
+        return unlockMedal(idUser, Medal.EficienciaF)
+    elif efficiency == 'G':
+        return unlockMedal(idUser, Medal.EficienciaG)
     return None
