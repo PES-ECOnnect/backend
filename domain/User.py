@@ -91,12 +91,6 @@ class User:
     def setVisibility(self, isPrivate):
         return dbu.setVisibility(self._id, isPrivate)
 
-    def setActiveMedal(self, medalId):
-        return dbu.setActiveMedal(self._id, medalId)
-
-    def hasUnlockedMedal(self, medalId):
-        return dbu.hasUnlockedMedal(self._id, medalId)
-
     def deleteUser(self):
         # delete user
         dbu.deleteUser(self._id)
@@ -107,27 +101,3 @@ class User:
             dbs.deleteUserTokens(id)
         else:
             dbu.unbanUser(id)
-
-class Medalla(Enum):
-    EficienciaA = 1
-    EficienciaB = 2
-    EficienciaC = 3
-    EficienciaD = 4
-    EficienciaE = 5
-    EficienciaF = 6
-    EficienciaG = 7
-    EmpresaOr = 8
-    EmpresaPlata = 9
-    EmpresaBronze = 10
-    ProducteOr = 11
-    ProductePlata = 12
-    ProducteBronze = 13
-    ForumOr = 14
-    ForumPlata = 15
-    ForumBronze = 16
-    LikeOr = 17
-    LikePlata = 18
-    LikeBronze = 19
-    PreguntaOr = 20
-    PreguntaPlata = 21
-    PreguntaBronze = 22

@@ -12,6 +12,7 @@ from domain.Question import *
 from domain.User import *
 from domain.Question import *
 from domain.Forum import *
+from domain.Medal import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -43,8 +44,10 @@ def NewPost():
 
         # Creation of the post
         createPost(token, text, image, tags)
+        idMedal = checkPostMedals(token)
 
-        return {'status': 'success'}
+        return {'status': 'success',
+                'medal': idMedal}
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
@@ -97,7 +100,10 @@ def likePost(id):
     try:
         auth.checkValidToken(token)
         like(token, id, isLike, remove)
-        return {'status': 'success'}
+        idMedal = checkLikeMedals(token)
+
+        return {'status': 'success',
+                'medal': idMedal}
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
