@@ -143,6 +143,11 @@ def unbanUser(userId):
 def deleteUser(userId):
     db.delete("DELETE FROM users WHERE iduser = %s", (userId,))
 
+def setLocation(userId,lat,lon):
+    db.update("UPDATE users SET lat= %s, lon=%s WHERE iduser = %s",(lat,lon,userId))
+
+def setEfficiency(userId,eff):
+    db.update("UPDATE users SET energyef=%s WHERE iduser = %s",(eff,userId))
 
 # OTHER FUNCTIONS
 def isEmailValid(email):
