@@ -116,7 +116,7 @@ def getNPosts(token, number, tag):
             "userid": authorInfo["iduser"],
             "username": authorInfo["name"],
             "useroption": userOption,
-            "medal": int(authorInfo["idactivemedal"]),
+            "medal": int(authorInfo["idactivemedal"]) if authorInfo["idactivemedal"] is not None else None,
             "ownpost": authorId == currentUserId,
             "authorbanned": authorIsBanned,
             "authorpictureurl": authorInfo["pictureurl"]
