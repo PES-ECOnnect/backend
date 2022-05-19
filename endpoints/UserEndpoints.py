@@ -434,7 +434,7 @@ def getDomiciles():
                     "numero": house["numero"],
                 })
         if len(house)==0:
-            return {'error': 'ERROR_BUILDING_NOT EXISTS'}
+            return {'error': 'ERROR_BUILDING_NOT_EXISTS'}
         return {'result': houses}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
