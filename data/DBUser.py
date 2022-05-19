@@ -53,11 +53,6 @@ def userFromRow(userRow) -> User:
     )
 
 
-def getUnlockedMedals(userId):
-    medals = db.select("SELECT m.idmedal FROM unlockedmedals u, medal m WHERE iduser = %s AND u.idmedal = m.idmedal", (userId,))
-    return medals
-
-
 def setEmail(userId, newEmail):
     if (isEmailValid(newEmail)):
         con = db.getConnection()
@@ -87,6 +82,10 @@ def setUsername(userId, newUsername):
 
 def setHome(userId, newHome):
     db.update("UPDATE users SET address = %s WHERE iduser = %s", (newHome, userId))
+
+
+def getHome(userId):
+    return db.select("SELECT lat, lon FROM users WHERE iduser = %s", (userId,), one=True)
 
 
 def setPassword(userId, newPwd):

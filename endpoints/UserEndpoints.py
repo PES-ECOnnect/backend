@@ -86,7 +86,7 @@ def getCurrentUserInfo():
                 "username": u.getName(),
                 "email": u.getEmail(),
                 "activeMedal": u.getActiveMedalId(),
-                "medals": u.getUnlockedMedals(),
+                "medals": getUnlockedMedals(u.getId()),
                 "isPrivate": u.getIsPrivate(),
                 "home": u.getAddress(),
                 "about": u.getAbout(),
@@ -164,11 +164,10 @@ def getUserInfo(id):
 
         return {
             'username': user.getName(),
-            'medals': user.getUnlockedMedals(),
+            'medals': getUnlockedMedals(id),
             'activeMedal': user.getActiveMedalId(),
             'about': user.getAbout(),
             'pictureURL': user.getPictureURL()
-
         }
 
     except dbs.InvalidTokenException:
@@ -486,4 +485,20 @@ def setHome():
         return {'status': 'success',
                 'idMedal': idmedal}
     except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@user_endpoint.route("/account/home", methods=['GET'])
+def getUserHome():
+    token = request.args.get('token')
+    if anyNoneIn([token]):
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
+    try:
+        id = auth.getUserForToken(token).getId()
+        home = getHomeLocation(id)
+        return {
+            'lat': home['lat'],
+            'lon': home['lon']
+        }
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}

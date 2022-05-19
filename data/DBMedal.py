@@ -11,6 +11,11 @@ def hasUnlockedMedal(userId, medalId):
     else:
         return False
 
+def getUnlockedMedals(userId):
+    medals = db.select("SELECT m.idmedal FROM unlockedmedals u, medal m WHERE iduser = %s AND u.idmedal = m.idmedal "
+                       "ORDER BY m.idmedal ASC", (userId,))
+    return medals
+
 def unlockMedal(idUser, idMedal):
     q = "INSERT INTO unlockedmedals (iduser, idmedal) VALUES (%s, %s)"
     return db.insert(query=q, args=(idUser, idMedal))

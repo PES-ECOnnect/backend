@@ -51,9 +51,6 @@ class User:
     def isAdmin(self):
         return self._isAdmin
 
-    def getUnlockedMedals(self):
-        return dbu.getUnlockedMedals(self._id)
-
     def getAbout(self):
         return self._about
 
@@ -140,7 +137,7 @@ def gethouseEfficiency(house):
         return -1
     
 def getNumQualificacio(quali, option):
-    switcher={
+    switcher = {
         'A': 1,
         'B': 2,
         'C': 3,
@@ -154,3 +151,6 @@ def getNumQualificacio(quali, option):
     else:
         switcher_2 = {y:x for x, y in switcher.items()} 
         return switcher_2.get(quali,"Error!")
+
+def getHomeLocation(userId):
+    return dbu.getHome(userId)

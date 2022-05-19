@@ -32,6 +32,9 @@ def setActiveMedal(idUser, idMedal):
 def hasUnlockedMedal(idUser, idMedal):
     return dbm.hasUnlockedMedal(idUser, idMedal)
 
+def getUnlockedMedals(idUser):
+    return dbm.getUnlockedMedals(idUser)
+
 def unlockMedal(idUser, medalla):
     idMedal = medalla.value
     result = dbm.unlockMedal(idUser, idMedal)
