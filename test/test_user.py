@@ -137,6 +137,9 @@ def test_getCurrentUserInfo():
     assert response.status_code == 200
     assert b"result" in response.data
 
+def test_getStreetNames():
+    # Cridar
+
 
 
 

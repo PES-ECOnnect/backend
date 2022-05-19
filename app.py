@@ -43,24 +43,6 @@ def anyNoneIn(l: list) -> bool:
 def helloWorld():
     return "PES Econnect Root!"
 
-@app.route("/account/home", methods=['PUT'])
-def setHome():
-    token = request.args.get('token')
-    newHome = request.args.get('newHome')
-
-    if anyNoneIn([token, newHome]):
-        return {'error': 'ERROR_INVALID_ARGUMENTS'}
-
-    try:
-        auth.checkValidToken(token)
-        user = auth.getUserForToken(token)
-        user.setHome(newHome)
-        return {'status': 'success'}
-    
-    except dbs.InvalidTokenException:
-        return {'error': 'ERROR_INVALID_TOKEN'}
-
-
 if __name__ == "__main__":
     app.debug = True
     app.run()
