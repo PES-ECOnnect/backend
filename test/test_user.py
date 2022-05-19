@@ -139,6 +139,7 @@ def test_getCurrentUserInfo():
 
 def test_getStreetNames():
     # Cridar
+    assert 1 == 1
 
 
 
