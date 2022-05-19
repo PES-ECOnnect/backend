@@ -3,7 +3,6 @@ import psycopg2.extras
 from configparser import ConfigParser
 import os
 
-
 def getConnection():
     params = {}
     '''
@@ -18,6 +17,7 @@ def getConnection():
         host=os.environ.get('ECONNECT_DATABASE_HOST'),
         password=os.environ.get('ECONNECT_DATABASE_PASSWORD')
     )
+
     return conn
 
 

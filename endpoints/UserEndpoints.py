@@ -168,6 +168,7 @@ def getUserInfo(id):
             'activeMedal': user.getActiveMedalId(),
             'about': user.getAbout(),
             'pictureURL': user.getPictureURL()
+
         }
 
     except dbs.InvalidTokenException:
@@ -418,7 +419,7 @@ def getDomiciles():
             results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street,numero=number)
         houses = []
         for house in results:
-            print(house)
+            #print(house)
             if("pis" in house and "porta" in house and "escala" in house):
                 houses.append({
                     # All the attributes we need in this thing
@@ -485,4 +486,4 @@ def setHome():
         return {'status': 'success',
                 'idMedal': idmedal}
     except dbs.InvalidTokenException:
-        return {'error': 'ERROR_INVALID_TOKEN'}
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
