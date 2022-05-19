@@ -91,12 +91,6 @@ class User:
     def setVisibility(self, isPrivate):
         return dbu.setVisibility(self._id, isPrivate)
 
-    def setActiveMedal(self, medalId):
-        return dbu.setActiveMedal(self._id, medalId)
-
-    def hasUnlockedMedal(self, medalId):
-        return dbu.hasUnlockedMedal(self._id, medalId)
-
     def deleteUser(self):
         # delete user
         dbu.deleteUser(self._id)
@@ -107,27 +101,56 @@ class User:
             dbs.deleteUserTokens(id)
         else:
             dbu.unbanUser(id)
+    
+    def setLocation(self,lat,lon):
+        return dbu.setLocation(self._id,lat,lon)
+    
+    def setEfficiency(self,eff):
+        return dbu.setEfficiency(self._id,eff)
 
-class Medalla(Enum):
-    EficienciaA = 1
-    EficienciaB = 2
-    EficienciaC = 3
-    EficienciaD = 4
-    EficienciaE = 5
-    EficienciaF = 6
-    EficienciaG = 7
-    EmpresaOr = 8
-    EmpresaPlata = 9
-    EmpresaBronze = 10
-    ProducteOr = 11
-    ProductePlata = 12
-    ProducteBronze = 13
-    ForumOr = 14
-    ForumPlata = 15
-    ForumBronze = 16
-    LikeOr = 17
-    LikePlata = 18
-    LikeBronze = 19
-    PreguntaOr = 20
-    PreguntaPlata = 21
-    PreguntaBronze = 22
+##################################### END OF CLASS USER #####################################
+ 
+def gethouseEfficiency(house):
+    # Calculates the efficiency of a house (medium letter)
+    # qualificaci_emissions calefaccio
+    # qualificaci_emissions_1 refrigeracio
+    # qualificaci_emissions_2 enllumenament
+    # qualificaci_de_consum_d energia primaria no renovable
+    # qualificacio_d_emissions emissions CO2
+    emisco2 = house.get("qualificacio_d_emissions")
+    consener = house.get("qualificaci_de_consum_d")
+    calefaccio = house.get("qualificaci_emissions")
+    refrigeracio = house.get("qualificaci_emissions_1")
+    enllumenament = house.get("qualificaci_emissions_2")
+
+    qualificacions = {emisco2,consener,calefaccio,refrigeracio,enllumenament}
+    suma = 0
+    nombre = 0
+    for quali in qualificacions:
+        if quali:
+            num = getNumQualificacio(quali, 1)
+            if num == "Invalid Qualification":
+                print("Invalid Qualification")
+                return -1
+            suma += num
+            nombre += 1
+    if nombre > 0:
+        return getNumQualificacio(int(round(suma/nombre,0)), 0) 
+    else:
+        return -1
+    
+def getNumQualificacio(quali, option):
+    switcher={
+        'A': 1,
+        'B': 2,
+        'C': 3,
+        'D': 4,
+        'E': 5,
+        'F': 6,
+        'G': 7
+    }
+    
+    if option: return switcher.get(quali,"Invalid Qualification")
+    else:
+        switcher_2 = {y:x for x, y in switcher.items()} 
+        return switcher_2.get(quali,"Error!")

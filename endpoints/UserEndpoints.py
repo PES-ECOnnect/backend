@@ -13,6 +13,7 @@ from domain.Question import *
 from domain.User import *
 from domain.Question import *
 from domain.Forum import *
+from domain.Medal import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -294,8 +295,8 @@ def updateActiveMedal():
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
 
-        if user.hasUnlockedMedal(medalId):
-            user.setActiveMedal(medalId)
+        if dbm.hasUnlockedMedal(user.getId(), medalId):
+            dbm.setActiveMedal(user.getId(), medalId)
             return {'status': 'success'}
 
         return {'error': 'ERROR_USER_INVALID_MEDAL'}
@@ -386,16 +387,18 @@ def getStreetNames(zipcode):
         auth.checkValidToken(token)
         # Get json cities with zipcode
         results = client_gene.get("j6ii-t3w2",codi_postal=str(zipcode))
-        print(results)
         if results == []:
             return {'error': 'CITY_NOT_EXISTS'}
         # Recorrem tots els objectes del json
-        streets = {}
+        streets_total = []
         for house in results:
             street = house["adre_a"]
-            if not street in streets:
-                streets.update({street:'1'})
-        return streets
+            trobat = False
+            for x in streets_total:
+                if(x == street): trobat = True
+            if trobat == False:
+                streets_total.append(street)
+        return {'result': streets_total}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
@@ -415,10 +418,12 @@ def getDomiciles():
             results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street,numero=number)
         houses = []
         for house in results:
-            if("pis" in house and "porta" in house):
+            print(house)
+            if("pis" in house and "porta" in house and "escala" in house):
                 houses.append({
                     # All the attributes we need in this thing
                     "numero": house["numero"],
+                    "escala": house["escala"],
                     "pis": house["pis"],
                     "porta": house["porta"]
                 })
@@ -427,6 +432,57 @@ def getDomiciles():
                     # All the attributes we need in this thing
                     "numero": house["numero"],
                 })
+        if len(house)==0:
+            return {'error': 'ERROR_BUILDING_NOT EXISTS'}
         return {'result': houses}
     except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@user_endpoint.route("/account/home", methods=['PUT'])
+def setHome():
+    token = request.args.get('token')
+    street = request.args.get('street')
+    number = request.args.get('number')
+    zipcode = request.args.get('zipcode')
+    escala = request.args.get('escala')
+    pis = request.args.get('pis')
+    porta = request.args.get('porta')
+    if anyNoneIn([token,street,number,zipcode]): # The number may be null?
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
+    try:
+        auth.checkValidToken(token)
+        
+        # Get house
+        escalanull = (escala is None)
+        pisnull = (pis is None)
+        portanull = (porta is None)
+        if not escalanull and not pisnull and not portanull:
+            house = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street,numero=number,porta=porta,escala=escala,pis=pis)
+        else:
+            if escalanull and not pisnull and not portanull:
+                house = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street,numero=number,porta=porta,pis=pis)
+            else:
+                if not escalanull and pisnull and portanull:
+                    house = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street,numero=number,escala=escala)
+                else:
+                    if escalanull and pisnull and not portanull:
+                        house = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street,numero=number,porta=porta)
+                    else: 
+                        house = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street,numero=number)
+        #print(house[0]["comarca"])
+        # Get House Efficiency Letter:
+        if house is None or len(house) == 0:
+            return {'error': 'ERROR_BUILDING_NOT EXISTS'}
+        qualif = gethouseEfficiency(house[0])
+        # Set house (address, lat, lon, efficiency)?
+        user = auth.getUserForToken(token)
+        address = house[0]["adre_a"]+' '+house[0]["numero"]+', '+house[0]["poblacio"]
+        user.setHome(address)
+        user.setLocation(house[0]["latitud"],house[0]["longitud"])
+        user.setEfficiency(qualif)
+        # Call function to set medal
+        idmedal = checkEfficiencyMedals(token)
+        return {'status': 'success',
+                'idMedal': idmedal}
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}

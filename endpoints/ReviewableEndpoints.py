@@ -12,6 +12,7 @@ from domain.Question import *
 from domain.User import *
 from domain.Question import *
 from domain.Forum import *
+from domain.Medal import *
 
 # Data Layer (TODO - Remove)
 import data.DBSession as dbs
@@ -119,7 +120,9 @@ def answerQuestion(id):
         auth.checkValidToken(token)
         reviewable = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
         reviewable.answerQuestion(id, token, chosenOption, questionIndex)
-        return {'status': 'success'}
+        idMedal = checkQuestionMedals(token)
+        return {'status': 'success',
+                'medal': idMedal}
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
@@ -164,8 +167,14 @@ def reviewReviewable(id):
 
         reviewable = Reviewable(id, 'a', 1, 'testURL', 'das', 1, 1)
         reviewable.review(id, token, review)
+        type = dbr.getTypeName(id)
+        if type == "Company":
+            idMedal = checkCompanyMedals(token)
+        else:
+            idMedal = checkProductMedals(token)
 
-        return {'status': 'success'}
+        return {'status': 'success',
+                'medal': idMedal}
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}

@@ -104,17 +104,6 @@ def setPicture(userId, newPictureURL):
 def setVisibility(userId, isPrivate):
     db.update("UPDATE users SET privateprofile = %s WHERE iduser = %s", (isPrivate,userId,))
 
-def setActiveMedal(userId, medalId):
-    db.update("UPDATE users SET idactivemedal = %s WHERE iduser = %s", (medalId, userId))
-
-
-def hasUnlockedMedal(userId, medalId):
-    result = db.select("SELECT * FROM unlockedmedals WHERE iduser=(%s) AND idmedal=(%s)", (userId, medalId))
-    if result:
-        return True
-    else:
-        return False
-
 
 def getPostDisplayInfo(userId: int) -> dict:
     q = "SELECT * FROM users " \
@@ -154,6 +143,11 @@ def unbanUser(userId):
 def deleteUser(userId):
     db.delete("DELETE FROM users WHERE iduser = %s", (userId,))
 
+def setLocation(userId,lat,lon):
+    db.update("UPDATE users SET lat= %s, lon=%s WHERE iduser = %s",(lat,lon,userId))
+
+def setEfficiency(userId,eff):
+    db.update("UPDATE users SET energyef=%s WHERE iduser = %s",(eff,userId))
 
 # OTHER FUNCTIONS
 def isEmailValid(email):
