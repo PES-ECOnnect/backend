@@ -154,3 +154,7 @@ def getNumQualificacio(quali, option):
 
 def getHomeLocation(userId):
     return dbu.getHome(userId)
+
+
+def report(id):
+    return dbu.reportUser(id)
