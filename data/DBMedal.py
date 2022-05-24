@@ -2,6 +2,9 @@ import data.DBUtils as db
 
 def setActiveMedal(userId, medalId):
     db.update("UPDATE users SET idactivemedal = %s WHERE iduser = %s", (medalId, userId))
+    
+def removeActiveMedal(userId):
+    db.update("UPDATE users SET idactivemedal = NULL WHERE iduser = %s", (userId))
 
 
 def hasUnlockedMedal(userId, medalId):

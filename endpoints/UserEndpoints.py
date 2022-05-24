@@ -294,7 +294,10 @@ def updateActiveMedal():
     try:
         auth.checkValidToken(token)
         user = auth.getUserForToken(token)
-
+        
+        if int(medalId) == 0:
+            dbm.removeActiveMedal(user.getId())
+            return {'status': 'success'}
         if dbm.hasUnlockedMedal(user.getId(), medalId):
             dbm.setActiveMedal(user.getId(), medalId)
             return {'status': 'success'}
