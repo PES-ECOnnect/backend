@@ -34,6 +34,46 @@ def test_initDB():
     db.insert("INSERT INTO sessiontoken VALUES (%s, %s)", (token, id))
     db.insert("INSERT INTO unlockedmedals VALUES (%s, %s)", (id, 3))
 
+def test_getStreetNames():
+    response = app.test_client().get("homes/cities/08034?token=93003eec-b589-11ec-a4e2-00155d3ce0fa")
+    assert response.status_code == 200
+    response = json.loads(response.get_data(as_text=True))
+    street = response["result"]
+    assert "Avinguda Diagonal" in street
+
+def test_getStreetNames_CityNotExists():
+    response = app.test_client().get("homes/cities/12341234?token=93003eec-b589-11ec-a4e2-00155d3ce0fa")
+    assert response.status_code == 200
+    response = json.loads(response.get_data(as_text=True))
+    assert response["error"] == "CITY_NOT_EXISTS"
+
+def test_getDomiciles():
+    response = app.test_client().get("homes/building?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&street=Carrer Jordi Girona&zipcode=08034")
+    assert response.status_code == 200
+    response = json.loads(response.get_data(as_text=True))
+    assert {"numero": '1'} in response["result"]
+
+def test_getDomiciles_BuildingNotExists():
+    response = app.test_client().get("homes/building?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&street=Carrer Jordi Girona&number=12341234&zipcode=08034")
+    assert response.status_code == 200
+    response = json.loads(response.get_data(as_text=True))
+    assert response == {'error': 'ERROR_BUILDING_NOT_EXISTS'}
+
+def test_setHome():
+    response = app.test_client().put("account/home?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&street=Carrer Jordi Girona&number=1&zipcode=08034")
+    assert response.status_code == 200
+    response = json.loads(response.get_data(as_text=True))
+    assert response['idMedal'] == 3 and response["status"] == "success"
+    # Check medal 
+    select = db.select(("SELECT * FROM users where name = 'testname'"),one=True)
+    print(select)
+    assert str(select["lat"]) == '41.388602' and str(select["lon"]) == '2.113347' and select["energyef"] == 'C'
+
+def test_setHome_BuildingNotExists():
+    response = app.test_client().put("account/home?token=93003eec-b589-11ec-a4e2-00155d3ce0fa&street=Carrer Jordi Girona&number=123412341234&zipcode=08034")
+    assert response.status_code == 200
+    response = json.loads(response.get_data(as_text=True))
+    assert response['error'] == 'ERROR_BUILDING_NOT EXISTS'
 
 def test_getUserInfo():
     response = app.test_client().get("/users/1")
@@ -137,20 +177,6 @@ def test_getCurrentUserInfo():
     response = app.test_client().get("account?token=TEST_POL")
     assert response.status_code == 200
     assert b"result" in response.data
-
-def test_getStreetNames():
-    response = app.test_client().get("homes/cities/08034?token=83003eec-b589-11ec-a4e2-00155d3ce0fc")
-    assert response.status_code == 200
-    response = json.loads(response.get_data(as_text=True))
-    street = response["result"]
-    assert "Avinguda Diagonal" in street
-
-def test_getStreetNames_CityNotExists():
-    response = app.test_client().get("homes/cities/12341234?token=83003eec-b589-11ec-a4e2-00155d3ce0fc")
-    assert response.status_code == 200
-    response = json.loads(response.get_data(as_text=True))
-    assert response["error"] == "CITY_NOT_EXISTS"
-
 
 
 def test_cleanDB():

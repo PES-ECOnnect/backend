@@ -433,8 +433,10 @@ def getDomiciles():
                 houses.append({
                     # All the attributes we need in this thing
                     "numero": house["numero"],
+                    #"numero":house,
+                    
                 })
-        if len(house)==0:
+        if len(houses)==0:
             return {'error': 'ERROR_BUILDING_NOT_EXISTS'}
         return {'result': houses}
     except dbs.InvalidTokenException:
