@@ -164,3 +164,19 @@ def getRevpPosts():
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
+
+@forum_endpoint.route("/posts/<id>/report", methods=['POST'])
+def reportPost(id):
+    token = request.args.get('token')
+
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    try:
+        auth.checkValidToken(token)
+        report(id)
+
+        return {'status': 'success'}
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}

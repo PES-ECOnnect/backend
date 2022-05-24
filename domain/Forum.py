@@ -119,7 +119,8 @@ def getNPosts(token, number, tag):
             "medal": authorInfo["idactivemedal"],
             "ownpost": authorId == currentUserId,
             "authorbanned": authorIsBanned,
-            "authorpictureurl": authorInfo["pictureurl"]
+            "authorpictureurl": authorInfo["pictureurl"],
+            "timesreported": postInfo["timesreported"]
         })
 
     return result
@@ -157,6 +158,10 @@ def getRevPollutionPosts(n: int, tag: str, lastDate):
         })
 
     return result
+
+
+def report(id):
+    return dbf.reportPost(id)
 
 
 class InvalidDateException(Exception):
