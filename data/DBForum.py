@@ -208,7 +208,7 @@ def userDislikesPost(userId: int, postId: int) -> int:
 
 # Get latest N posts ordered chronologically
 def getLatestNPosts(n: int) -> list:
-    q = "SELECT idpost, EXTRACT(EPOCH FROM temps) as timestamp, text, imageurl, iduser as authorid " \
+    q = "SELECT idpost, EXTRACT(EPOCH FROM temps) as timestamp, text, imageurl, iduser as authorid, timesreported " \
         "FROM post p " \
         "ORDER BY temps DESC LIMIT %s"
 
@@ -218,7 +218,7 @@ def getLatestNPosts(n: int) -> list:
 
 # Get latest N posts that contain a given tag ordered chronologically
 def getLatestNPostsWithTag(n: int, tag: str) -> list:
-    q = "SELECT p.idpost, EXTRACT(EPOCH FROM temps) as timestamp, p.text, p.imageurl, iduser as authorid " \
+    q = "SELECT p.idpost, EXTRACT(EPOCH FROM temps) as timestamp, p.text, p.imageurl, iduser as authorid, timesreported " \
         "FROM post p " \
         "JOIN posthashtag ph on ph.idpost = p.idpost " \
         "JOIN hashtag h on h.idtag = ph.idtag " \
@@ -231,6 +231,12 @@ def getLatestNPostsWithTag(n: int, tag: str) -> list:
 
 def getUserPosts(userId):
     return db.select("SELECT idpost FROM post WHERE iduser = (%s)", (userId,))
+
+
+def reportPost(postId):
+    q = "UPDATE post SET timesreported = timesreported + 1 WHERE idpost = %s"
+    return update(query=q, args=(postId,))
+
 
 # Exceptions
 class InsertionErrorException(Exception):
