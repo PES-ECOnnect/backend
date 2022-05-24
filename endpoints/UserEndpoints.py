@@ -505,7 +505,7 @@ def getUserHome():
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
-@user_endpoint.route("/user/<id>/report", methods=['POST'])
+@user_endpoint.route("/users/<id>/report", methods=['POST'])
 def reportUser(id):
     token = request.args.get('token')
 
