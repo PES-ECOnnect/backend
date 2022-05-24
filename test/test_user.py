@@ -5,6 +5,7 @@ import data.DBUser as dbu
 import domain.User
 import domain.Authenticator as auth
 import hashlib
+import json
 
 
 def test_updatePicture():
@@ -138,9 +139,17 @@ def test_getCurrentUserInfo():
     assert b"result" in response.data
 
 def test_getStreetNames():
-    # Cridar
-    assert 1 == 1
+    response = app.test_client().get("homes/cities/08034?token=83003eec-b589-11ec-a4e2-00155d3ce0fc")
+    assert response.status_code == 200
+    response = json.loads(response.get_data(as_text=True))
+    street = response["result"]
+    assert "Avinguda Diagonal" in street
 
+def test_getStreetNames_CityNotExists():
+    response = app.test_client().get("homes/cities/12341234?token=83003eec-b589-11ec-a4e2-00155d3ce0fc")
+    assert response.status_code == 200
+    response = json.loads(response.get_data(as_text=True))
+    assert response["error"] == "CITY_NOT_EXISTS"
 
 
 
