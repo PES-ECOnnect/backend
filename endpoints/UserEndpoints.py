@@ -12,7 +12,6 @@ from domain.Question import *
 
 from domain.User import *
 from domain.Question import *
-from domain.Forum import *
 from domain.Medal import *
 
 # Data Layer (TODO - Remove)
@@ -502,6 +501,21 @@ def getUserHome():
             'lat': home['lat'],
             'lon': home['lon']
         }
+
+    except dbs.InvalidTokenException:
+        return {'error': 'ERROR_INVALID_TOKEN'}
+
+@user_endpoint.route("/user/<id>/report", methods=['POST'])
+def reportUser(id):
+    token = request.args.get('token')
+
+    if anyNoneIn([token]):
+        return {'error': 'ERROR_INVALID_ARGUMENTS'}
+
+    try:
+        auth.checkValidToken(token)
+        report(id)
+        return {'status': 'success'}
 
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
