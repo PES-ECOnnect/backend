@@ -484,7 +484,7 @@ def setHome():
         user = auth.getUserForToken(token)
         address = house[0]["adre_a"]+' '+house[0]["numero"]+', '+house[0]["poblacio"]
         user.setHome(address)
-        if ("latitud" in house and "longitud" in house):
+        if ("latitud" in house[0] and "longitud" in house[0]):
             user.setLocation(house[0]["latitud"],house[0]["longitud"])
         user.setEfficiency(qualif)
         # Call function to set medal
