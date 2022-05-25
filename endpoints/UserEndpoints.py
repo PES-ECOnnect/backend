@@ -479,10 +479,13 @@ def setHome():
             return {'error': 'ERROR_BUILDING_NOT EXISTS'}
         qualif = gethouseEfficiency(house[0])
         # Set house (address, lat, lon, efficiency)?
+        print(house[0])
+        
         user = auth.getUserForToken(token)
         address = house[0]["adre_a"]+' '+house[0]["numero"]+', '+house[0]["poblacio"]
         user.setHome(address)
-        user.setLocation(house[0]["latitud"],house[0]["longitud"])
+        if ("latitud" in house and "longitud" in house):
+            user.setLocation(house[0]["latitud"],house[0]["longitud"])
         user.setEfficiency(qualif)
         # Call function to set medal
         idmedal = checkEfficiencyMedals(token)
