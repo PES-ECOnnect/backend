@@ -404,7 +404,6 @@ def getStreetNames(zipcode):
                            " DE ": " ",
                            "C.": "CARRER",
                            "C/": "CARRER",
-                           "C ": "CARRER",
                            "AV.": "AVINGUDA",
                            "AV/": "AVINGUDA",
                            "AVDA": "AVINGUDA",
