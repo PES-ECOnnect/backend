@@ -439,36 +439,32 @@ def getStreetNames(zipcode):
 @user_endpoint.route("/homes/building")
 def getDomiciles():
     token = request.args.get('token')
-    street = request.args.get('street') # SPLIT PER #
+    street = request.args.get('street').split("#") # SPLIT PER #
     number = request.args.get('number')
     zipcode = request.args.get('zipcode')
     if anyNoneIn([token,street]): # The number may be null?
         return {'error': 'ERROR_INVALID_ARGUMENTS'}
     try:
-        auth.checkValidToken(token)
-        if number is None:
-            results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street)
-        else:
-            results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=street,numero=number)
         houses = []
-        for house in results:
-            #print(house)
-            if("pis" in house and "porta" in house and "escala" in house):
-                houses.append({
-                    # All the attributes we need in this thing
-                    "numero": house["numero"],
-                    "escala": house["escala"],
-                    "pis": house["pis"],
-                    "porta": house["porta"]
-                })
+        auth.checkValidToken(token)
+        for st in street:
+            if number is None:
+                results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=st)
             else:
-                houses.append({
-                    # All the attributes we need in this thing
-                    "numero": house["numero"],
-                    #"numero":house,
-                    
-                })
-        if len(houses)==0:
+                results = client_gene.get("j6ii-t3w2",codi_postal=zipcode,adre_a=st,numero=number)
+            for house in results:
+                #print(house)
+                casa = {"numero":house["numero"]}
+                if "pis" in house:
+                    casa["pis"] = house["pis"]
+                if "porta" in house:
+                    casa["porta"] = house["porta"]
+                if "escala" in house:
+                    casa["escala"] = house["escala"]
+                if "num_cas" in house:
+                    casa["num_cas"] = house["num_cas"]
+                houses.append(casa)
+        if len(houses)== 0:
             return {'error': 'ERROR_BUILDING_NOT_EXISTS'}
         return {'result': houses}
     except dbs.InvalidTokenException:
