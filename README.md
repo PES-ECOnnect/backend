@@ -1,4 +1,4 @@
-a# PES_ECOnnect (Backend)
+# PES_ECOnnect (Backend)
 
 ## Team Members
 | Name | GitHub username | Taiga username |
