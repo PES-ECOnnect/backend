@@ -409,7 +409,8 @@ def getStreetNames(zipcode):
                            "AV/": "AVINGUDA",
                            "AVDA": "AVINGUDA",
                            "PASEO": "PASSEIG",
-                           " D'": ""}
+                           " D'": "",
+                           "ST.": "SANT"}
             for orig in traduccions:
                 nomCorrecte = nomCorrecte.replace(orig,traduccions[orig])
 
@@ -463,6 +464,8 @@ def getDomiciles():
                     casa["escala"] = house["escala"]
                 if "num_cas" in house:
                     casa["num_cas"] = house["num_cas"]
+                if "adre_a" in house:
+                    casa["carrer"] = house["adre_a"]
                 houses.append(casa)
         if len(houses)== 0:
             return {'error': 'ERROR_BUILDING_NOT_EXISTS'}
