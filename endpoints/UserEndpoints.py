@@ -392,14 +392,46 @@ def getStreetNames(zipcode):
         if results == []:
             return {'error': 'CITY_NOT_EXISTS'}
         # Recorrem tots els objectes del json
+
+        # serà alias : streets
+
         streets_total = []
         for house in results:
             street = house["adre_a"]
+            nomCorrecte = street.upper()
+            traduccions = {"AVENIDA": "AVINGUDA",
+                           "CALLE": "CARRER",
+                           " DE ": " ",
+                           "C.": "CARRER",
+                           "C/": "CARRER",
+                           "C ": "CARRER",
+                           "AV.": "AVINGUDA",
+                           "AV/": "AVINGUDA",
+                           "AVDA": "AVINGUDA",
+                           "PASEO": "PASSEIG",
+                           " D'": ""}
+            for orig in traduccions:
+                nomCorrecte = nomCorrecte.replace(orig,traduccions[orig])
+
             trobat = False
-            for x in streets_total:
-                if(x == street): trobat = True
-            if trobat == False:
-                streets_total.append(street)
+            for elem in streets_total:
+                if elem['name'] == nomCorrecte: trobat = True
+            if not trobat:
+                streets_total.append({
+                    'name': nomCorrecte,
+                    'aliases': [street,]
+                })
+            else:
+                for elem in streets_total:
+                    if elem['name'] == nomCorrecte:
+                        # Check bad name not already in array
+                        found = False
+                        for badst in elem['aliases']:
+                            #print(badst + ' ' + street)
+                            if badst == street:
+                                found = True
+                        if not found:
+                            elem['aliases'].append(street)
         return {'result': streets_total}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
@@ -407,7 +439,7 @@ def getStreetNames(zipcode):
 @user_endpoint.route("/homes/building")
 def getDomiciles():
     token = request.args.get('token')
-    street = request.args.get('street')
+    street = request.args.get('street') # SPLIT PER #
     number = request.args.get('number')
     zipcode = request.args.get('zipcode')
     if anyNoneIn([token,street]): # The number may be null?
