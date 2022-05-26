@@ -521,7 +521,7 @@ def setHome():
         # Call function to set medal
         idmedal = checkEfficiencyMedals(token)
         return {'status': 'success',
-                'idMedal': idmedal}
+                'medal': idmedal}
     except dbs.InvalidTokenException:
         return {'error': 'ERROR_INVALID_TOKEN'}
 
