@@ -496,7 +496,8 @@ def getUserHome():
         home = getHomeLocation(id)
         return {
             'lat': home['lat'],
-            'lon': home['lon']
+            'lon': home['lon'],
+            'address': home['address']
         }
 
     except dbs.InvalidTokenException:

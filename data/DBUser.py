@@ -85,7 +85,7 @@ def setHome(userId, newHome):
 
 
 def getHome(userId):
-    return db.select("SELECT lat, lon FROM users WHERE iduser = %s", (userId,), one=True)
+    return db.select("SELECT lat, lon, address FROM users WHERE iduser = %s", (userId,), one=True)
 
 
 def setPassword(userId, newPwd):
