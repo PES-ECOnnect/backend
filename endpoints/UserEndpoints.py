@@ -409,7 +409,17 @@ def getStreetNames(zipcode):
                            "AVDA": "AVINGUDA",
                            "PASEO": "PASSEIG",
                            " D'": "",
-                           "ST.": "SANT"}
+                           "ST.": "SANT",
+                           "' ": "'",
+                           "À": "A",
+                           "Á": "A",
+                           "È": "E",
+                           "É": "E",
+                           "Í": "I",
+                           "Ò": "O",
+                           "Ó": "O",
+                           "Ú": "U"
+            }
             for orig in traduccions:
                 nomCorrecte = nomCorrecte.replace(orig,traduccions[orig])
 
