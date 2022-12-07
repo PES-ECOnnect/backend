@@ -15,8 +15,8 @@ def hasUnlockedMedal(userId, medalId):
         return False
 
 def getUnlockedMedals(userId):
-    medals = db.select("SELECT m.idmedal FROM unlockedmedals u, medal m WHERE iduser = %s AND u.idmedal = m.idmedal "
-                       "ORDER BY m.idmedal ASC", (userId,))
+    medals = db.select("SELECT idmedal FROM unlockedmedals WHERE iduser = %s"
+                       "ORDER BY idmedal ASC", (userId,))
     return medals
 
 def unlockMedal(idUser, idMedal):
